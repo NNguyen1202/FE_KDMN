@@ -21,8 +21,6 @@ const BhxhTable: React.FC = () => {
   const [selectedAgency, setSelectedAgency] = useState<GroupedAgency | null>(
     null,
   );
-  const [selectedProvince, setSelectedProvince] =
-    useState<ProvinceGroup | null>(null);
   const [selectedProvinceCard, setSelectedProvinceCard] =
     useState<ProvinceGroup | null>(null);
 
@@ -114,10 +112,10 @@ const BhxhTable: React.FC = () => {
     );
   }, [groupedAgencies]);
 
-  const paginatedData = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return groupedAgencies.slice(startIndex, startIndex + itemsPerPage);
-  }, [groupedAgencies, currentPage]);
+  // const paginatedData = useMemo(() => {
+  //   const startIndex = (currentPage - 1) * itemsPerPage;
+  //   return groupedAgencies.slice(startIndex, startIndex + itemsPerPage);
+  // }, [groupedAgencies, currentPage]);
 
   const totalPages = Math.ceil(groupedAgencies.length / itemsPerPage);
 
