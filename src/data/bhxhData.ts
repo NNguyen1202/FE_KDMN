@@ -8,6 +8,19 @@ export interface BhxhAgency {
   level: 'Cấp Tỉnh' | 'Cấp Huyện/Cơ sở';
   maXa: string;
   tenXaQuanLy: string;
+
+  // Mới
+  address?: string;
+  phone?: string;
+  email?: string;
+
+  bankName?: string;
+  bankAccount?: string;
+  accountHolder?: string;
+
+  transferContent?: string;
+
+  paymentMethods?: string[];
 }
 
 export const bhxhAgencies: BhxhAgency[] = [

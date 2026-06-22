@@ -1,25 +1,50 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { bhxhAgencies, BhxhAgency } from "../../data/bhxhData";
+
+type GroupedAgency = BhxhAgency & {
+  xaQuanLy: {
+    maXa: string;
+    tenXa: string;
+  }[];
+};
+type ProvinceGroup = {
+  provinceCode: string;
+  provinceName: string;
+  agencies: GroupedAgency[];
+};
 
 const BhxhTable: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedProvince, setSelectedProvince] = useState("All");
+  const [provinceFilter, setProvinceFilter] = useState("All");
   const [selectedLevel, setSelectedLevel] = useState("All");
+  const [selectedAgency, setSelectedAgency] = useState<GroupedAgency | null>(
+    null,
+  );
+  const [selectedProvince, setSelectedProvince] =
+    useState<ProvinceGroup | null>(null);
+  const [selectedProvinceCard, setSelectedProvinceCard] =
+    useState<ProvinceGroup | null>(null);
+
+  const [showDetail, setShowDetail] = useState(false);
 
   // Quản lý phân trang
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 50;
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, provinceFilter, selectedLevel]);
 
-  // Trích xuất tự động danh sách Tỉnh/Thành duy nhất để đưa vào Dropdown bộ lọc
   const uniqueProvinces = useMemo(() => {
-    const provinces = bhxhAgencies.map((item) => item.provinceName);
-    return ["All", ...Array.from(new Set(provinces))];
+    const provinces = Array.from(
+      new Set(bhxhAgencies.map((item) => item.provinceName)),
+    ).sort((a, b) => a.localeCompare(b, "vi"));
+
+    return ["All", ...provinces];
   }, []);
 
   // Xử lý bộ lọc thông minh (Chấp nhận tìm kiếm theo Mã Cơ quan, Tên Cơ quan hoặc Tên Tỉnh)
   const filteredAgencies = useMemo(() => {
-    setCurrentPage(1); // Reset về trang 1 khi người dùng đổi điều kiện lọc
     return bhxhAgencies.filter((item) => {
       const matchSearch =
         item.agencyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -27,21 +52,74 @@ const BhxhTable: React.FC = () => {
         item.provinceName.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchProvince =
-        selectedProvince === "All" || item.provinceName === selectedProvince;
+        provinceFilter === "All" || item.provinceName === provinceFilter;
+
       const matchLevel =
         selectedLevel === "All" || item.level === selectedLevel;
 
       return matchSearch && matchProvince && matchLevel;
     });
-  }, [searchTerm, selectedProvince, selectedLevel]);
+  }, [searchTerm, provinceFilter, selectedLevel]);
 
   // Tính toán dữ liệu hiển thị trên trang hiện tại
+  type GroupedAgency = BhxhAgency & {
+    xaQuanLy: {
+      maXa: string;
+      tenXa: string;
+    }[];
+  };
+  const groupedAgencies = useMemo<GroupedAgency[]>(() => {
+    const map = new Map<string, GroupedAgency>();
+
+    filteredAgencies.forEach((item) => {
+      const key = item.agencyCode;
+
+      if (!map.has(key)) {
+        map.set(key, {
+          ...item,
+          xaQuanLy: [],
+        });
+      }
+
+      const agency = map.get(key);
+
+      if (agency) {
+        agency.xaQuanLy.push({
+          maXa: item.maXa,
+          tenXa: item.tenXaQuanLy,
+        });
+      }
+    });
+
+    return Array.from(map.values());
+  }, [filteredAgencies]);
+
+  const groupedProvinces = useMemo<ProvinceGroup[]>(() => {
+    const map = new Map<string, ProvinceGroup>();
+
+    groupedAgencies.forEach((agency) => {
+      if (!map.has(agency.provinceCode)) {
+        map.set(agency.provinceCode, {
+          provinceCode: agency.provinceCode,
+          provinceName: agency.provinceName,
+          agencies: [],
+        });
+      }
+
+      map.get(agency.provinceCode)?.agencies.push(agency);
+    });
+
+    return Array.from(map.values()).sort((a, b) =>
+      a.provinceName.localeCompare(b.provinceName, "vi"),
+    );
+  }, [groupedAgencies]);
+
   const paginatedData = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
-    return filteredAgencies.slice(startIndex, startIndex + itemsPerPage);
-  }, [filteredAgencies, currentPage]);
+    return groupedAgencies.slice(startIndex, startIndex + itemsPerPage);
+  }, [groupedAgencies, currentPage]);
 
-  const totalPages = Math.ceil(filteredAgencies.length / itemsPerPage);
+  const totalPages = Math.ceil(groupedAgencies.length / itemsPerPage);
 
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-6">
@@ -60,8 +138,8 @@ const BhxhTable: React.FC = () => {
         <div className="flex flex-wrap gap-3">
           {/* Dropdown Tỉnh/Thành phố */}
           <select
-            value={selectedProvince}
-            onChange={(e) => setSelectedProvince(e.target.value)}
+            value={provinceFilter}
+            onChange={(e) => setProvinceFilter(e.target.value)}
             className="rounded border border-stroke bg-transparent py-2 px-3 font-medium outline-none dark:border-form-strokedark dark:bg-form-input text-black dark:text-white"
           >
             <option value="All" className="dark:bg-boxdark">
@@ -164,69 +242,64 @@ const BhxhTable: React.FC = () => {
           </tbody>
         </table>
       </div> */}
-      <div className="max-w-full overflow-x-auto">
-        <table className="w-full table-auto">
-          <thead>
-            <tr className="bg-gray-2 text-left dark:bg-meta-4">
-              <th className="min-w-[50px] py-4 px-4 font-medium text-black dark:text-white">
-                ID
-              </th>
-              <th className="min-w-[120px] py-4 px-4 font-medium text-black dark:text-white">
-                Tỉnh/Thành phố
-              </th>
-              <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">
-                Cơ quan BHXH
-              </th>
-              <th className="min-w-[100px] py-4 px-4 font-medium text-black dark:text-white">
-                Mã xã
-              </th>
-              {/* TIÊU ĐỀ CỘT G MỚI */}
-              <th className="min-w-[180px] py-4 px-4 font-medium text-black dark:text-white">
-                Địa bàn xã quản lý
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {bhxhAgencies.map((agency) => (
-              <tr
-                key={agency.id}
-                className="border-b border-[#eee] dark:border-strokedark"
-              >
-                <td className="py-5 px-4 text-sm text-black dark:text-white">
-                  {agency.id.replace("agency-", "")}
-                </td>
-                <td className="py-5 px-4">
-                  <p className="text-sm font-medium text-black dark:text-white">
-                    {agency.provinceName}
-                  </p>
-                  <span className="text-xs text-gray-5">
-                    Mã: {agency.provinceCode}
-                  </span>
-                </td>
-                <td className="py-5 px-4">
-                  <p className="text-sm text-black dark:text-white">
-                    {agency.agencyName}
-                  </p>
-                  <span className="text-xs text-gray-5">
-                    Mã CQ: {agency.agencyCode}
-                  </span>
-                </td>
-                <td className="py-5 px-4 text-sm text-black dark:text-white">
-                  <code className="rounded bg-gray-1 py-1 px-2 text-sm font-semibold dark:bg-meta-4">
-                    {agency.maXa}
-                  </code>
-                </td>
-                {/* NỘI DUNG CỘT G MỚI */}
-                <td className="py-5 px-4">
-                  <span className="inline-flex rounded-full bg-success bg-opacity-10 py-1 px-3 text-sm font-medium text-success">
-                    {agency.tenXaQuanLy}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {groupedProvinces.map((province) => (
+          <div
+            key={province.provinceCode}
+            onClick={() => setSelectedProvinceCard(province)}
+            className="cursor-pointer rounded-lg border p-5"
+          >
+            <h3 className="font-bold">{province.provinceName}</h3>
+
+            <p>{province.agencies.length} cơ quan BHXH</p>
+          </div>
+        ))}
       </div>
+
+      {selectedProvinceCard && (
+        <div className="fixed inset-0 z-[100000] flex">
+          <div
+            className="absolute inset-0 bg-black/30"
+            onClick={() => setSelectedProvinceCard(null)}
+            
+          />
+
+          <div className="relative ml-auto h-full w-[650px] overflow-y-scroll bg-white p-6 dark:bg-boxdark">
+            <div className="mb-5 flex justify-between">
+              <h2 className="text-xl font-bold">
+                {selectedProvinceCard.provinceName}
+              </h2>
+
+              <button onClick={() => setSelectedProvinceCard(null)}>
+                Đóng
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {selectedProvinceCard.agencies.map((agency) => (
+                <div
+                  key={agency.agencyCode}
+                  className="cursor-pointer rounded border p-4 hover:bg-gray-50"
+                  onClick={() => {
+                    setSelectedAgency(agency);
+                    setShowDetail(true);
+                  }}
+                >
+                  <div className="font-semibold">{agency.agencyName}</div>
+
+                  <div className="text-sm text-gray-500">
+                    Mã CQ: {agency.agencyCode}
+                  </div>
+
+                  <div className="text-sm text-gray-500">
+                    {agency.xaQuanLy.length} xã/phường
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* THANH ĐIỀU HƯỚNG PHÂN TRANG (PAGINATION) */}
       {totalPages > 1 && (
@@ -250,6 +323,125 @@ const BhxhTable: React.FC = () => {
             >
               Sau
             </button>
+          </div>
+        </div>
+      )}
+      {showDetail && selectedAgency && (
+        <div className="fixed inset-0 z-[100001] flex">
+          <div
+            className="absolute inset-0"
+            onClick={() => setShowDetail(false)}
+          />
+
+          <div className="ml-auto h-full w-[650px] overflow-y-auto bg-white p-6 shadow-2xl dark:bg-boxdark">
+            <div className="mb-6 flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-black dark:text-white">
+                  {selectedAgency.agencyName}
+                </h2>
+
+                <p className="mt-1 text-sm text-body">
+                  {selectedAgency.provinceName}
+                </p>
+              </div>
+
+              <button
+                onClick={() => setShowDetail(false)}
+                className="rounded border px-3 py-1"
+              >
+                Đóng
+              </button>
+            </div>
+
+            <div className="space-y-5">
+              <div>
+                <h4 className="mb-2 font-semibold">Thông tin cơ quan</h4>
+
+                <div className="space-y-2 text-sm">
+                  <p>
+                    <b>Mã cơ quan:</b> {selectedAgency.agencyCode}
+                  </p>
+
+                  <p>
+                    <b>Tên cơ quan:</b> {selectedAgency.agencyName}
+                  </p>
+
+                  <p>
+                    <b>Tỉnh/Thành:</b> {selectedAgency.provinceName}
+                  </p>
+
+                  <p>
+                    <b>Địa chỉ:</b> {selectedAgency.address}
+                  </p>
+
+                  <p>
+                    <b>Điện thoại:</b> {selectedAgency.phone}
+                  </p>
+
+                  <p>
+                    <b>Email:</b> {selectedAgency.email}
+                  </p>
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <h4 className="mb-2 font-semibold">Thông tin chuyển tiền</h4>
+
+                <div className="space-y-2 text-sm">
+                  <p>
+                    <b>Ngân hàng:</b>
+                    {selectedAgency.bankName}
+                  </p>
+
+                  <p>
+                    <b>Số tài khoản:</b>
+                    {selectedAgency.bankAccount}
+                  </p>
+
+                  <p>
+                    <b>Chủ tài khoản:</b>
+                    {selectedAgency.accountHolder}
+                  </p>
+
+                  <p>
+                    <b>Nội dung chuyển khoản:</b>
+                    {selectedAgency.transferContent}
+                  </p>
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <h4 className="mb-2 font-semibold">Cách thức đóng BHXH</h4>
+
+                <ul className="list-disc pl-5 text-sm">
+                  {selectedAgency.paymentMethods?.map((method, index) => (
+                    <li key={index}>{method}</li>
+                  ))}
+                </ul>
+              </div>
+              <div className="border-t pt-5">
+                <h4 className="mb-4 text-lg font-semibold">
+                  Danh sách xã/phường quản lý
+                </h4>
+
+                <div className="grid grid-cols-1 gap-2">
+                  {selectedAgency.xaQuanLy?.map((xa) => (
+                    <div
+                      key={xa.maXa}
+                      className="flex items-center justify-between rounded border border-stroke p-3 dark:border-strokedark"
+                    >
+                      <div>
+                        <p className="font-medium">{xa.tenXa}</p>
+                      </div>
+
+                      <span className="rounded bg-gray-2 px-2 py-1 text-xs dark:bg-meta-4">
+                        {xa.maXa}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
