@@ -47,6 +47,8 @@ const BhxhTable: React.FC = () => {
       const matchSearch =
         item.agencyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.agencyCode.includes(searchTerm) ||
+        item.maXa.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.tenXaQuanLy.toLowerCase().includes(searchTerm.toLowerCase());
         item.provinceName.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchProvince =
