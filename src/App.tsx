@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { BrowserRouter as Router, Routes, Route } from "react-router";
 import SignIn from "./pages/AuthPages/SignIn";
 import SignUp from "./pages/AuthPages/SignUp";
@@ -13,7 +12,7 @@ import Buttons from "./pages/UiElements/Buttons";
 import LineChart from "./pages/Charts/LineChart";
 import BarChart from "./pages/Charts/BarChart";
 import Calendar from "./pages/Calendar";
-import BasicTables from "./pages/Tables/UserManagement";
+
 import BhxhTable from "./pages/Tables/BhxhTable";
 import FormElements from "./pages/Forms/FormElements";
 import Blank from "./pages/Blank";
@@ -22,7 +21,7 @@ import { ScrollToTop } from "./components/common/ScrollToTop";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./pages/Dashboard/Home";
 import UserManagement from "./pages/Tables/UserManagement";
-import RevenueReport from "./pages/RevenueReport";
+
 import CreateUser from "./pages/User/CreateUser";
 import EditUser from "./pages/User/EditUser";
 import ViewUser from "./pages/User/ViewUser";

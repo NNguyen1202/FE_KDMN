@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
 
@@ -8,18 +7,16 @@ import {
   CalenderIcon,
   ChevronDownIcon,
   DollarLineIcon,
-  GridIcon,
   HorizontaLDots,
   ListIcon,
   PageIcon,
   PieChartIcon,
   PlugInIcon,
   TableIcon,
-  UserCircleIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 import SidebarWidget from "./SidebarWidget";
-import { User, User2, User2Icon, UserCheck2Icon, UserCircle2Icon, UserCog, UserCog2, UserCog2Icon } from "lucide-react";
+import { UserCircle2Icon, UserCog2Icon } from "lucide-react";
 
 type NavItem = {
   name: string;

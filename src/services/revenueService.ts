@@ -12,7 +12,6 @@ export const getAllSales = () => api.get("/sales-record/all");
 export const getSalesByUser = (userId: string) =>
   api.get(`/sales-record/user/${userId}`);
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const searchSales = (params: any) =>
   api.get("/sales-record/search", { params });
 

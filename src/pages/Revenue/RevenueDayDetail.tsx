@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 
@@ -15,7 +15,6 @@ import { useNavigate } from "react-router";
 
 import RevenueTable from "./RevenueTable";
 import RevenueRangeSummary from "./RevenueRangeSummary";
-import RevenueForm from "./RevenueForm";
 import RevenueSummary from "./RevenueSummary";
 import { useModal } from "../../hooks/useModal";
 import RevenueModal from "./RevenueModal";
@@ -65,7 +64,6 @@ export default function RevenueDayDetail() {
 
   useEffect(() => {
     loadData();
-
     loadRangeSummary();
   }, []);
 
@@ -139,13 +137,13 @@ export default function RevenueDayDetail() {
         </div>
 
         <div className="flex items-center justify-center rounded-xl border border-stroke bg-white p-5 shadow-sm">
-  <button
-    onClick={openModal}
-    className="rounded-lg bg-primary px-6 py-3 flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2 text-white hover:bg-brand-600 hover:bg-opacity-90"
-  >
-    + Thêm doanh thu
-  </button>
-</div>
+          <button
+            onClick={openModal}
+            className="rounded-lg bg-primary px-6 py-3 flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2 text-white hover:bg-brand-600 hover:bg-opacity-90"
+          >
+            + Thêm doanh thu
+          </button>
+        </div>
       </div>
 
       <div className="flex justify-end"></div>
