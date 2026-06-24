@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
 
@@ -6,6 +7,7 @@ import {
   BoxCubeIcon,
   CalenderIcon,
   ChevronDownIcon,
+  DollarLineIcon,
   GridIcon,
   HorizontaLDots,
   ListIcon,
@@ -17,6 +19,7 @@ import {
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 import SidebarWidget from "./SidebarWidget";
+import { User, User2, User2Icon, UserCheck2Icon, UserCircle2Icon, UserCog, UserCog2, UserCog2Icon } from "lucide-react";
 
 type NavItem = {
   name: string;
@@ -27,9 +30,35 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   {
-    icon: <GridIcon />,
     name: "Dashboard",
-    subItems: [{ name: "Ecommerce", path: "/", pro: false }],
+    path: "/revenue-dashboard",
+    icon: <DollarLineIcon />,
+  },
+  {
+    name: "Báo cáo doanh thu",
+    path: "/revenue-report",
+    icon: <PieChartIcon />,
+  },
+  {
+    name: "Quản lý User",
+    path: "/users",
+    icon: <UserCog2Icon />,
+  },
+  {
+    name: "BHXH",
+    icon: <TableIcon />,
+    subItems: [
+      // {
+      //   name: "User Management",
+      //   path: "/user-management",
+      //   pro: false,
+      // },
+      {
+        name: "Cơ quan BHXH 2026",
+        path: "/bhxh-tables",
+        pro: false,
+      },
+    ],
   },
   {
     icon: <CalenderIcon />,
@@ -37,7 +66,7 @@ const navItems: NavItem[] = [
     path: "/calendar",
   },
   {
-    icon: <UserCircleIcon />,
+    icon: <UserCircle2Icon />,
     name: "User Profile",
     path: "/profile",
   },
@@ -46,14 +75,14 @@ const navItems: NavItem[] = [
     icon: <ListIcon />,
     subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
   },
-  {
-    name: "BHXH",
-    icon: <TableIcon />,
-    subItems: [
-      { name: "Basic Tables", path: "/basic-tables", pro: false },
-      { name: "Cơ quan BHXH 2026", path: "/bhxh-tables", pro: false }
-    ],
-  },
+  // {
+  //   name: "BHXH",
+  //   icon: <TableIcon />,
+  //   subItems: [
+  //     { name: "Basic Tables", path: "/basic-tables", pro: false },
+  //     { name: "Cơ quan BHXH 2026", path: "/bhxh-tables", pro: false },
+  //   ],
+  // },
   {
     name: "Pages",
     icon: <PageIcon />,
@@ -104,14 +133,14 @@ const AppSidebar: React.FC = () => {
     index: number;
   } | null>(null);
   const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>(
-    {}
+    {},
   );
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   // const isActive = (path: string) => location.pathname === path;
   const isActive = useCallback(
     (path: string) => location.pathname === path,
-    [location.pathname]
+    [location.pathname],
   );
 
   useEffect(() => {
@@ -293,8 +322,8 @@ const AppSidebar: React.FC = () => {
           isExpanded || isMobileOpen
             ? "w-[290px]"
             : isHovered
-            ? "w-[290px]"
-            : "w-[90px]"
+              ? "w-[290px]"
+              : "w-[90px]"
         }
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
         lg:translate-x-0`}

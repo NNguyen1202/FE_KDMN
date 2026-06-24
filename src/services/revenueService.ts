@@ -1,0 +1,30 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import api from "../api/axios";
+
+export const createRevenue = (data: any) => {
+  return api.post("/sales-record/create", data);
+};
+
+export const getDashboard = () => api.get("/sales-record/dashboard");
+
+export const getAllSales = () => api.get("/sales-record/all");
+
+export const getSalesByUser = (userId: string) =>
+  api.get(`/sales-record/user/${userId}`);
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const searchSales = (params: any) =>
+  api.get("/sales-record/search", { params });
+
+export const getCalendarRevenue = (month: number, year: number) => {
+  return api.get(`/sales-record/calendar?month=${month}&year=${year}`);
+};
+
+export const getRevenueByDay = (date: string) => {
+  return api.get(`/sales-record/day?date=${date}`);
+};
+
+export const getRangeSummary = (from: string, to: string) =>
+  api.get(`/sales-record/range-summary?from=${from}&to=${to}`);
+
+export const getDashboardRevenue = () => api.get("/sales-record/dashboard");
