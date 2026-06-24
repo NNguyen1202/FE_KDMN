@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { BrowserRouter as Router, Routes, Route } from "react-router";
 import SignIn from "./pages/AuthPages/SignIn";
 import SignUp from "./pages/AuthPages/SignUp";
@@ -12,7 +13,7 @@ import Buttons from "./pages/UiElements/Buttons";
 import LineChart from "./pages/Charts/LineChart";
 import BarChart from "./pages/Charts/BarChart";
 import Calendar from "./pages/Calendar";
-import BasicTables from "./pages/Tables/BasicTables";
+import BasicTables from "./pages/Tables/UserManagement";
 import BhxhTable from "./pages/Tables/BhxhTable";
 import FormElements from "./pages/Forms/FormElements";
 import Blank from "./pages/Blank";
@@ -20,6 +21,13 @@ import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./pages/Dashboard/Home";
+import UserManagement from "./pages/Tables/UserManagement";
+import RevenueReport from "./pages/RevenueReport";
+import CreateUser from "./pages/User/CreateUser";
+import EditUser from "./pages/User/EditUser";
+import ViewUser from "./pages/User/ViewUser";
+import RevenueCalendar from "./pages/Revenue/RevenueCalendar";
+import RevenueDayDetail from "./pages/Revenue/RevenueDayDetail";
 
 export default function App() {
   return (
@@ -37,6 +45,40 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
+            <Route path="/users" element={<UserManagement />} />
+
+            <Route path="/users/create" element={<CreateUser />} />
+
+            <Route path="/users/edit/:id" element={<EditUser />} />
+
+            <Route path="/users/view/:id" element={<ViewUser />} />
+
+            {/* <Route
+              path="/revenue-dashboard"
+              element={
+                <ProtectedRoute>
+                  <RevenueDashboard />
+                </ProtectedRoute>
+              }
+            /> */}
+
+            <Route
+              path="/revenue-report"
+              element={
+                <ProtectedRoute>
+                  <RevenueCalendar />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/revenue-report/day/:date"
+              element={
+                <ProtectedRoute>
+                  <RevenueDayDetail />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
@@ -47,7 +89,7 @@ export default function App() {
             <Route path="/form-elements" element={<FormElements />} />
 
             {/* Tables */}
-            <Route path="/basic-tables" element={<BasicTables />} />
+            {/* <Route path="/user-management" element={<BasicTables />} /> */}
             <Route
               path="/bhxh-tables"
               element={
