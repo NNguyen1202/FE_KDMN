@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 interface Props {
   data: any[];
   month: number;
@@ -15,11 +14,6 @@ export default function RevenueCalendarGrid({
   year,
   onClickDate,
 }: Props) {
-  const firstDay = new Date(
-    year,
-    month - 1,
-    1
-  );
 
   const lastDay = new Date(
     year,
