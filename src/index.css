@@ -790,3 +790,12 @@ span.flatpickr-weekday,
 .simplebar-scrollbar.simplebar-visible:before {
   @apply opacity-100;
 }
+.fc .fc-daygrid-day-frame {
+  min-height: 120px !important;
+}
+
+@media (max-width: 768px) {
+  .fc .fc-daygrid-day-frame {
+    min-height: 70px !important;
+  }
+}

@@ -90,6 +90,8 @@ const Calendar: React.FC = () => {
               center: "title",
               right: "dayGridMonth,timeGridWeek,timeGridDay",
             }}
+            height="auto"
+            contentHeight={700}
             events={events}
             dateClick={handleDateClick}
             eventContent={renderRevenueContent}
@@ -101,20 +103,20 @@ const Calendar: React.FC = () => {
 };
 
 const renderRevenueContent = (eventInfo: any) => {
-    const { totalRevenue, totalCustomers, totalRecords } =
-      eventInfo.event.extendedProps;
+  const { totalRevenue, totalCustomers, totalRecords } =
+    eventInfo.event.extendedProps;
 
-    return (
-      <div
-        className="rounded-lg bg-green-50 p-2 text-xs"
-      >
-        <div className="font-semibold text-black">{totalRevenue.toLocaleString()}đ</div>
-
-        <div className="font-semibold text-black">{totalRecords} giao dịch</div>
-
-        <div className="font-semibold text-black">{totalCustomers} khách</div>
+  return (
+    <div className="rounded-lg bg-green-50 p-2 text-xs">
+      <div className="font-semibold text-black">
+        {totalRevenue.toLocaleString()}đ
       </div>
-    );
-  };
+
+      <div className="font-semibold text-black">{totalRecords} giao dịch</div>
+
+      <div className="font-semibold text-black">{totalCustomers} khách</div>
+    </div>
+  );
+};
 
 export default Calendar;
