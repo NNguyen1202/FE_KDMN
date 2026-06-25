@@ -3,10 +3,7 @@ import { useNavigate, useParams } from "react-router";
 
 import { ArrowLeft, Save } from "lucide-react";
 
-import {
-  getUserById,
-  updateUser,
-} from "../../services/userService";
+import { getUserById, updateUser } from "../../services/userService";
 
 export default function EditUser() {
   const { id } = useParams();
@@ -53,9 +50,7 @@ export default function EditUser() {
     }
   };
 
-  const handleSubmit = async (
-    e: React.FormEvent
-  ) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
@@ -85,12 +80,8 @@ export default function EditUser() {
 
   return (
     <div className="rounded-2xl border bg-white p-6">
-
       <div className="mb-6 flex items-center justify-between">
-
-        <h2 className="text-2xl font-bold">
-          Sửa User
-        </h2>
+        <h2 className="text-2xl font-bold">Sửa User</h2>
 
         <button
           onClick={() => navigate(-1)}
@@ -99,20 +90,12 @@ export default function EditUser() {
           <ArrowLeft size={18} />
           Quay lại
         </button>
-
       </div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-6"
-      >
-
+      <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid gap-6 md:grid-cols-2">
-
           <div>
-            <label className="mb-2 block font-medium">
-              Họ tên
-            </label>
+            <label className="mb-2 block font-medium">Họ tên</label>
 
             <input
               value={form.fullName}
@@ -127,9 +110,7 @@ export default function EditUser() {
           </div>
 
           <div>
-            <label className="mb-2 block font-medium">
-              Email
-            </label>
+            <label className="mb-2 block font-medium">Email</label>
 
             <input
               value={form.email}
@@ -144,9 +125,7 @@ export default function EditUser() {
           </div>
 
           <div>
-            <label className="mb-2 block font-medium">
-              Số điện thoại
-            </label>
+            <label className="mb-2 block font-medium">Số điện thoại</label>
 
             <input
               value={form.phone}
@@ -161,9 +140,7 @@ export default function EditUser() {
           </div>
 
           <div>
-            <label className="mb-2 block font-medium">
-              Ngày sinh
-            </label>
+            <label className="mb-2 block font-medium">Ngày sinh</label>
 
             <input
               value={form.doB}
@@ -177,13 +154,10 @@ export default function EditUser() {
               className="w-full rounded-lg border p-3"
             />
           </div>
-
         </div>
 
         <div>
-          <label className="mb-2 block font-medium">
-            Avatar URL
-          </label>
+          <label className="mb-2 block font-medium">Avatar URL</label>
 
           <input
             value={form.avatarUrl}
@@ -206,7 +180,6 @@ export default function EditUser() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
-
           <label className="flex items-center gap-2">
             <input
               type="checkbox"
@@ -218,7 +191,6 @@ export default function EditUser() {
                 })
               }
             />
-
             Đang hoạt động
           </label>
 
@@ -233,7 +205,6 @@ export default function EditUser() {
                 })
               }
             />
-
             Email xác thực
           </label>
 
@@ -248,29 +219,21 @@ export default function EditUser() {
                 })
               }
             />
-
             SĐT xác thực
           </label>
-
         </div>
 
         <div className="flex justify-end">
-
           <button
             disabled={loading}
             className="flex items-center gap-2 rounded-lg bg-brand-500 px-5 py-3 text-white"
           >
             <Save size={18} />
 
-            {loading
-              ? "Đang lưu..."
-              : "Cập nhật User"}
+            {loading ? "Đang lưu..." : "Cập nhật User"}
           </button>
-
         </div>
-
       </form>
-
     </div>
   );
 }

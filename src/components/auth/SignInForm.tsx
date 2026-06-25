@@ -34,10 +34,18 @@ export default function SignInForm() {
 
       localStorage.setItem("refreshToken", data.refreshToken);
 
-      localStorage.setItem("user", JSON.stringify(data));
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          _id: data._id,
+          fullName: data.fullName,
+          email: data.email,
+          phone: data.phone,
+        }),
+      );
 
       navigate("/", { replace: true });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       alert(error?.response?.data?.message || "Sai email hoặc mật khẩu");
     } finally {

@@ -162,9 +162,10 @@ export default function RevenueForm({
           >
             <option value="">Chọn sản phẩm</option>
 
-            <option value="EasyHRM">EasyHRM</option>
-
-            <option value="iCare">iCare</option>
+            <option value="EasyHRM MASS">EasyHRM MASS</option>
+            <option value="EasyHRM PROJECT">EasyHRM PROJECT</option>
+            <option value="iCare DN">iCare DN</option>
+            <option value="iCare HKD">iCare HKD</option>
           </select>
         </div>
 
