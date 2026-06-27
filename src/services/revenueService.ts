@@ -7,7 +7,10 @@ export const createRevenue = (data: any) => {
 
 export const getDashboard = () => api.get("/sales-record/dashboard");
 
-export const getAllSales = () => api.get("/sales-record/all");
+export const getAllSales = (params?: any) =>
+  api.get("/sales-record/all", {
+    params,
+  });
 
 export const getSalesByUser = (userId: string) =>
   api.get(`/sales-record/user/${userId}`);
@@ -27,3 +30,8 @@ export const getRangeSummary = (from: string, to: string) =>
   api.get(`/sales-record/range-summary?from=${from}&to=${to}`);
 
 export const getDashboardRevenue = () => api.get("/sales-record/dashboard");
+
+export const updateRevenue = (id: string, data: any) =>
+  api.put(`/sales-record/${id}`, data);
+
+export const deleteRevenue = (id: string) => api.delete(`/sales-record/${id}`);

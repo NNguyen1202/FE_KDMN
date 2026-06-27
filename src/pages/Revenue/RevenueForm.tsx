@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
-import { createRevenue } from "../../services/revenueService";
+import { createRevenue, updateRevenue } from "../../services/revenueService";
 import { getUsers } from "../../services/userService";
 
 interface RevenueFormProps {
   reportDate: string;
+  record?: any;
   onSuccess: () => void;
 }
 
@@ -24,42 +25,56 @@ interface RevenueFormData {
   note: string;
 }
 
+const defaultForm = (reportDate: string): RevenueFormData => ({
+  userId: "",
+  reportDate,
+  productType: "",
+  sourceType: "",
+  customerCount: 0,
+  productQuantity: 0,
+  revenue: 0,
+  note: "",
+});
+
 export default function RevenueForm({
   reportDate,
-  onSuccess
+  record,
+  onSuccess,
 }: RevenueFormProps) {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const [formData, setFormData] = useState<RevenueFormData>({
-    userId: "",
-    reportDate: reportDate || "",
-    productType: "",
-    sourceType: "",
-    customerCount: 0,
-    productQuantity: 0,
-    revenue: 0,
-    note: "",
-  });
+  const [formData, setFormData] = useState<RevenueFormData>(
+    defaultForm(reportDate),
+  );
 
   useEffect(() => {
     loadUsers();
   }, []);
 
   useEffect(() => {
-    setFormData((prev) => ({
-      ...prev,
-      reportDate,
-    }));
-  }, [reportDate]);
+    if (record) {
+      setFormData({
+        userId: record.userId?._id || record.userId,
+        reportDate: record.reportDate,
+        productType: record.productType,
+        sourceType: record.sourceType,
+        customerCount: record.customerCount,
+        productQuantity: record.productQuantity,
+        revenue: record.revenue,
+        note: record.note || "",
+      });
+    } else {
+      setFormData(defaultForm(reportDate));
+    }
+  }, [record, reportDate]);
 
   const loadUsers = async () => {
     try {
       const res = await getUsers();
-
       setUsers(res?.data?.data || res?.data || []);
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -82,48 +97,40 @@ export default function RevenueForm({
   };
 
   const resetForm = () => {
-    setFormData({
-      userId: "",
-      reportDate,
-      productType: "",
-      sourceType: "",
-      customerCount: 0,
-      productQuantity: 0,
-      revenue: 0,
-      note: "",
-    });
+    setFormData(defaultForm(reportDate));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!formData.userId) {
+      alert("Vui lòng chọn nhân viên");
+      return;
+    }
+
+    if (!formData.productType) {
+      alert("Vui lòng chọn sản phẩm");
+      return;
+    }
+
+    if (!formData.sourceType) {
+      alert("Vui lòng chọn nguồn");
+      return;
+    }
+
     try {
-      if (!formData.userId) {
-        alert("Vui lòng chọn nhân viên");
-        return;
-      }
-
-      if (!formData.productType) {
-        alert("Vui lòng nhập sản phẩm");
-        return;
-      }
-
-      if (!formData.sourceType) {
-        alert("Vui lòng nhập nguồn");
-        return;
-      }
-
       setLoading(true);
 
-      await createRevenue(formData);
-
-      resetForm();
+      if (record) {
+        await updateRevenue(record._id, formData);
+      } else {
+        await createRevenue(formData);
+      }
 
       onSuccess();
-    } catch (error: any) {
-      console.error(error);
-
-      alert(error?.response?.data?.message || "Không thể lưu doanh thu");
+      resetForm();
+    } catch (err: any) {
+      alert(err?.response?.data?.message || "Không thể lưu doanh thu");
     } finally {
       setLoading(false);
     }
@@ -181,9 +188,7 @@ export default function RevenueForm({
             <option value="">Chọn nguồn</option>
 
             <option value="Marketing">Marketing</option>
-
             <option value="ChuDong">Chủ động</option>
-
             <option value="CTV_DaiLy">CTV / Đại lý</option>
           </select>
         </div>
@@ -214,12 +219,26 @@ export default function RevenueForm({
           />
         </div>
 
+        <div>
+          <label className="mb-1 block text-sm font-medium">
+            Doanh thu thực tế
+          </label>
+
+          <input
+            type="number"
+            name="revenue"
+            value={formData.revenue}
+            onChange={handleChange}
+            className="w-full rounded-lg border px-3 py-2"
+          />
+        </div>
+
         <div className="col-span-2">
           <label className="mb-1 block text-sm font-medium">Ghi chú</label>
 
           <textarea
-            name="note"
             rows={4}
+            name="note"
             value={formData.note}
             onChange={handleChange}
             className="w-full rounded-lg border px-3 py-2"
@@ -227,16 +246,17 @@ export default function RevenueForm({
         </div>
       </div>
 
-      {/* BUTTONS */}
       <div className="flex justify-end gap-3 border-t pt-4">
-        
-
         <button
           type="submit"
           disabled={loading}
-          className="flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2 text-white hover:bg-brand-600"
+          className="rounded-lg bg-brand-500 px-5 py-2 text-white hover:bg-brand-600 disabled:opacity-60"
         >
-          {loading ? "Đang lưu..." : "Lưu doanh thu"}
+          {loading
+            ? "Đang lưu..."
+            : record
+            ? "Cập nhật doanh thu"
+            : "Lưu doanh thu"}
         </button>
       </div>
     </form>

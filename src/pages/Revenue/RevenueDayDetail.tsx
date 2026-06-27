@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
@@ -9,7 +10,10 @@ import "react-datepicker/dist/react-datepicker.css";
 import {
   getRangeSummary,
   getRevenueByDay,
+  deleteRevenue,
 } from "../../services/revenueService";
+
+import { toast } from "react-toastify";
 
 import { useNavigate } from "react-router";
 
@@ -33,19 +37,25 @@ export default function RevenueDayDetail() {
   const [fromDate, setFromDate] = useState(firstDayOfMonth);
 
   const [toDate, setToDate] = useState(currentDate);
+
   const [rangeSummary, setRangeSummary] = useState<any>(null);
 
   const { isOpen, openModal, closeModal } = useModal();
 
+  const [editingRecord, setEditingRecord] = useState<any>(null);
+
   const navigate = useNavigate();
 
   const loadData = async () => {
-    const res = await getRevenueByDay(date as string);
-    console.log(res);
+    try {
+      const res = await getRevenueByDay(date as string);
 
-    setRecords(res.data.records);
+      setRecords(res.data.records || []);
 
-    setSummary(res.data.summary);
+      setSummary(res.data.summary || {});
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -62,14 +72,33 @@ export default function RevenueDayDetail() {
     setRangeSummary(res.data.data);
   };
 
+  const handleEdit = (record: any) => {
+    setEditingRecord(record);
+    openModal();
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm("Bạn có chắc muốn xóa bản ghi này?")) return;
+
+    try {
+      await deleteRevenue(id);
+
+      toast.success("Đã xóa thành công");
+
+      await loadData(); // load lại danh sách
+    } catch (err) {
+      toast.error("Xóa thất bại");
+    }
+  };
+
   useEffect(() => {
     loadData();
     loadRangeSummary();
-  }, []);
+  }, [date]);
 
   return (
     <div className="space-y-5">
-      <div className="mb-6 flex items-center gap-4">
+      <div className="mb-6 flex bg-white rounded-xl border-stroke items-center gap-4">
         <button
           onClick={() => navigate("/revenue-report")}
           className="flex items-center gap-2 rounded-lg border px-4 py-2 hover:bg-gray-50"
@@ -98,13 +127,7 @@ export default function RevenueDayDetail() {
                   setFromDate(date?.toISOString().split("T")[0] || "")
                 }
                 dateFormat="dd/MM/yyyy"
-                className="
-    rounded-lg
-    border
-    border-stroke
-    px-4
-    py-2
-  "
+                className=" rounded-lg border border-stroke px-4 py-2"
               />
             </div>
 
@@ -117,13 +140,7 @@ export default function RevenueDayDetail() {
                   setToDate(date?.toISOString().split("T")[0] || "")
                 }
                 dateFormat="dd/MM/yyyy"
-                className="
-    rounded-lg
-    border
-    border-stroke
-    px-4
-    py-2
-  "
+                className=" rounded-lg border border-stroke px-4 py-2"
               />
             </div>
 
@@ -138,7 +155,10 @@ export default function RevenueDayDetail() {
 
         <div className="flex items-center justify-center rounded-xl border border-stroke bg-white p-5 shadow-sm">
           <button
-            onClick={openModal}
+            onClick={() => {
+              setEditingRecord(null);
+              openModal();
+            }}
             className="rounded-lg bg-primary px-6 py-3 flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2 text-white hover:bg-brand-600 hover:bg-opacity-90"
           >
             + Thêm doanh thu
@@ -149,13 +169,21 @@ export default function RevenueDayDetail() {
       <div className="flex justify-end"></div>
 
       <div className="space-y-6">
-        <RevenueSummary summary={summary} />
+        <RevenueSummary summary={summary} title={"Tổng doanh thu ngày"} totalRevenue={0} products={[]} />
         {rangeSummary && <RevenueRangeSummary data={rangeSummary} />}
-        <RevenueTable records={records} />
+        <RevenueTable
+          records={records}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
         <RevenueModal
           isOpen={isOpen}
-          closeModal={closeModal}
+          closeModal={() => {
+            setEditingRecord(null);
+            closeModal();
+          }}
           reportDate={date!}
+          record={editingRecord}
           onSuccess={loadData}
         />
       </div>
