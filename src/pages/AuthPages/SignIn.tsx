@@ -6,7 +6,7 @@ export default function SignIn() {
   return (
     <>
       <PageMeta
-        title="SignIn Dashboard"
+        title="Đăng nhập"
         description="This is SignIn Tables Dashboard"
       />
       <AuthLayout>

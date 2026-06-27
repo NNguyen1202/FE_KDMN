@@ -1,35 +1,68 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { formatCurrency } from "../../utils/formatCurrency";
+
+interface ProductRevenue {
+  productType: string;
+  customers: number;
+  revenue: number;
+}
+
 interface Props {
+  title: string;
+
+  totalRevenue: number;
+
+  products: ProductRevenue[];
+
+  children?: React.ReactNode;
+
   summary: any;
 }
 
-export default function RevenueSummary({ summary }: Props) {
+export default function RevenueSummary({
+  title,
+
+  children,
+
+  summary,
+}: Props) {
   return (
-    <div className="grid grid-cols-4 gap-5">
-      <div className="rounded-2xl border bg-white p-5">
-        <div className="text-sm">Doanh thu</div>
+    <div className="rounded-2xl border border-stroke bg-white p-5 shadow-sm">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-sm text-gray-500">{title}</p>
 
-        <div className="mt-2 text-2xl font-bold">
-          {(summary.totalRevenue || 0).toLocaleString()}đ
+          <h2 className="mt-3 text-3xl font-bold text-brand-500">
+            {formatCurrency(summary.totalRevenue || 0)}
+          </h2>
         </div>
+
+        {children}
       </div>
 
-      <div className="rounded-2xl border bg-white p-5">
-        <div className="text-sm">Khách hàng</div>
+      <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {summary?.products?.map((item: ProductRevenue) => (
+          <div
+            key={item.productType}
+            className="rounded-xl border border-gray-200 p-4"
+          >
+            <p className="font-semibold">{item.productType}</p>
 
-        <div className="mt-2 text-2xl font-bold">{summary.totalCustomers}</div>
-      </div>
+            <div className="mt-4">
+              <p className="text-xs text-gray-500">Khách hàng</p>
 
-      <div className="rounded-2xl border bg-white p-5">
-        <div className="text-sm">Sản phẩm</div>
+              <p className="text-xl font-semibold">{item.customers}</p>
+            </div>
 
-        <div className="mt-2 text-2xl font-bold">{summary.totalProducts}</div>
-      </div>
+            <div className="mt-4">
+              <p className="text-xs text-gray-500">Doanh thu</p>
 
-      <div className="rounded-2xl border bg-white p-5">
-        <div className="text-sm">Giao dịch</div>
-
-        <div className="mt-2 text-2xl font-bold">{summary.totalRecords}</div>
+              <p className="text-lg font-bold text-green-600">
+                {formatCurrency(item.revenue)}
+              </p>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

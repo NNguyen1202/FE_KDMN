@@ -28,7 +28,7 @@ type NavItem = {
 const navItems: NavItem[] = [
   {
     name: "Dashboard",
-    path: "/revenue-dashboard",
+    path: "/",
     icon: <DollarLineIcon />,
   },
   {
