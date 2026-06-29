@@ -5,9 +5,11 @@ import { useNavigate, useParams } from "react-router";
 
 import { getUserById } from "../../services/userService";
 
-import { getSalesByUser } from "../../services/revenueService";
+import { getUserDashboard } from "../../services/dashboardService";
 
 import { getRoleById } from "../../services/userService";
+
+import { getRoleDisplayName } from "../../utils/role";
 
 export default function ViewUser() {
   const { id } = useParams();
@@ -18,14 +20,21 @@ export default function ViewUser() {
 
   const [roleName, setRoleName] = useState("");
 
-  const [sales, setSales] = useState([]);
-  const [totalRevenue, setTotalRevenue] = useState(0);
+  const today = new Date();
+
+  const [month, setMonth] = useState(today.getMonth() + 1);
+
+  const [year, setYear] = useState(today.getFullYear());
+
+  const [summary, setSummary] = useState<any>({});
+
+  const [products, setProducts] = useState<any[]>([]);
 
   useEffect(() => {
     if (id) {
       loadUser(id);
     }
-  }, [id]);
+  }, [id, month, year]);
 
   const loadUser = async (userId: string) => {
     try {
@@ -35,7 +44,7 @@ export default function ViewUser() {
 
       const userData = res.data.getUser;
       console.log(userData);
-      
+
       // lấy role
       if (userData.roleID) {
         const roleId =
@@ -45,21 +54,14 @@ export default function ViewUser() {
 
         const roleRes = await getRoleById(roleId);
 
-        setRoleName(roleRes.data.roleName);
+        setRoleName(getRoleDisplayName(roleRes.data.roleName));
         console.log(roleName);
-        
       }
 
-      const salesRes = await getSalesByUser(userId);
+      const dashboard = await getUserDashboard(userId, month, year);
 
-      setSales(salesRes.data);
-
-      const total = salesRes.data.reduce(
-        (sum: number, item: any) => sum + item.revenue,
-        0,
-      );
-
-      setTotalRevenue(total);
+      setSummary(dashboard.summary ?? {});
+      setProducts(dashboard.productRevenue ?? []);
     } catch (error) {
       console.error(error);
     }
@@ -179,29 +181,89 @@ export default function ViewUser() {
               </div>
             </div>
           </div>
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="rounded-2xl border border-green-200 bg-green-50 p-5">
-              <p className="text-sm text-gray-500">Tổng doanh thu</p>
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
+              <div className="flex items-end gap-3">
+                <div>
+                  <label className="mb-1 block text-sm">Tháng</label>
 
-              <h2 className="mt-2 text-3xl font-bold text-green-600">
-                {totalRevenue.toLocaleString("vi-VN")} đ
-              </h2>
+                  <select
+                    value={month}
+                    onChange={(e) => setMonth(Number(e.target.value))}
+                    className="rounded-lg border px-3 py-2"
+                  >
+                    {Array.from({ length: 12 }, (_, i) => (
+                      <option key={i} value={i + 1}>
+                        Tháng {i + 1}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-sm">Năm</label>
+
+                  <select
+                    value={year}
+                    onChange={(e) => setYear(Number(e.target.value))}
+                    className="rounded-lg border px-3 py-2"
+                  >
+                    {[2024, 2025, 2026, 2027].map((y) => (
+                      <option key={y}>{y}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-green-200 mt-5 bg-green-50 p-5">
+                <p className="text-sm text-gray-500">Tổng doanh thu</p>
+
+                <h2 className="mt-2 text-3xl font-bold text-green-600 whitespace-nowrap">
+                  {(summary?.totalRevenue ?? 0).toLocaleString("vi-VN")} đ
+                </h2>
+              </div>
+
+              <div className="rounded-2xl border border-blue-200 mt-5 bg-blue-50 p-5">
+                <p className="text-sm text-gray-500">Tổng giao dịch</p>
+
+                <h2 className="mt-2 text-3xl font-bold text-blue-600">
+                  {summary?.totalRecords ?? 0}
+                </h2>
+              </div>
+
+              <div className="rounded-2xl border border-purple-200 mt-5 bg-purple-50 p-5">
+                <p className="text-sm text-gray-500">Trạng thái</p>
+
+                <h2 className="mt-2 text-3xl font-bold text-purple-600">
+                  {user.isActive ? "Active" : "Inactive"}
+                </h2>
+              </div>
             </div>
 
-            <div className="rounded-2xl border border-blue-200 bg-blue-50 p-5">
-              <p className="text-sm text-gray-500">Tổng giao dịch</p>
+            <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-6">
+              <h3 className="mb-5 text-lg font-semibold">
+                Doanh thu theo sản phẩm
+              </h3>
 
-              <h2 className="mt-2 text-3xl font-bold text-blue-600">
-                {sales.length}
-              </h2>
-            </div>
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                {(products ?? []).map((item: any) => (
+                  <div key={item._id} className="rounded-xl border p-4">
+                    <p className="font-semibold">{item._id}</p>
 
-            <div className="rounded-2xl border border-purple-200 bg-purple-50 p-5">
-              <p className="text-sm text-gray-500">Trạng thái</p>
+                    <p className="mt-3 text-2xl font-bold text-green-600">
+                      {item.revenue.toLocaleString("vi-VN")} đ
+                    </p>
 
-              <h2 className="mt-2 text-3xl font-bold text-purple-600">
-                {user.isActive ? "Active" : "Inactive"}
-              </h2>
+                    <div className="mt-3 space-y-1 text-sm text-gray-500">
+                      <p>👥 {item.customers} khách</p>
+
+                      <p>📦 {item.quantity} sản phẩm</p>
+
+                      <p>🧾 {item.records} giao dịch</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>

@@ -24,10 +24,8 @@ export default function SignInForm() {
 
       const { data } = await axios.post(
         "https://be-mean-repo-2x5e.onrender.com/api/user/login",
-        {
-          email,
-          password,
-        },
+        { email, password },
+        { timeout: 15000 }, // 15s
       );
 
       localStorage.setItem("accessToken", data.accessToken);

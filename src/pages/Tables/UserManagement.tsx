@@ -21,7 +21,7 @@
 //   );
 // }
 import { useEffect, useMemo, useState } from "react";
-import { getUsers } from "../../services/userService";
+import { getUsers,getUserById, getRoleById } from "../../services/userService";
 import { Eye, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router";
 import { deleteUser } from "../../services/userService";
@@ -31,6 +31,7 @@ export default function UserManagement() {
 
   const [users, setUsers] = useState<any[]>([]);
   const [search, setSearch] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const [page, setPage] = useState(1);
 
@@ -86,6 +87,41 @@ export default function UserManagement() {
   };
 
   useEffect(() => {
+  const loadCurrentUser = async () => {
+    try {
+      const currentUser = JSON.parse(localStorage.getItem("user") || "null");
+      console.log("Người dùng hiện tại: ",currentUser);
+      
+      if (!currentUser?._id) return;
+
+      // Lấy user đầy đủ
+      const userRes = await getUserById(currentUser._id);
+      console.log("Người dùng lấy ID hiện tại: ",userRes);
+      const user = userRes.data.getUser;
+
+      if (!user?.roleID) return;
+
+      // Nếu roleID là ObjectId
+      const roleId =
+        typeof user.roleID === "string"
+          ? user.roleID
+          : user.roleID._id;
+
+      const roleRes = await getRoleById(roleId);
+
+      console.log("Lấy role người dùng: ",roleRes);
+      
+
+      setIsAdmin(roleRes.data.roleName === "Admin");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  loadCurrentUser();
+}, []);
+
+  useEffect(() => {
     loadUsers();
   }, []);
 
@@ -97,23 +133,65 @@ export default function UserManagement() {
 
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-6">
-      <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Quản lý User</h2>
+      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">
+            Quản lý người dùng
+          </h2>
 
-        <button onClick={loadUsers} className="rounded-lg border px-4 py-2">
-          Làm mới
-        </button>
+          <p className="mt-1 text-sm text-gray-500">
+            Quản lý tài khoản và thông tin nhân viên trong hệ thống
+          </p>
+        </div>
 
-        <button
-          onClick={() => navigate("/users/create")}
-          className="flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2 text-white hover:bg-brand-600"
-        >
-          <Plus size={18} />
-          Thêm User
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={loadUsers}
+            className="rounded-lg border border-stroke bg-white px-4 py-2 hover:bg-gray-50"
+          >
+            Làm mới
+          </button>
+
+          {isAdmin && (
+            <button
+              onClick={() => navigate("/users/create")}
+              className="flex items-center gap-2 rounded-lg bg-brand-500 px-5 py-2 text-white hover:bg-brand-600"
+            >
+              <Plus size={18} />
+              Thêm người dùng
+            </button>
+          )}
+        </div>
       </div>
 
-      <div className="mb-5 relative">
+      <div className="mb-6 rounded-xl border border-stroke bg-white p-5 shadow-sm">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div className="relative">
+            <Search size={18} className="absolute left-3 top-3 text-gray-400" />
+
+            <input
+              value={search}
+              onChange={(e) => {
+                setPage(1);
+                setSearch(e.target.value);
+              }}
+              placeholder="Tìm tên, email hoặc số điện thoại..."
+              className="w-full rounded-lg border border-stroke py-2.5 pl-10 pr-4"
+            />
+          </div>
+          <select className="rounded-lg border border-stroke px-4">
+            <option>Tất cả vai trò</option>
+            <option>Admin</option>
+            <option>User</option>
+          </select>
+
+          <div className="flex items-center justify-end text-sm text-gray-500">
+            Tổng cộng <b className="mx-1">{users.length}</b> người dùng
+          </div>
+        </div>
+      </div>
+
+      {/* <div className="mb-5 relative">
         <Search size={18} className="absolute left-3 top-3 text-gray-400" />
 
         <input
@@ -122,9 +200,66 @@ export default function UserManagement() {
           placeholder="Tìm theo tên, email, SĐT..."
           className="w-full rounded-lg border py-2 pl-10 pr-4"
         />
-      </div>
+      </div> */}
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto ">
+        <div className="mb-6 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-6">
+          <div className="rounded-2xl border border-stroke bg-white p-5 shadow-sm">
+            <p className="text-sm text-gray-500">Tổng người dùng</p>
+
+            <h2 className="mt-2 text-3xl font-bold text-brand-500">
+              {users.length}
+            </h2>
+          </div>
+
+          <div className="rounded-2xl border border-stroke bg-white p-5 shadow-sm">
+            <p className="text-sm text-gray-500">Quản trị viên</p>
+
+            <h2 className="mt-2 text-3xl font-bold text-red-500">
+              {users.filter((x) => x?.roleID?.roleName === "Admin").length}
+            </h2>
+          </div>
+
+          <div className="rounded-2xl border border-stroke bg-white p-5 shadow-sm">
+            <p className="text-sm text-gray-500">Quản lý</p>
+
+            <h2 className="mt-2 text-3xl font-bold text-blue-500">
+              {users.filter((x) => x?.roleID?.roleName === "Manager").length}
+            </h2>
+          </div>
+
+          <div className="rounded-2xl border border-stroke bg-white p-5 shadow-sm">
+            <p className="text-sm text-gray-500">Chuyên viên kinh doanh</p>
+
+            <h2 className="mt-2 text-3xl font-bold text-blue-500">
+              {
+                users.filter(
+                  (x) => x?.roleID?.roleName === "Business specialist",
+                ).length
+              }
+            </h2>
+          </div>
+
+          <div className="rounded-2xl border border-stroke bg-white p-5 shadow-sm">
+            <p className="text-sm text-gray-500">Nhân viên thử việc</p>
+
+            <h2 className="mt-2 text-3xl font-bold text-blue-500">
+              {
+                users.filter(
+                  (x) => x?.roleID?.roleName === "Probationary employee",
+                ).length
+              }
+            </h2>
+          </div>
+
+          <div className="rounded-2xl border border-stroke bg-white p-5 shadow-sm">
+            <p className="text-sm text-gray-500">Hiển thị</p>
+
+            <h2 className="mt-2 text-3xl font-bold text-green-500">
+              {filteredUsers.length}
+            </h2>
+          </div>
+        </div>
         <table className="min-w-full">
           <thead>
             <tr className="border-b bg-gray-50">
@@ -157,7 +292,18 @@ export default function UserManagement() {
 
                 <td className="px-4 py-3 font-medium">{user.fullName}</td>
 
-                <td className="px-4 py-3">{user.role}</td>
+                <td className="px-4 py-3 text-left">
+                  <span
+                    className={`inline-flex min-w-[90px] justify-center rounded-full px-3 py-1 text-xs font-semibold 
+                  ${
+                    user?.roleID?.roleName === "Admin"
+                      ? "bg-red-100 text-red-600"
+                      : "bg-blue-100 text-blue-600"
+                  }`}
+                  >
+                    {user?.roleID?.roleName}
+                  </span>
+                </td>
 
                 <td className="px-4 py-3">{formatDate(user.doB)}</td>
 
@@ -169,24 +315,28 @@ export default function UserManagement() {
                   <div className="flex justify-center gap-2">
                     <button
                       onClick={() => navigate(`/users/view/${user._id}`)}
-                      className="rounded bg-blue-500 p-2 text-white"
+                      className="rounded-lg border border-blue-200 p-2 text-blue-600 hover:bg-blue-50"
                     >
                       <Eye size={16} />
                     </button>
 
-                    <button
-                      onClick={() => navigate(`/users/edit/${user._id}`)}
-                      className="rounded bg-amber-500 p-2 text-white"
-                    >
-                      <Pencil size={16} />
-                    </button>
+                    {isAdmin && (
+                      <>
+                        <button
+                          onClick={() => navigate(`/users/edit/${user._id}`)}
+                          className="rounded-lg border border-yellow-200 p-2 text-yellow-600 hover:bg-yellow-50"
+                        >
+                          <Pencil size={16} />
+                        </button>
 
-                    <button
-                      onClick={() => handleDelete(user._id)}
-                      className="rounded bg-red-500 p-2 text-white"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                        <button
+                          onClick={() => handleDelete(user._id)}
+                          className="rounded-lg border border-red-200 p-2 text-red-600 hover:bg-red-50"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </>
+                    )}
                   </div>
                 </td>
               </tr>
