@@ -8,10 +8,7 @@ export const getDashboard = async (month: number, year: number) => {
   return res.data.data;
 };
 
-export const getMonthlyRevenue = async (
-  month: number,
-  year: number,
-) => {
+export const getMonthlyRevenue = async (month: number, year: number) => {
   const res = await api.get(`/sales-record/dashboard/monthly-revenue`, {
     params: {
       month,
@@ -28,6 +25,18 @@ export const getYearRevenue = async (year: number) => {
       year,
     },
   });
+
+  return res.data.data;
+};
+
+export const getUserDashboard = async (
+  userId: string,
+  month: number,
+  year: number,
+) => {
+  const res = await api.get(
+    `/sales-record/user/${userId}/dashboard?month=${month}&year=${year}`,
+  );
 
   return res.data.data;
 };
