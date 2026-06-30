@@ -21,7 +21,7 @@
 //   );
 // }
 import { useEffect, useMemo, useState } from "react";
-import { getUsers,getUserById, getRoleById } from "../../services/userService";
+import { getUsers, getUserById, getRoleById } from "../../services/userService";
 import { Eye, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router";
 import { deleteUser } from "../../services/userService";
@@ -87,39 +87,36 @@ export default function UserManagement() {
   };
 
   useEffect(() => {
-  const loadCurrentUser = async () => {
-    try {
-      const currentUser = JSON.parse(localStorage.getItem("user") || "null");
-      console.log("Người dùng hiện tại: ",currentUser);
-      
-      if (!currentUser?._id) return;
+    const loadCurrentUser = async () => {
+      try {
+        const currentUser = JSON.parse(localStorage.getItem("user") || "null");
+        console.log("Người dùng hiện tại: ", currentUser);
 
-      // Lấy user đầy đủ
-      const userRes = await getUserById(currentUser._id);
-      console.log("Người dùng lấy ID hiện tại: ",userRes);
-      const user = userRes.data.getUser;
+        if (!currentUser?._id) return;
 
-      if (!user?.roleID) return;
+        // Lấy user đầy đủ
+        const userRes = await getUserById(currentUser._id);
+        console.log("Người dùng lấy ID hiện tại: ", userRes);
+        const user = userRes.data.getUser;
 
-      // Nếu roleID là ObjectId
-      const roleId =
-        typeof user.roleID === "string"
-          ? user.roleID
-          : user.roleID._id;
+        if (!user?.roleID) return;
 
-      const roleRes = await getRoleById(roleId);
+        // Nếu roleID là ObjectId
+        const roleId =
+          typeof user.roleID === "string" ? user.roleID : user.roleID._id;
 
-      console.log("Lấy role người dùng: ",roleRes);
-      
+        const roleRes = await getRoleById(roleId);
 
-      setIsAdmin(roleRes.data.roleName === "Admin");
-    } catch (err) {
-      console.error(err);
-    }
-  };
+        console.log("Lấy role người dùng: ", roleRes);
 
-  loadCurrentUser();
-}, []);
+        setIsAdmin(roleRes.data.roleName === "Admin");
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    loadCurrentUser();
+  }, []);
 
   useEffect(() => {
     loadUsers();
@@ -294,12 +291,19 @@ export default function UserManagement() {
 
                 <td className="px-4 py-3 text-left">
                   <span
-                    className={`inline-flex min-w-[90px] justify-center rounded-full px-3 py-1 text-xs font-semibold 
-                  ${
-                    user?.roleID?.roleName === "Admin"
-                      ? "bg-red-100 text-red-600"
-                      : "bg-blue-100 text-blue-600"
-                  }`}
+                    className={`inline-flex min-w-[90px] justify-center rounded-full px-3 py-1 text-xs font-semibold
+                    ${
+                        user?.roleID?.roleName === "Admin"
+                        ? "bg-red-100 text-red-600"
+                        : user?.roleID?.roleName === "Manager"
+                        ? "bg-yellow-100 text-yellow-700"
+                        : user?.roleID?.roleName === "Business specialist"
+                        ? "bg-sky-100 text-sky-600"
+                        : user?.roleID?.roleName === "Probationary employee"
+                        ? "bg-pink-100 text-pink-600"
+                        : "bg-gray-100 text-gray-600"
+                        }
+                      `}
                   >
                     {user?.roleID?.roleName}
                   </span>
