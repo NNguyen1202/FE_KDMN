@@ -1,58 +1,90 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useModal } from "../../hooks/useModal";
 import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
+import { updateUser } from "../../services/userService";
+import { useEffect, useState } from "react";
 
-export default function UserInfoCard() {
+interface Props {
+  user: any;
+  role: any;
+  reload: () => void;
+}
+
+export default function UserInfoCard({ user, role, reload }: Props) {
   const { isOpen, openModal, closeModal } = useModal();
-  const handleSave = () => {
-    // Handle save logic here
-    console.log("Saving changes...");
-    closeModal();
+
+  const [form, setForm] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    avatarUrl: "",
+  });
+
+  useEffect(() => {
+    if (!user) return;
+
+    setForm({
+      fullName: user.fullName || "",
+      email: user.email || "",
+      phone: user.phone || "",
+      avatarUrl: user.avatarUrl || "",
+    });
+  }, [user]);
+
+  const handleSave = async () => {
+    try {
+      await updateUser(user._id, {
+        fullName: form.fullName,
+        email: form.email,
+        phone: form.phone,
+        avatarUrl: form.avatarUrl,
+      });
+
+      await reload();
+
+      closeModal();
+    } catch (err) {
+      console.error(err);
+    }
   };
+
   return (
     <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
-            Personal Information
+            Thông tin cá nhân
           </h4>
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
             <div>
               <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                First Name
+                Họ và tên
               </p>
+
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                Musharof
+                {user?.fullName}
               </p>
             </div>
 
             <div>
               <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Last Name
+                Địa chỉ Email
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                Chowdhury
+                {user?.email}
               </p>
             </div>
 
             <div>
               <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Email address
+                Số điện thoại
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                randomuser@pimjo.com
-              </p>
-            </div>
-
-            <div>
-              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Phone
-              </p>
-              <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                +09 363 398 46
+                {user?.phone}
               </p>
             </div>
 
@@ -61,7 +93,7 @@ export default function UserInfoCard() {
                 Bio
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                Team Manager
+                {role.roleName}
               </p>
             </div>
           </div>
@@ -102,7 +134,7 @@ export default function UserInfoCard() {
           </div>
           <form className="flex flex-col">
             <div className="custom-scrollbar h-[450px] overflow-y-auto px-2 pb-3">
-              <div>
+              {/* <div>
                 <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
                   Social Links
                 </h5>
@@ -134,36 +166,68 @@ export default function UserInfoCard() {
                     <Input type="text" value="https://instagram.com/PimjoHQ" />
                   </div>
                 </div>
-              </div>
+              </div> */}
               <div className="mt-7">
                 <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
-                  Personal Information
+                  Thông tin cá nhân
                 </h5>
 
                 <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                   <div className="col-span-2 lg:col-span-1">
-                    <Label>First Name</Label>
-                    <Input type="text" value="Musharof" />
+                    <Label>Họ và tên</Label>
+                    <Input
+                      type="text"
+                      value={form.fullName}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          fullName: e.target.value,
+                        })
+                      }
+                    />
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
-                    <Label>Last Name</Label>
-                    <Input type="text" value="Chowdhury" />
+                    <Label>Địa chỉ Email</Label>
+                    <Input
+                      type="email"
+                      value={form.email}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          email: e.target.value,
+                        })
+                      }
+                    />
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
-                    <Label>Email Address</Label>
-                    <Input type="text" value="randomuser@pimjo.com" />
-                  </div>
-
-                  <div className="col-span-2 lg:col-span-1">
-                    <Label>Phone</Label>
-                    <Input type="text" value="+09 363 398 46" />
+                    <Label>Số điện thoại</Label>
+                    <Input
+                      type="text"
+                      value={form.phone}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          phone: e.target.value,
+                        })
+                      }
+                    />
                   </div>
 
                   <div className="col-span-2">
-                    <Label>Bio</Label>
-                    <Input type="text" value="Team Manager" />
+                    <Label>Avatar URL</Label>
+
+                    <Input
+                      type="text"
+                      value={form.avatarUrl}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          avatarUrl: e.target.value,
+                        })
+                      }
+                    />
                   </div>
                 </div>
               </div>

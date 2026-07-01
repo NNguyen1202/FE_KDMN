@@ -35,7 +35,7 @@ export default function UserManagement() {
 
   const [page, setPage] = useState(1);
 
-  const pageSize = 10;
+  const pageSize = 20;
 
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {

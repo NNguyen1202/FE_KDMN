@@ -6,7 +6,7 @@ export default function RevenueCards() {
   const { yearRevenue, revenueYear, setRevenueYear } =
     useDashboard();
 
-  const expectedRevenue: number = 2400000000; // <-- Mục tiêu năm, sửa tại FE
+  const expectedRevenue: number = 2800000000; // <-- Mục tiêu năm, sửa tại FE
 
   const currentRevenue = yearRevenue.totalRevenue || 0;
 
