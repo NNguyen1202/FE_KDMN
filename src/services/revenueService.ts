@@ -12,8 +12,13 @@ export const getAllSales = (params?: any) =>
     params,
   });
 
-export const getSalesByUser = (userId: string) =>
-  api.get(`/sales-record/user/${userId}`);
+export const getSalesByUser = (userId: string, month?: number, year?: number) =>
+  api.get(`/sales-record/user/${userId}`, {
+    params: {
+      month,
+      year,
+    },
+  });
 
 export const searchSales = (params: any) =>
   api.get("/sales-record/search", { params });
