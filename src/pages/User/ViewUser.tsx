@@ -10,6 +10,7 @@ import { getUserDashboard } from "../../services/dashboardService";
 import { getRoleById } from "../../services/userService";
 
 import { getRoleDisplayName } from "../../utils/role";
+import { getSalesByUser } from "../../services/revenueService";
 
 export default function ViewUser() {
   const { id } = useParams();
@@ -30,6 +31,8 @@ export default function ViewUser() {
 
   const [products, setProducts] = useState<any[]>([]);
 
+  const [salesRecords, setSalesRecords] = useState<any[]>([]);
+
   useEffect(() => {
     if (id) {
       loadUser(id);
@@ -41,6 +44,10 @@ export default function ViewUser() {
       const res = await getUserById(userId);
 
       setUser(res.data.getUser);
+
+      const salesRes = await getSalesByUser(userId, month, year);
+
+      setSalesRecords(salesRes.data.data ?? []);
 
       const userData = res.data.getUser;
       console.log(userData);
@@ -265,6 +272,65 @@ export default function ViewUser() {
                 ))}
               </div>
             </div>
+
+            <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-6">
+  <h3 className="mb-5 text-lg font-semibold">
+    Danh sách giao dịch tháng {month}/{year}
+  </h3>
+
+  <div className="overflow-x-auto">
+    <table className="min-w-full">
+      <thead className="border-b bg-gray-50">
+        <tr>
+          <th className="px-4 py-3 text-left">Ngày</th>
+          <th className="px-4 py-3 text-left">Sản phẩm</th>
+          <th className="px-4 py-3 text-left">Nguồn</th>
+          <th className="px-4 py-3 text-center">Khách hàng</th>
+          <th className="px-4 py-3 text-center">Số lượng</th>
+          <th className="px-4 py-3 text-right">Doanh thu</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {salesRecords.length > 0 ? (
+          salesRecords.map((item: any) => (
+            <tr key={item._id} className="border-b hover:bg-gray-50">
+              <td className="px-4 py-3">
+                {new Date(item.reportDate).toLocaleDateString("vi-VN")}
+              </td>
+
+              <td className="px-4 py-3 font-medium">
+                {item.productType}
+              </td>
+
+              <td className="px-4 py-3">
+                {item.sourceType}
+              </td>
+
+              <td className="px-4 py-3 text-center">
+                {item.customerCount}
+              </td>
+
+              <td className="px-4 py-3 text-center">
+                {item.productQuantity}
+              </td>
+
+              <td className="px-4 py-3 text-right font-semibold text-green-600">
+                {item.revenue.toLocaleString("vi-VN")} đ
+              </td>
+            </tr>
+          ))
+        ) : (
+          <tr>
+            <td colSpan={6} className="py-6 text-center text-gray-500">
+              Không có giao dịch trong tháng này.
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  </div>
+</div>
           </div>
         </div>
       </div>
