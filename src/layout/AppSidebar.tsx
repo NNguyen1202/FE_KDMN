@@ -45,8 +45,8 @@ const navItems: NavItem[] = [
       //   pro: false,
       // },
       {
-        name: "Cơ quan BHXH 2026",
-        path: "/bhxh-tables",
+        name: "iCare 2026",
+        path: "/bhxh",
         pro: false,
       },
     ],

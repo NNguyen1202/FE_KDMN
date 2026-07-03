@@ -17,10 +17,22 @@ interface ProductRevenue {
 }
 
 interface RevenueSummary {
-    month: number;
-    year: number;
-    totalRevenue: number;
-    products: ProductRevenue[];
+  month: number;
+  year: number;
+  totalRevenue: number;
+  products: ProductRevenue[];
+  sourceCustomers: SourceCustomer[];
+}
+
+interface SourceCustomer {
+  _id: {
+    sourceType: string;
+    productType: string;
+  };
+  customers: number;
+  revenue: number;
+  quantity: number;
+  records: number;
 }
 
 interface DashboardContextType {
@@ -66,14 +78,16 @@ export const DashboardProvider = ({
     year,
     totalRevenue: 0,
     products: [],
+    sourceCustomers: [],
   });
 
-  const [yearRevenue,setYearRevenue]=useState<RevenueSummary>({
+  const [yearRevenue, setYearRevenue] = useState<RevenueSummary>({
     month: 0,
     year: revenueYear,
-    totalRevenue:0,
-    products:[]
-});
+    totalRevenue: 0,
+    products: [],
+    sourceCustomers: [],
+  });
 
   useEffect(() => {
     loadDashboard();
