@@ -23,7 +23,7 @@ export default function SignInForm() {
       setLoading(true);
 
       const { data } = await axios.post(
-        "https://be-mean-repo-2x5e.onrender.com/api/user/login",
+        "https://kdmn-easyhrm-icare.azurewebsites.net/api/user/login",
         { email, password },
         { timeout: 15000 }, // 15s
       );

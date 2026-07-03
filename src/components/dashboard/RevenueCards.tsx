@@ -1,10 +1,90 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { formatCurrency } from "../../utils/formatCurrency";
 import { useDashboard } from "../../context/DashboardContext";
+import {
+  ChevronDownIcon,
+  ChevronUpIcon,
+  MegaphoneIcon,
+  UserIcon,
+  UserCheck,
+} from "lucide-react";
+import { useState } from "react";
 
 export default function RevenueCards() {
-  const { yearRevenue, revenueYear, setRevenueYear } =
-    useDashboard();
+  const { yearRevenue, revenueYear, setRevenueYear } = useDashboard();
+
+  const allProducts = [
+    "EasyHRM MASS",
+    "EasyHRM PROJECT",
+    "iCare HKD",
+    "iCare DN",
+  ];
+
+  const getSourceName = (source: string) => {
+    switch (source) {
+      case "Marketing":
+        return "Marketing";
+      case "ChuDong":
+        return "Chủ động";
+      case "CTV_DaiLy":
+        return "CTV / Đại lý";
+      default:
+        return source;
+    }
+  };
+
+  const getSourceIcon = (source: string) => {
+    switch (source) {
+      case "Marketing":
+        return <MegaphoneIcon className="h-6 w-6 text-orange-500" />;
+      case "ChuDong":
+        return <UserIcon className="h-6 w-6 text-green-600" />;
+      case "CTV_DaiLy":
+        return <UserCheck className="h-6 w-6 text-blue-600" />;
+      default:
+        return <UserCheck className="h-6 w-6 text-gray-500" />;
+    }
+  };
+
+  const groupedSources = yearRevenue.sourceCustomers.reduce(
+    (acc: Record<string, any[]>, item: any) => {
+      const source = item._id.sourceType;
+
+      if (!acc[source]) acc[source] = [];
+
+      acc[source].push(item);
+
+      return acc;
+    },
+    {},
+  );
+
+  Object.keys(groupedSources).forEach((source) => {
+    allProducts.forEach((product) => {
+      if (
+        !groupedSources[source].find((x: any) => x._id.productType === product)
+      ) {
+        groupedSources[source].push({
+          _id: {
+            sourceType: source,
+            productType: product,
+          },
+          customers: 0,
+          revenue: 0,
+        });
+      }
+    });
+
+    groupedSources[source].sort(
+      (a: any, b: any) =>
+        allProducts.indexOf(a._id.productType) -
+        allProducts.indexOf(b._id.productType),
+    );
+  });
+
+  const [openSource, setOpenSource] = useState<string>(
+    Object.keys(groupedSources)[0] || "",
+  );
 
   const expectedRevenue: number = 2800000000; // <-- Mục tiêu năm, sửa tại FE
 
@@ -75,6 +155,103 @@ export default function RevenueCards() {
               </div>
             </div>
           ))}
+        </div>
+
+        <div className="mt-10">
+          <h2 className="mb-5 text-2xl font-bold">Khách hàng theo nguồn</h2>
+
+          <div className="space-y-4">
+            {Object.entries(groupedSources).map(([source, products]: any) => {
+              const isOpen = openSource === source;
+
+              const totalCustomer = products.reduce(
+                (sum: number, p: any) => sum + p.customers,
+                0,
+              );
+
+              const totalRevenue = products.reduce(
+                (sum: number, p: any) => sum + p.revenue,
+                0,
+              );
+
+              return (
+                <div
+                  key={source}
+                  className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm"
+                >
+                  <button
+                    onClick={() => setOpenSource(isOpen ? "" : source)}
+                    className="flex w-full items-center justify-between bg-slate-50 px-6 py-5 hover:bg-slate-100"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-50">
+                        {getSourceIcon(source)}
+                      </div>
+
+                      <div className="text-left">
+                        <h3 className="text-lg font-semibold">
+                          {getSourceName(source)}
+                        </h3>
+
+                        <div className="mt-2 flex gap-2">
+                          <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
+                            👥 {totalCustomer} khách
+                          </span>
+
+                          <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
+                            💰 {formatCurrency(totalRevenue)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {isOpen ? (
+                      <ChevronUpIcon className="h-6 w-6 text-gray-500" />
+                    ) : (
+                      <ChevronDownIcon className="h-6 w-6 text-gray-500" />
+                    )}
+                  </button>
+
+                  {isOpen && (
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-6 py-3 text-left">Sản phẩm</th>
+
+                            <th className="px-6 py-3 text-center">Khách</th>
+
+                            <th className="px-6 py-3 text-right">Doanh thu</th>
+                          </tr>
+                        </thead>
+
+                        <tbody>
+                          {products.map((item: any) => (
+                            <tr
+                              key={item._id.productType}
+                              className="border-t hover:bg-gray-50"
+                            >
+                              <td className="px-6 py-4">
+                                {item._id.productType}
+                              </td>
+
+                              <td className="px-6 py-4 text-center font-semibold text-blue-600">
+                                {item.customers}
+                              </td>
+
+                              <td className="px-6 py-4 text-right font-semibold text-green-600">
+                                {formatCurrency(item.revenue)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 
