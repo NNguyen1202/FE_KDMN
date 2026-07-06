@@ -6,6 +6,8 @@ import AgencyTable from "../../components/bhxh/agency/AgencyTable";
 import ProvinceTable from "../../components/bhxh/province/ProvinceTable";
 import ManagementAreaTable from "../../components/bhxh/managementArea/ManagementAreaTable";
 import AgencyContactTable from "../../components/bhxh/agencyContact/AgencyContactTable";
+import OnlineRegistrationTable from "../../components/bhxh/onlineRegistration/OnlineRegistrationTable";
+import PaymentAccountTable from "../../components/bhxh/paymentAccount/PaymentAccountTable";
 
 import {
   getAllAgency,
@@ -16,6 +18,10 @@ import {
   searchManagementArea,
   getAllAgencyContact,
   searchAgencyContact,
+  getAllOnlineRegistration,
+  searchOnlineRegistration,
+  getAllPaymentAccount,
+  searchPaymentAccount,
 } from "../../services/bhxhService";
 
 const tabs = [
@@ -37,7 +43,7 @@ const tabs = [
   },
   {
     key: "onlineRegistration",
-    title: "Online",
+    title: "Đăng ký Online",
   },
   {
     key: "paymentAccount",
@@ -60,48 +66,66 @@ export default function BhxhPage() {
 
   const [agencyContactData, setAgencyContacts] = useState<any[]>([]);
 
-  const loadAgency = async () => {
+  const [onlineRegistrations, setOnlineRegistrations] = useState<any[]>([]);
+
+  const [paymentAccounts, setPaymentAccounts] = useState<any[]>([]);
+
+  const [searchField, setSearchField] = useState("agencyName");
+
+  const loadAgency = async (search = "") => {
     try {
       setLoading(true);
 
       const res: any =
-        keyword.trim() === ""
+        search.trim() === ""
           ? await getAllAgency()
-          : await searchAgency({ keyword });
-
-      setAgencyData(res.data || []);
+          : await searchAgency({
+              field: searchField,
+              keyword: search,
+            });
+            console.log("RES: ", res);
+            
+      setAgencyData(Array.isArray(res.data) ? res.data : res.data?.data ?? []);
     } finally {
       setLoading(false);
     }
   };
 
-  const loadProvince = async () => {
+  const loadProvince = async (search = "") => {
     try {
       setLoading(true);
 
       const res: any =
-        keyword.trim() === ""
+        search.trim() === ""
           ? await getAllProvince()
-          : await searchProvince({ keyword });
+          : await searchProvince({
+              field: searchField,
+              keyword: search,
+            });
 
-      setProvinceData(res.data || []);
+      setProvinceData(
+        Array.isArray(res.data) ? res.data : res.data?.data ?? [],
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const loadManagementArea = async () => {
+  const loadManagementArea = async (search = "") => {
     try {
       setLoading(true);
 
       const res: any =
-        keyword.trim() === ""
+        search.trim() === ""
           ? await getAllManagementArea()
-          : await searchManagementArea({ keyword });
+          : await searchManagementArea({
+              field: searchField,
+              keyword: search,
+            });
 
-      const data = Array.isArray(res.data) ? res.data : res.data?.data ?? [];
-
-      setManagementAreaData(data);
+      setManagementAreaData(
+        Array.isArray(res.data) ? res.data : res.data?.data ?? [],
+      );
     } finally {
       setLoading(false);
     }
@@ -116,6 +140,42 @@ export default function BhxhPage() {
         : await getAllAgencyContact();
 
       setAgencyContacts(
+        Array.isArray(res.data) ? res.data : res.data?.data ?? [],
+      );
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadOnlineRegistration = async (keyword = "") => {
+    try {
+      setLoading(true);
+
+      const res: any = keyword
+        ? await searchOnlineRegistration({ keyword })
+        : await getAllOnlineRegistration();
+
+      setOnlineRegistrations(
+        Array.isArray(res.data) ? res.data : res.data?.data ?? [],
+      );
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadPaymentAccount = async (keyword = "") => {
+    try {
+      setLoading(true);
+
+      const res: any = keyword
+        ? await searchPaymentAccount({ keyword })
+        : await getAllPaymentAccount();
+
+      setPaymentAccounts(
         Array.isArray(res.data) ? res.data : res.data?.data ?? [],
       );
     } catch (err) {
@@ -143,52 +203,92 @@ export default function BhxhPage() {
         loadAgencyContact();
         break;
 
+      case "onlineRegistration":
+        loadOnlineRegistration();
+        break;
+
+      case "paymentAccount":
+        loadPaymentAccount();
+        break;
+
       default:
         break;
     }
   };
 
   useEffect(() => {
-  setKeyword("");
-  loadCurrentTab();
-}, [activeTab]);
+    setKeyword("");
+
+    switch (activeTab) {
+      case "agency":
+        setSearchField("agencyName");
+        break;
+
+      case "province":
+        setSearchField("provinceName");
+        break;
+
+      case "managementArea":
+        setSearchField("wardName");
+        break;
+
+      case "agencyContact":
+      case "onlineRegistration":
+      case "paymentAccount":
+        setSearchField("agencyName");
+        break;
+    }
+
+    loadCurrentTab();
+  }, [activeTab]);
 
   const handleSearch = () => {
-  switch (activeTab) {
-    case "agency":
-      loadAgency();
-      break;
+    switch (activeTab) {
+      case "agency":
+        loadAgency(keyword);
+        break;
 
-    case "province":
-      loadProvince();
-      break;
+      case "province":
+        loadProvince(keyword);
+        break;
 
-    case "managementArea":
-      loadManagementArea();
-      break;
+      case "managementArea":
+        loadManagementArea(keyword);
+        break;
 
-    case "agencyContact":
-      loadAgencyContact(keyword);
-      break;
+      case "agencyContact":
+        loadAgencyContact(keyword);
+        break;
 
-    default:
-      break;
-  }
-};
+      case "onlineRegistration":
+        loadOnlineRegistration(keyword);
+        break;
+
+      case "paymentAccount":
+        loadPaymentAccount(keyword);
+        break;
+
+      default:
+        break;
+    }
+  };
 
   const handleRefresh = () => {
     setKeyword("");
 
     switch (activeTab) {
       case "agency":
+        setSearchField("agencyName");
         loadAgency();
         break;
 
       case "province":
+        setSearchField("provinceName");
         loadProvince();
         break;
 
       case "managementArea":
+        setSearchField("wardName");
         loadManagementArea();
         break;
 
@@ -196,8 +296,43 @@ export default function BhxhPage() {
         loadAgencyContact();
         break;
 
+      case "onlineRegistration":
+        loadOnlineRegistration();
+        break;
+
+      case "paymentAccount":
+        loadPaymentAccount();
+        break;
+
       default:
         break;
+    }
+  };
+
+  const getPlaceholder = () => {
+    switch (activeTab) {
+      case "agency":
+        return searchField === "agencyCode"
+          ? "Nhập mã cơ quan..."
+          : "Nhập tên cơ quan...";
+
+      case "province":
+        return searchField === "provinceCode"
+          ? "Nhập mã tỉnh..."
+          : "Nhập tên tỉnh...";
+
+      case "managementArea":
+        return searchField === "wardCode"
+          ? "Nhập mã xã/phường..."
+          : "Nhập tên xã/phường...";
+
+      case "agencyContact":
+      case "onlineRegistration":
+      case "paymentAccount":
+        return "Nhập tên cơ quan...";
+
+      default:
+        return "Nhập từ khóa...";
     }
   };
 
@@ -222,11 +357,44 @@ export default function BhxhPage() {
         </div>
 
         <div className="mb-6 flex items-center gap-3">
+          <select
+            value={searchField}
+            onChange={(e) => setSearchField(e.target.value)}
+            className="rounded-lg border px-4 py-2"
+          >
+            {activeTab === "agency" && (
+              <>
+                <option value="agencyCode">Mã cơ quan</option>
+                <option value="agencyName">Tên cơ quan</option>
+              </>
+            )}
+
+            {activeTab === "province" && (
+              <>
+                <option value="provinceCode">Mã tỉnh</option>
+                <option value="provinceName">Tên tỉnh</option>
+              </>
+            )}
+
+            {activeTab === "managementArea" && (
+              <>
+                <option value="wardCode">Mã xã / Phường</option>
+                <option value="wardName">Tên xã / Phường</option>
+              </>
+            )}
+
+            {(activeTab === "agencyContact" ||
+              activeTab === "onlineRegistration" ||
+              activeTab === "paymentAccount") && (
+              <option value="agencyName">Tên cơ quan</option>
+            )}
+          </select>
+
           <input
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            placeholder="Nhập từ khóa..."
             className="w-96 rounded-lg border px-4 py-2"
+            placeholder={getPlaceholder()}
           />
 
           <button
@@ -273,6 +441,22 @@ export default function BhxhPage() {
             data={agencyContactData}
             loading={loading}
             reload={loadAgencyContact}
+          />
+        )}
+
+        {activeTab === "onlineRegistration" && (
+          <OnlineRegistrationTable
+            data={onlineRegistrations}
+            loading={loading}
+            reload={loadOnlineRegistration}
+          />
+        )}
+
+        {activeTab === "paymentAccount" && (
+          <PaymentAccountTable
+            data={paymentAccounts}
+            loading={loading}
+            reload={loadPaymentAccount}
           />
         )}
       </div>
