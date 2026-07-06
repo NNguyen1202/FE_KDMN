@@ -58,7 +58,7 @@ export default function ManagementAreaTable({ data, loading, reload }: Props) {
         <table className="w-full">
           <thead className="bg-gray-100 dark:bg-gray-800">
             <tr>
-              <th className="px-4 py-3">STT</th>
+              <th className="px-4 py-3 w-20">STT</th>
               <th className="px-4 py-3 text-left">Mã</th>
               <th className="px-4 py-3 text-left">Tên xã / phường</th>
               <th className="px-4 py-3 text-left">Tỉnh / Thành</th>
@@ -79,7 +79,7 @@ export default function ManagementAreaTable({ data, loading, reload }: Props) {
             {!loading &&
               data.map((item, index) => (
                 <tr key={item._id} className="border-t">
-                  <td className="px-4 py-3">{index + 1}</td>
+                  <td className="px-4 py-3 text-center">{index + 1}</td>
 
                   <td>{item.wardCode}</td>
 
