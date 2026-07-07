@@ -9,62 +9,54 @@ import {
   DashboardProvider,
   useDashboard,
 } from "../../context/DashboardContext";
+import PageMeta from "../../components/common/PageMeta";
 
 function DashboardContent() {
-  const {
-    month,
-    year,
-    setMonth,
-    setYear,
-    monthlyRevenue,
-  } = useDashboard();
+  const { month, year, setMonth, setYear, monthlyRevenue } = useDashboard();
 
   return (
-    <div className="space-y-8">
+    <>
+      <PageMeta title="Dashboard" description="KDMN | Dashboard" />
+      <div className="space-y-8">
+        {/* ================= THÁNG ================= */}
 
-      {/* ================= THÁNG ================= */}
+        <DashboardFilter
+          month={month}
+          year={year}
+          monthlyRevenue={monthlyRevenue}
+          setMonth={setMonth}
+          setYear={setYear}
+        />
 
-      <DashboardFilter
-        month={month}
-        year={year}
-        monthlyRevenue={monthlyRevenue}
-        setMonth={setMonth}
-        setYear={setYear}
-      />
+        {/* ================= NĂM + KPI ================= */}
 
-      {/* ================= NĂM + KPI ================= */}
+        <RevenueCards />
 
-      <RevenueCards />
+        {/* ================= BIỂU ĐỒ DOANH THU ================= */}
 
-      {/* ================= BIỂU ĐỒ DOANH THU ================= */}
+        <div className="grid grid-cols-12 gap-6">
+          <div className="col-span-12 xl:col-span-8">
+            <RevenueChart />
+          </div>
 
-      <div className="grid grid-cols-12 gap-6">
-
-        <div className="col-span-12 xl:col-span-8">
-          <RevenueChart />
+          <div className="col-span-12 xl:col-span-4">
+            <ProductDonutChart />
+          </div>
         </div>
 
-        <div className="col-span-12 xl:col-span-4">
-          <ProductDonutChart />
-        </div>
+        {/* ================= NHÂN VIÊN ================= */}
 
+        <div className="grid grid-cols-12 gap-6">
+          <div className="col-span-12 xl:col-span-8">
+            <EmployeeRevenueChart />
+          </div>
+
+          <div className="col-span-12 xl:col-span-4">
+            <TopEmployeesTable />
+          </div>
+        </div>
       </div>
-
-      {/* ================= NHÂN VIÊN ================= */}
-
-      <div className="grid grid-cols-12 gap-6">
-
-        <div className="col-span-12 xl:col-span-8">
-          <EmployeeRevenueChart />
-        </div>
-
-        <div className="col-span-12 xl:col-span-4">
-          <TopEmployeesTable />
-        </div>
-
-      </div>
-
-    </div>
+    </>
   );
 }
 

@@ -10,10 +10,7 @@ const RevenueCalendar = () => {
 
   return (
     <>
-      <PageMeta
-        title="Báo cáo doanh thu"
-        description="Revenue Report"
-      />
+      <PageMeta title="Báo cáo doanh thu" description="Revenue Report" />
 
       <div className="mb-5 flex items-center justify-between">
         <h2 className="text-2xl font-semibold text-gray-900">
@@ -24,9 +21,7 @@ const RevenueCalendar = () => {
           <button
             onClick={() => setView("calendar")}
             className={`px-4 py-2 transition ${
-              view === "calendar"
-                ? "bg-brand-500 text-white"
-                : "bg-white"
+              view === "calendar" ? "bg-brand-500 text-white" : "bg-white"
             }`}
           >
             📅 Lịch
@@ -35,9 +30,7 @@ const RevenueCalendar = () => {
           <button
             onClick={() => setView("list")}
             className={`px-4 py-2 transition ${
-              view === "list"
-                ? "bg-brand-500 text-white"
-                : "bg-white"
+              view === "list" ? "bg-brand-500 text-white" : "bg-white"
             }`}
           >
             📋 Danh sách
@@ -45,11 +38,7 @@ const RevenueCalendar = () => {
         </div>
       </div>
 
-      {view === "calendar" ? (
-        <RevenueCalendarView />
-      ) : (
-        <RevenueListView />
-      )}
+      {view === "calendar" ? <RevenueCalendarView /> : <RevenueListView />}
     </>
   );
 };
