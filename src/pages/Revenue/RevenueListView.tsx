@@ -13,6 +13,7 @@ import { getAllSales, deleteRevenue } from "../../services/revenueService";
 
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import PageMeta from "../../components/common/PageMeta";
 
 export default function RevenueListView() {
   const [records, setRecords] = useState<any[]>([]);
@@ -72,131 +73,137 @@ export default function RevenueListView() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="rounded-2xl border border-stroke bg-white p-6 shadow-sm">
-        <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">
-              Danh sách doanh thu
-            </h2>
+    <>
+      <PageMeta
+        title="KDMN Revenue List View"
+        description="Revenue List View"
+      />
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="rounded-2xl border border-stroke bg-white p-6 shadow-sm">
+          <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Danh sách doanh thu
+              </h2>
 
-            <p className="mt-1 text-sm text-gray-500">
-              Quản lý toàn bộ doanh thu đã nhập trong hệ thống
-            </p>
-          </div>
+              <p className="mt-1 text-sm text-gray-500">
+                Quản lý toàn bộ doanh thu đã nhập trong hệ thống
+              </p>
+            </div>
 
-          <button
-            onClick={() => {
-              setEditingRecord(null);
-              openModal();
-            }}
-            className="inline-flex items-center justify-center rounded-lg bg-brand-500 px-5 py-3 font-medium text-white transition hover:bg-brand-600"
-          >
-            + Thêm doanh thu
-          </button>
-        </div>
-
-        {/* Filter */}
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-6">
-          <div>
-            <label className="mb-2 block text-sm font-medium">Từ ngày</label>
-
-            <DatePicker
-              selected={fromDate}
-              onChange={(date: Date | null) => {
-                if (date) setFromDate(date);
+            <button
+              onClick={() => {
+                setEditingRecord(null);
+                openModal();
               }}
-              dateFormat="dd/MM/yyyy"
-              className="w-full rounded-lg border border-stroke px-4 py-2.5"
-            />
+              className="inline-flex items-center justify-center rounded-lg bg-brand-500 px-5 py-3 font-medium text-white transition hover:bg-brand-600"
+            >
+              + Thêm doanh thu
+            </button>
           </div>
 
-          <div>
-            <label className="mb-2 block text-sm font-medium">Đến ngày</label>
+          {/* Filter */}
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-6">
+            <div>
+              <label className="mb-2 block text-sm font-medium">Từ ngày</label>
 
-            <DatePicker
-              selected={toDate}
-              onChange={(date: Date | null) => {
-                if (date) setToDate(date);
-              }}
-              dateFormat="dd/MM/yyyy"
-              className="w-full rounded-lg border border-stroke px-4 py-2.5"
-            />
-          </div>
+              <DatePicker
+                selected={fromDate}
+                onChange={(date: Date | null) => {
+                  if (date) setFromDate(date);
+                }}
+                dateFormat="dd/MM/yyyy"
+                className="w-full rounded-lg border border-stroke px-4 py-2.5"
+              />
+            </div>
 
-          <div className="flex items-end gap-3 lg:col-span-2">
-            {/* <button
+            <div>
+              <label className="mb-2 block text-sm font-medium">Đến ngày</label>
+
+              <DatePicker
+                selected={toDate}
+                onChange={(date: Date | null) => {
+                  if (date) setToDate(date);
+                }}
+                dateFormat="dd/MM/yyyy"
+                className="w-full rounded-lg border border-stroke px-4 py-2.5"
+              />
+            </div>
+
+            <div className="flex items-end gap-3 lg:col-span-2">
+              {/* <button
               onClick={loadData}
               className="rounded-lg bg-brand-500 px-5 py-2.5 text-white transition hover:bg-brand-600"
             >
               Lọc
             </button> */}
 
-            <button
-              onClick={() => {
-                setFromDate(firstDay);
-                setToDate(lastDay);
-              }}
-              className="rounded-lg border border-stroke px-5 py-2.5 hover:bg-gray-50"
-            >
-              Đặt lại
-            </button>
+              <button
+                onClick={() => {
+                  setFromDate(firstDay);
+                  setToDate(lastDay);
+                }}
+                className="rounded-lg border border-stroke px-5 py-2.5 hover:bg-gray-50"
+              >
+                Đặt lại
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Summary */}
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-4">
-        <RevenueSummary
-          summary={summary}
-          title="Tổng doanh thu"
-          totalRevenue={0}
-          products={[]}
+        {/* Summary */}
+        <div className="grid grid-cols-1 gap-5 xl:grid-cols-4">
+          <RevenueSummary
+            summary={summary}
+            title="Tổng doanh thu"
+            totalRevenue={0}
+            products={[]}
+          />
+
+          <div className="rounded-2xl border border-stroke bg-white p-5 shadow-sm">
+            <p className="text-sm text-gray-500">Tổng khách hàng</p>
+
+            <h2 className="mt-3 text-3xl font-bold text-blue-600">
+              {summary?.totalCustomers || 0}
+            </h2>
+          </div>
+
+          <div className="rounded-2xl border border-stroke bg-white p-5 shadow-sm">
+            <p className="text-sm text-gray-500">Tổng sản phẩm</p>
+
+            <h2 className="mt-3 text-3xl font-bold text-green-600">
+              {summary?.totalProducts || 0}
+            </h2>
+          </div>
+
+          <div className="rounded-2xl border border-stroke bg-white p-5 shadow-sm">
+            <p className="text-sm text-gray-500">Tổng bản ghi</p>
+
+            <h2 className="mt-3 text-3xl font-bold text-orange-500">
+              {records.length}
+            </h2>
+          </div>
+        </div>
+
+        {/* Table */}
+        <RevenueTable
+          records={records}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
         />
 
-        <div className="rounded-2xl border border-stroke bg-white p-5 shadow-sm">
-          <p className="text-sm text-gray-500">Tổng khách hàng</p>
-
-          <h2 className="mt-3 text-3xl font-bold text-blue-600">
-            {summary?.totalCustomers || 0}
-          </h2>
-        </div>
-
-        <div className="rounded-2xl border border-stroke bg-white p-5 shadow-sm">
-          <p className="text-sm text-gray-500">Tổng sản phẩm</p>
-
-          <h2 className="mt-3 text-3xl font-bold text-green-600">
-            {summary?.totalProducts || 0}
-          </h2>
-        </div>
-
-        <div className="rounded-2xl border border-stroke bg-white p-5 shadow-sm">
-          <p className="text-sm text-gray-500">Tổng bản ghi</p>
-
-          <h2 className="mt-3 text-3xl font-bold text-orange-500">
-            {records.length}
-          </h2>
-        </div>
+        <RevenueModal
+          isOpen={isOpen}
+          closeModal={() => {
+            setEditingRecord(null);
+            closeModal();
+          }}
+          reportDate={new Date().toISOString().split("T")[0]}
+          record={editingRecord}
+          onSuccess={loadData}
+        />
       </div>
-
-      {/* Table */}
-      <RevenueTable
-        records={records}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
-
-      <RevenueModal
-        isOpen={isOpen}
-        closeModal={() => {
-          setEditingRecord(null);
-          closeModal();
-        }}
-        reportDate={new Date().toISOString().split("T")[0]}
-        record={editingRecord}
-        onSuccess={loadData}
-      />
-    </div>
+    </>
   );
 }

@@ -19,6 +19,12 @@ const formatMoney = (money: number) => {
   return money.toLocaleString("vi-VN") + "đ";
 };
 
+const sourceTypeMap: Record<string, string> = {
+  Marketing: "Marketing",
+  ChuDong: "Chủ động",
+  CTV_DaiLy: "CTV / Đại lý",
+};
+
 export default function RevenueTable({ records, onEdit, onDelete }: Props) {
   return (
     <div className="overflow-hidden rounded-2xl border border-stroke bg-white">
@@ -55,7 +61,9 @@ export default function RevenueTable({ records, onEdit, onDelete }: Props) {
 
                 <td className="p-3 text-center">{item.productType}</td>
 
-                <td className="p-3 text-center">{item.sourceType}</td>
+                <td className="p-3 text-center">
+                  {sourceTypeMap[item.sourceType] || item.sourceType}
+                </td>
 
                 <td className="p-3 text-center">{item.customerCount}</td>
 
