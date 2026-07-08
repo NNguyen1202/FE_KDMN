@@ -21,8 +21,6 @@ export default function TopEmployeesTable() {
               <th className="px-5 py-3 text-center">Doanh thu</th>
 
               <th className="px-5 py-3 text-center">Khách hàng</th>
-
-              <th className="px-5 py-3 text-center">Sản phẩm</th>
             </tr>
           </thead>
 
@@ -59,10 +57,6 @@ export default function TopEmployeesTable() {
 
                   <td className="px-5 py-4 text-center">
                     {item.customers || 0}
-                  </td>
-
-                  <td className="px-5 py-4 text-center">
-                    {item.quantity || 0}
                   </td>
                 </tr>
               ))

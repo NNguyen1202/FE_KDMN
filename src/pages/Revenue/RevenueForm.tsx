@@ -22,6 +22,7 @@ interface RevenueFormData {
   customerCount: number;
   productQuantity: number;
   revenue: number;
+  discountPercent: number;
   note: string;
 }
 
@@ -33,6 +34,7 @@ const defaultForm = (reportDate: string): RevenueFormData => ({
   customerCount: 0,
   productQuantity: 0,
   revenue: 0,
+  discountPercent: 0,
   note: "",
 });
 
@@ -62,6 +64,7 @@ export default function RevenueForm({
         customerCount: record.customerCount,
         productQuantity: record.productQuantity,
         revenue: record.revenue,
+        discountPercent: record.discountPercent || 0,
         note: record.note || "",
       });
     } else {
@@ -90,7 +93,8 @@ export default function RevenueForm({
       [name]:
         name === "customerCount" ||
         name === "productQuantity" ||
-        name === "revenue"
+        name === "revenue" ||
+        name === "discountPercent"
           ? Number(value)
           : value,
     }));
@@ -122,9 +126,9 @@ export default function RevenueForm({
       setLoading(true);
 
       if (record) {
-        await updateRevenue(record._id, formData);
+        await updateRevenue(record._id, payload);
       } else {
-        await createRevenue(formData);
+        await createRevenue(payload);
       }
 
       onSuccess();
@@ -134,6 +138,16 @@ export default function RevenueForm({
     } finally {
       setLoading(false);
     }
+  };
+
+  const actualRevenue =
+    formData.sourceType === "CTV_DaiLy"
+      ? Math.round(formData.revenue * (1 - formData.discountPercent / 100))
+      : formData.revenue;
+
+  const payload = {
+    ...formData,
+    revenue: actualRevenue,
   };
 
   return (
@@ -192,6 +206,23 @@ export default function RevenueForm({
             <option value="CTV_DaiLy">CTV / Đại lý</option>
           </select>
         </div>
+        {formData.sourceType === "CTV_DaiLy" && (
+          <div>
+            <label className="mb-1 block text-sm font-medium">
+              Chiết khấu (%)
+            </label>
+
+            <input
+              type="number"
+              name="discountPercent"
+              min={0}
+              max={100}
+              value={formData.discountPercent}
+              onChange={handleChange}
+              className="w-full rounded-lg border px-3 py-2"
+            />
+          </div>
+        )}
 
         <div>
           <label className="mb-1 block text-sm font-medium">Số khách</label>
@@ -221,7 +252,7 @@ export default function RevenueForm({
 
         <div>
           <label className="mb-1 block text-sm font-medium">
-            Doanh thu thực tế
+            Giá trị hợp đồng
           </label>
 
           <input
@@ -231,6 +262,20 @@ export default function RevenueForm({
             onChange={handleChange}
             className="w-full rounded-lg border px-3 py-2"
           />
+          {formData.sourceType === "CTV_DaiLy" && (
+            <div>
+              <label className="mb-1 block text-sm font-medium">
+                Doanh thu thực nhận
+              </label>
+
+              <input
+                type="text"
+                readOnly
+                value={actualRevenue.toLocaleString("vi-VN")}
+                className="w-full rounded-lg border bg-gray-100 px-3 py-2"
+              />
+            </div>
+          )}
         </div>
 
         <div className="col-span-2">
