@@ -10,7 +10,7 @@ import {
   TableIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
-import { UserCircle2Icon, UserCog2Icon } from "lucide-react";
+import { BellIcon, UserCircle2Icon, UserCog2Icon } from "lucide-react";
 
 type NavItem = {
   name: string;
@@ -60,6 +60,11 @@ const navItems: NavItem[] = [
     icon: <UserCircle2Icon />,
     name: "User Profile",
     path: "/profile",
+  },
+  {
+    icon: <BellIcon />,
+    name: "Thông báo",
+    path: "/notifications",
   },
   // {
   //   name: "Forms",
@@ -313,8 +318,8 @@ const AppSidebar: React.FC = () => {
           isExpanded || isMobileOpen
             ? "w-[290px]"
             : isHovered
-              ? "w-[290px]"
-              : "w-[90px]"
+            ? "w-[290px]"
+            : "w-[90px]"
         }
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
         lg:translate-x-0`}

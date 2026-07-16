@@ -91,7 +91,7 @@ const AppHeader: React.FC = () => {
             />
             <img
               className="hidden dark:block"
-              src="./images/logo/easyhrm-softdreams-logo.svg"
+              src="./images/logo/logoEasyHRM1.png"
               alt="Logo"
             />
           </Link>

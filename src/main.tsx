@@ -6,12 +6,15 @@ import "flatpickr/dist/flatpickr.css";
 import App from "./App.tsx";
 import { ThemeProvider } from "./context/ThemeContext.tsx";
 import { HelmetProvider } from "react-helmet-async";
+import { NotificationProvider } from "./context/NotificationContext.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ThemeProvider>
       <HelmetProvider>
-        <App />
+        <NotificationProvider>
+          <App />
+        </NotificationProvider>
       </HelmetProvider>
     </ThemeProvider>
   </StrictMode>,
