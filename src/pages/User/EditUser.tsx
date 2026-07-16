@@ -3,7 +3,11 @@ import { useNavigate, useParams } from "react-router";
 
 import { ArrowLeft, Save } from "lucide-react";
 
-import { getUserById, updateUser } from "../../services/userService";
+import {
+  getUserById,
+  updateUser,
+  getRoleById,
+} from "../../services/userService";
 
 export default function EditUser() {
   const { id } = useParams();
@@ -23,11 +27,45 @@ export default function EditUser() {
     isVerifiedPhone: false,
   });
 
+  const [isAdmin, setIsAdmin] = useState(false);
+
   useEffect(() => {
     if (id) {
       loadUser(id);
     }
   }, [id]);
+
+  useEffect(() => {
+    const loadCurrentUser = async () => {
+      try {
+        const currentUser = JSON.parse(localStorage.getItem("user") || "null");
+        console.log("Người dùng hiện tại: ", currentUser);
+
+        if (!currentUser?._id) return;
+
+        // Lấy user đầy đủ
+        const userRes = await getUserById(currentUser._id);
+        console.log("Người dùng lấy ID hiện tại: ", userRes);
+        const user = userRes.data.getUser;
+
+        if (!user?.roleID) return;
+
+        // Nếu roleID là ObjectId
+        const roleId =
+          typeof user.roleID === "string" ? user.roleID : user.roleID._id;
+
+        const roleRes = await getRoleById(roleId);
+
+        console.log("Lấy role người dùng: ", roleRes);
+
+        setIsAdmin(roleRes.data.roleName === "Admin");
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    loadCurrentUser();
+  }, []);
 
   const loadUser = async (userId: string) => {
     try {
@@ -157,18 +195,22 @@ export default function EditUser() {
         </div>
 
         <div>
-          <label className="mb-2 block font-medium">Avatar URL</label>
+          {isAdmin && (
+            <label className="mb-2 block font-medium">Avatar URL</label>
+          )}
 
-          <input
-            value={form.avatarUrl}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                avatarUrl: e.target.value,
-              })
-            }
-            className="w-full rounded-lg border p-3"
-          />
+          {isAdmin && (
+            <input
+              value={form.avatarUrl}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  avatarUrl: e.target.value,
+                })
+              }
+              className="w-full rounded-lg border p-3"
+            />
+          )}
 
           {form.avatarUrl && (
             <img

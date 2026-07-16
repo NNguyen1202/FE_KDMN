@@ -1,21 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { useNotification } from "../../context/NotificationContext";
+import { getUserById, getRoleById } from "../../services/userService";
 
 export default function NotificationDropdown() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
-  const {
-    notifications,
-    unreadCount,
-    markRead,
-    markReadAll,
-    remove,
-  } = useNotification();
+  const { notifications, unreadCount, markRead, markReadAll, remove } =
+    useNotification();
 
   const notifying = unreadCount > 0;
 
@@ -26,6 +23,38 @@ export default function NotificationDropdown() {
   function closeDropdown() {
     setIsOpen(false);
   }
+
+  useEffect(() => {
+    const loadCurrentUser = async () => {
+      try {
+        const currentUser = JSON.parse(localStorage.getItem("user") || "null");
+        console.log("Người dùng hiện tại: ", currentUser);
+
+        if (!currentUser?._id) return;
+
+        // Lấy user đầy đủ
+        const userRes = await getUserById(currentUser._id);
+        console.log("Người dùng lấy ID hiện tại: ", userRes);
+        const user = userRes.data.getUser;
+
+        if (!user?.roleID) return;
+
+        // Nếu roleID là ObjectId
+        const roleId =
+          typeof user.roleID === "string" ? user.roleID : user.roleID._id;
+
+        const roleRes = await getRoleById(roleId);
+
+        console.log("Lấy role người dùng: ", roleRes);
+
+        setIsAdmin(roleRes.data.roleName === "Admin");
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    loadCurrentUser();
+  }, []);
 
   return (
     <div className="relative">
@@ -74,12 +103,13 @@ export default function NotificationDropdown() {
               </button>
             )}
 
-            <button
-              onClick={toggleDropdown}
-              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
-            >
-              ✕
-            </button>
+              <button
+                onClick={toggleDropdown}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
+              >
+                ✕
+              </button>
+            
           </div>
         </div>
 
@@ -119,6 +149,7 @@ export default function NotificationDropdown() {
                   </div>
                 </div>
 
+                {isAdmin && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -128,6 +159,7 @@ export default function NotificationDropdown() {
                 >
                   ✕
                 </button>
+                )}
               </DropdownItem>
             </li>
           ))}
