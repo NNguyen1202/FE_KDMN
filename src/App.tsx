@@ -28,6 +28,7 @@ import ViewUser from "./pages/User/ViewUser";
 import RevenueCalendar from "./pages/Revenue/RevenueCalendar";
 import RevenueDayDetail from "./pages/Revenue/RevenueDayDetail";
 import BhxhPage from "./pages/BHXH/index";
+import NotificationPage from "./pages/Notification";
 
 export default function App() {
   return (
@@ -61,6 +62,8 @@ export default function App() {
                 </ProtectedRoute>
               }
             /> */}
+
+            <Route path="/notifications" element={<NotificationPage />} />
 
             <Route
               path="/revenue-report"
