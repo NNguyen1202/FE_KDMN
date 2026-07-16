@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { getUserById, getRoleById } from "../../services/userService";
+import { useEffect, useState } from "react";
 
 type Props = {
   data: any[];
@@ -37,6 +39,39 @@ export default function NotificationTable({
   onRead,
   onDelete,
 }: Props) {
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const loadCurrentUser = async () => {
+      try {
+        const currentUser = JSON.parse(localStorage.getItem("user") || "null");
+        console.log("Người dùng hiện tại: ", currentUser);
+
+        if (!currentUser?._id) return;
+
+        // Lấy user đầy đủ
+        const userRes = await getUserById(currentUser._id);
+        console.log("Người dùng lấy ID hiện tại: ", userRes);
+        const user = userRes.data.getUser;
+
+        if (!user?.roleID) return;
+
+        // Nếu roleID là ObjectId
+        const roleId =
+          typeof user.roleID === "string" ? user.roleID : user.roleID._id;
+
+        const roleRes = await getRoleById(roleId);
+
+        console.log("Lấy role người dùng: ", roleRes);
+
+        setIsAdmin(roleRes.data.roleName === "Admin");
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    loadCurrentUser();
+  }, []);
   if (loading) {
     return (
       <div className="rounded-2xl border bg-white p-10 text-center dark:bg-gray-900">
@@ -63,10 +98,7 @@ export default function NotificationTable({
           <tbody>
             {data.length === 0 ? (
               <tr>
-                <td
-                  colSpan={6}
-                  className="py-10 text-center text-gray-500"
-                >
+                <td colSpan={6} className="py-10 text-center text-gray-500">
                   Không có dữ liệu.
                 </td>
               </tr>
@@ -79,9 +111,7 @@ export default function NotificationTable({
                   }`}
                 >
                   <td className="px-5 py-4">
-                    <div className="font-semibold">
-                      {item.title}
-                    </div>
+                    <div className="font-semibold">{item.title}</div>
 
                     <div className="mt-1 text-sm text-gray-500">
                       {item.message}
@@ -91,17 +121,14 @@ export default function NotificationTable({
                   <td className="px-5 py-4">
                     <span
                       className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                        moduleColor[item.module] ??
-                        "bg-gray-100 text-gray-700"
+                        moduleColor[item.module] ?? "bg-gray-100 text-gray-700"
                       }`}
                     >
                       {moduleName[item.module] ?? item.module}
                     </span>
                   </td>
 
-                  <td className="px-5 py-4">
-                    {item.actorName}
-                  </td>
+                  <td className="px-5 py-4">{item.actorName}</td>
 
                   <td className="px-5 py-4 text-center">
                     {item.isRead ? (
@@ -130,12 +157,14 @@ export default function NotificationTable({
                         </button>
                       )}
 
-                      <button
-                        onClick={() => onDelete(item._id)}
-                        className="rounded-lg bg-red-500 px-3 py-1 text-sm text-white hover:bg-red-600"
-                      >
-                        Xóa
-                      </button>
+                      {isAdmin && (
+                        <button
+                          onClick={() => onDelete(item._id)}
+                          className="rounded-lg bg-red-500 px-3 py-1 text-sm text-white hover:bg-red-600"
+                        >
+                          Xóa
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
