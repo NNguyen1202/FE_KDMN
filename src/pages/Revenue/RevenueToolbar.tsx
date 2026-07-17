@@ -70,6 +70,7 @@ export default function RevenueToolbar({
           <option value="">Tất cả sản phẩm</option>
           <option>EasyHRM MASS</option>
           <option>EasyHRM PROJECT</option>
+          <option>EasyDocs</option>
           <option>iCare DN</option>
           <option>iCare HKD</option>
         </select>

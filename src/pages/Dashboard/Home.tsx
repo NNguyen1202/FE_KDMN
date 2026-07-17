@@ -46,14 +46,12 @@ function DashboardContent() {
 
         {/* ================= NHÂN VIÊN ================= */}
 
-        <div className="grid grid-cols-12 gap-6">
-          <div className="col-span-12 xl:col-span-8">
-            <EmployeeRevenueChart />
-          </div>
+        <div className="col-span-12 xl:col-span-8">
+          <EmployeeRevenueChart />
+        </div>
 
-          <div className="col-span-12 xl:col-span-4">
-            <TopEmployeesTable />
-          </div>
+        <div className="col-span-12 xl:col-span-8">
+          <TopEmployeesTable />
         </div>
       </div>
     </>

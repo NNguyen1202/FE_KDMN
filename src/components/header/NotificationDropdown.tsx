@@ -1,15 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { useNotification } from "../../context/NotificationContext";
 import { getUserById, getRoleById } from "../../services/userService";
+import { getNotificationLink } from "../../utils/notificationRedirect";
 
 export default function NotificationDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const navigate = useNavigate();
 
   const { notifications, unreadCount, markRead, markReadAll, remove } =
     useNotification();
@@ -103,13 +105,12 @@ export default function NotificationDropdown() {
               </button>
             )}
 
-              <button
-                onClick={toggleDropdown}
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
-              >
-                ✕
-              </button>
-            
+            <button
+              onClick={toggleDropdown}
+              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
+            >
+              ✕
+            </button>
           </div>
         </div>
 
@@ -125,7 +126,12 @@ export default function NotificationDropdown() {
               <DropdownItem
                 onItemClick={() => {
                   markRead(item._id);
+
                   closeDropdown();
+
+                  navigate(
+                    getNotificationLink(item.referenceModel, item.referenceId),
+                  );
                 }}
                 className={`flex gap-3 rounded-lg border-b border-gray-100 p-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5 ${
                   !item.isRead ? "bg-blue-50 dark:bg-blue-900/20" : ""
@@ -150,15 +156,15 @@ export default function NotificationDropdown() {
                 </div>
 
                 {isAdmin && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    remove(item._id);
-                  }}
-                  className="text-red-500 hover:text-red-700"
-                >
-                  ✕
-                </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      remove(item._id);
+                    }}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    ✕
+                  </button>
                 )}
               </DropdownItem>
             </li>

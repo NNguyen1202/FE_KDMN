@@ -63,6 +63,7 @@ export default function DashboardFilter({
   const allProducts = [
     "EasyHRM MASS",
     "EasyHRM PROJECT",
+    "EasyDocs",
     "iCare HKD",
     "iCare DN",
   ];
@@ -205,44 +206,46 @@ export default function DashboardFilter({
         </div>
 
         <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
-          {monthlyRevenue.products.map((item: any) => (
-            <div
-              key={item._id}
-              className="rounded-2xl border border-gray-200 bg-white p-5 transition hover:-translate-y-1 hover:shadow-lg"
-            >
-              <div className="flex items-center justify-between">
-                <h3 className="text-base font-semibold">{item._id}</h3>
+          {[...(monthlyRevenue.products || [])]
+            .sort((a: any, b: any) => b.revenue - a.revenue)
+            .map((item: any) => (
+              <div
+                key={item._id}
+                className="rounded-2xl border border-gray-200 bg-white p-5 transition hover:-translate-y-1 hover:shadow-lg"
+              >
+                <div className="flex items-center justify-between">
+                  <h3 className="text-base font-semibold">{item._id}</h3>
 
-                <div className="rounded-full bg-brand-100 px-3 py-1 text-xs font-semibold text-brand-600">
-                  🖤
+                  <div className="rounded-full bg-brand-100 px-3 py-1 text-xs font-semibold text-brand-600">
+                    🖤
+                  </div>
+                </div>
+
+                <div className="mt-6 flex items-center justify-between">
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-gray-400">
+                      Khách hàng
+                    </p>
+
+                    <p className="mt-1 text-3xl font-bold text-gray-800">
+                      {item.customers}
+                    </p>
+                  </div>
+
+                  <div className="h-10 w-px bg-gray-200" />
+
+                  <div className="text-right">
+                    <p className="text-xs uppercase tracking-wide text-gray-400">
+                      Doanh thu
+                    </p>
+
+                    <p className="mt-1 text-lg font-bold text-green-600">
+                      {formatCurrency(item.revenue)}
+                    </p>
+                  </div>
                 </div>
               </div>
-
-              <div className="mt-6 flex items-center justify-between">
-                <div>
-                  <p className="text-xs uppercase tracking-wide text-gray-400">
-                    Khách hàng
-                  </p>
-
-                  <p className="mt-1 text-3xl font-bold text-gray-800">
-                    {item.customers}
-                  </p>
-                </div>
-
-                <div className="h-10 w-px bg-gray-200" />
-
-                <div className="text-right">
-                  <p className="text-xs uppercase tracking-wide text-gray-400">
-                    Doanh thu
-                  </p>
-
-                  <p className="mt-1 text-lg font-bold text-green-600">
-                    {formatCurrency(item.revenue)}
-                  </p>
-                </div>
-              </div>
-            </div>
-          ))}
+            ))}
         </div>
 
         <div className="mt-4 grid grid-cols-1 gap-5">
