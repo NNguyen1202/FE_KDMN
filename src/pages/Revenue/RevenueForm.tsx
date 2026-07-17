@@ -50,6 +50,15 @@ export default function RevenueForm({
     defaultForm(reportDate),
   );
 
+  const formatNumber = (value: number | string) => {
+    if (!value) return "";
+    return Number(value).toLocaleString("vi-VN");
+  };
+
+  const parseNumber = (value: string) => {
+    return Number(value.replace(/\./g, "").replace(/,/g, ""));
+  };
+
   useEffect(() => {
     loadUsers();
   }, []);
@@ -93,9 +102,10 @@ export default function RevenueForm({
       [name]:
         name === "customerCount" ||
         name === "productQuantity" ||
-        name === "revenue" ||
         name === "discountPercent"
           ? Number(value)
+          : name === "revenue"
+          ? parseNumber(value)
           : value,
     }));
   };
@@ -209,19 +219,23 @@ export default function RevenueForm({
         </div>
         {formData.sourceType === "CTV_DaiLy" && (
           <div>
-            <label className="mb-1 block text-sm font-medium">
-              Chiết khấu (%)
-            </label>
+            <label className="mb-1 block text-sm font-medium">Chiết khấu</label>
 
-            <input
-              type="number"
-              name="discountPercent"
-              min={0}
-              max={100}
-              value={formData.discountPercent}
-              onChange={handleChange}
-              className="w-full rounded-lg border px-3 py-2"
-            />
+            <div className="relative">
+              <input
+                type="number"
+                name="discountPercent"
+                min={0}
+                max={100}
+                value={formData.discountPercent}
+                onChange={handleChange}
+                className="w-full rounded-lg border py-2 pl-3 pr-10"
+              />
+
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+                %
+              </span>
+            </div>
           </div>
         )}
 
@@ -256,15 +270,23 @@ export default function RevenueForm({
             Giá trị hợp đồng
           </label>
 
-          <input
-            type="number"
-            name="revenue"
-            value={formData.revenue}
-            onChange={handleChange}
-            className="w-full rounded-lg border px-3 py-2"
-          />
+          <div className="relative">
+            <input
+              type="text"
+              name="revenue"
+              value={formatNumber(formData.revenue)}
+              onChange={handleChange}
+              inputMode="numeric"
+              className="w-full rounded-lg border py-2 pl-3 pr-12"
+            />
+
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+              VNĐ
+            </span>
+          </div>
+
           {formData.sourceType === "CTV_DaiLy" && (
-            <div>
+            <div className="relative mt-3">
               <label className="mb-1 block text-sm font-medium">
                 Doanh thu thực nhận
               </label>
@@ -272,9 +294,13 @@ export default function RevenueForm({
               <input
                 type="text"
                 readOnly
-                value={actualRevenue.toLocaleString("vi-VN")}
-                className="w-full rounded-lg border bg-gray-100 px-3 py-2"
+                value={formatNumber(actualRevenue)}
+                className="w-full rounded-lg border bg-gray-100 py-2 pl-3 pr-12 font-semibold text-green-600"
               />
+
+              <span className="absolute right-3 top-[45px] -translate-y-1/2 text-sm text-gray-500">
+                VNĐ
+              </span>
             </div>
           )}
         </div>
