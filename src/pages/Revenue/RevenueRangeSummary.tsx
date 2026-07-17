@@ -29,6 +29,19 @@ export default function RevenueRangeSummary({
 
         <div className="rounded-2xl border bg-white p-5">
           <div className="text-sm text-gray-500">
+            Doanh thu EasyDocs
+          </div>
+
+          <div className="mt-2 text-2xl font-bold text-green-600">
+            {(
+              data.easyDocsRevenue || 0
+            ).toLocaleString()}
+            đ
+          </div>
+        </div>
+
+        <div className="rounded-2xl border bg-white p-5">
+          <div className="text-sm text-gray-500">
             Doanh thu iCare
           </div>
 
@@ -47,6 +60,16 @@ export default function RevenueRangeSummary({
 
           <div className="mt-2 text-2xl font-bold">
             {data.easyHRMCustomers || 0}
+          </div>
+        </div>
+
+        <div className="rounded-2xl border bg-white p-5">
+          <div className="text-sm text-gray-500">
+            Khách EasyDocs
+          </div>
+
+          <div className="mt-2 text-2xl font-bold">
+            {data.easyDocsCustomers || 0}
           </div>
         </div>
 

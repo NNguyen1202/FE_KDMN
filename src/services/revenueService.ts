@@ -23,6 +23,10 @@ export const getSalesByUser = (userId: string, month?: number, year?: number) =>
 export const searchSales = (params: any) =>
   api.get("/sales-record/search", { params });
 
+export const getSalesRecordById = (id: string) => {
+  return api.get(`/sales-record/${id}`);
+};
+
 export const getCalendarRevenue = (month: number, year: number) => {
   return api.get(`/sales-record/calendar?month=${month}&year=${year}`);
 };

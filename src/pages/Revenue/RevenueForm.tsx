@@ -185,6 +185,7 @@ export default function RevenueForm({
 
             <option value="EasyHRM MASS">EasyHRM MASS</option>
             <option value="EasyHRM PROJECT">EasyHRM PROJECT</option>
+            <option value="EasyDocs">EasyDocs</option>
             <option value="iCare DN">iCare DN</option>
             <option value="iCare HKD">iCare HKD</option>
           </select>

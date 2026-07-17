@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { getUserById, getRoleById } from "../../services/userService";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { getNotificationLink } from "../../utils/notificationRedirect";
 
 type Props = {
   data: any[];
@@ -40,6 +42,7 @@ export default function NotificationTable({
   onDelete,
 }: Props) {
   const [isAdmin, setIsAdmin] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadCurrentUser = async () => {
@@ -106,6 +109,16 @@ export default function NotificationTable({
               data.map((item) => (
                 <tr
                   key={item._id}
+                  onClick={() => {
+                    onRead(item._id);
+
+                    navigate(
+                      getNotificationLink(
+                        item.referenceModel,
+                        item.referenceId,
+                      ),
+                    );
+                  }}
                   className={`border-t transition hover:bg-gray-50 dark:hover:bg-gray-800 ${
                     !item.isRead ? "bg-blue-50/40" : ""
                   }`}

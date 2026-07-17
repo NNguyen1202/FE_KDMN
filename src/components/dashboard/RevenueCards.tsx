@@ -16,6 +16,7 @@ export default function RevenueCards() {
   const allProducts = [
     "EasyHRM MASS",
     "EasyHRM PROJECT",
+    "EasyDocs",
     "iCare HKD",
     "iCare DN",
   ];
@@ -131,30 +132,32 @@ export default function RevenueCards() {
         </div>
 
         <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
-          {yearRevenue.products.map((item: any) => (
-            <div
-              key={item._id}
-              className="rounded-xl border border-gray-200 p-5 transition duration-300 hover:-translate-y-1 hover:shadow-lg"
-            >
-              <h3 className="text-lg font-semibold">{item._id}</h3>
+          {[...(yearRevenue.products || [])]
+            .sort((a: any, b: any) => b.revenue - a.revenue)
+            .map((item: any) => (
+              <div
+                key={item._id}
+                className="rounded-xl border border-gray-200 p-5 transition duration-300 hover:-translate-y-1 hover:shadow-lg"
+              >
+                <h3 className="text-lg font-semibold">{item._id}</h3>
 
-              <div className="mt-6">
-                <p className="text-sm text-gray-500">Tổng khách hàng</p>
+                <div className="mt-6">
+                  <p className="text-sm text-gray-500">Tổng khách hàng</p>
 
-                <p className="text-3xl font-bold text-gray-800">
-                  {item.customers}
-                </p>
+                  <p className="text-3xl font-bold text-gray-800">
+                    {item.customers}
+                  </p>
+                </div>
+
+                <div className="mt-6">
+                  <p className="text-sm text-gray-500">Doanh thu</p>
+
+                  <p className="text-xl font-bold text-green-600">
+                    {formatCurrency(item.revenue)}
+                  </p>
+                </div>
               </div>
-
-              <div className="mt-6">
-                <p className="text-sm text-gray-500">Doanh thu</p>
-
-                <p className="text-xl font-bold text-green-600">
-                  {formatCurrency(item.revenue)}
-                </p>
-              </div>
-            </div>
-          ))}
+            ))}
         </div>
 
         <div className="mt-10">
