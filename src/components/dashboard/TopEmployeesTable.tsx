@@ -12,6 +12,22 @@ export default function TopEmployeesTable() {
 
   const employees = dashboard?.employeeRevenue || [];
 
+  // Tổng KPI của tất cả nhân viên
+  const totalTargetRevenue = employees.reduce(
+    (sum: number, item: any) => sum + (item.targetRevenue || 0),
+    0,
+  );
+
+  // Tổng doanh thu thực tế
+  const totalRevenue = employees.reduce(
+    (sum: number, item: any) => sum + (item.revenue || 0),
+    0,
+  );
+
+  // % hoàn thành toàn đội
+  const totalPercent =
+    totalTargetRevenue > 0 ? (totalRevenue / totalTargetRevenue) * 100 : 0;
+
   const productColor = (product: string) => {
     switch (product) {
       case "EasyHRM MASS":
@@ -76,12 +92,27 @@ export default function TopEmployeesTable() {
       <div className="overflow-hidden rounded-2xl border border-stroke bg-white shadow-sm">
         <div className="flex items-center justify-between border-b border-stroke px-6 py-4">
           <h3 className="text-lg font-semibold">🏆 Top nhân viên kinh doanh</h3>
-          <button
-            onClick={() => setOpenTargetModal(true)}
-            className="rounded-lg bg-brand-500 px-4 py-2 text-white hover:bg-brand-600"
-          >
-            Quản lý KPI
-          </button>
+
+          <div className="flex items-center gap-4">
+            <div className="rounded-xl border bg-blue-50 px-4 py-2 text-right">
+              <div className="text-xs text-gray-500">Tổng KPI dự kiến</div>
+
+              <div className="font-bold text-blue-700">
+                {Number(totalTargetRevenue).toLocaleString("vi-VN")}₫
+              </div>
+
+              <div className="text-xs text-green-600">
+                Đạt {totalPercent.toFixed(1)}%
+              </div>
+            </div>
+
+            <button
+              onClick={() => setOpenTargetModal(true)}
+              className="rounded-lg bg-brand-500 px-4 py-2 text-white hover:bg-brand-600"
+            >
+              Quản lý KPI
+            </button>
+          </div>
         </div>
 
         <div className="overflow-x-auto">
