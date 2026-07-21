@@ -35,8 +35,56 @@ interface SourceCustomer {
   records: number;
 }
 
+interface EmployeeProduct {
+  productType: string;
+  quantity: number;
+  revenue: number;
+  customers: number;
+}
+
+interface EmployeeRevenue {
+  _id: string;
+
+  revenue: number;
+  customers: number;
+  quantity: number;
+
+  user: {
+    _id: string;
+    fullName: string;
+    email: string;
+    avatarUrl: string;
+  };
+
+  products: EmployeeProduct[];
+
+  // KPI
+  targetRevenue?: number;
+
+  // %
+  percent?: number;
+}
+
+interface EmployeeTarget {
+  _id: string;
+  userId: string;
+  month: number;
+  year: number;
+  targetRevenue: number;
+}
+
+interface DashboardData {
+  summary: any;
+
+  monthlyRevenue: any[];
+
+  productRevenue: any[];
+
+  employeeRevenue: EmployeeRevenue[];
+}
+
 interface DashboardContextType {
-  dashboard: any;
+  dashboard: DashboardData | null;
 
   month: number;
   year: number;
@@ -50,6 +98,8 @@ interface DashboardContextType {
   setRevenueYear: (year: number) => void;
 
   yearRevenue: RevenueSummary;
+
+  employeeTargets: EmployeeTarget[];
 
   reloadDashboard: () => Promise<void>;
 }
@@ -65,7 +115,9 @@ export const DashboardProvider = ({
 }) => {
   const today = new Date();
 
-  const [dashboard, setDashboard] = useState<any>(null);
+  const [dashboard, setDashboard] = useState<DashboardData | null>(null);
+
+  const [employeeTargets, setEmployeeTargets] = useState<EmployeeTarget[]>([]);
 
   const [month, setMonth] = useState(today.getMonth() + 1);
 
@@ -103,6 +155,8 @@ export const DashboardProvider = ({
 
       setDashboard(dashboardData);
 
+      setEmployeeTargets(dashboardData.employeeTargets || []);
+
       const revenue = await getMonthlyRevenue(month, year);
 
       setMonthlyRevenue(revenue);
@@ -138,6 +192,8 @@ export const DashboardProvider = ({
         setRevenueYear,
 
         yearRevenue,
+
+        employeeTargets,
 
         reloadDashboard: loadDashboard,
       }}
