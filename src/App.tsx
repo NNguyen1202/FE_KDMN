@@ -30,10 +30,13 @@ import RevenueDayDetail from "./pages/Revenue/RevenueDayDetail";
 import BhxhPage from "./pages/BHXH/index";
 import NotificationPage from "./pages/Notification";
 import EmployeeTargetPage from "./pages/EmployeeTarget";
+//import SakuraParticles from "./components/common/SakuraParticles";
+import MoonFestivalDecoration from "./components/common/MoonFestivalDecoration";
 
 export default function App() {
   return (
     <>
+    <MoonFestivalDecoration />
       <Router>
         <ScrollToTop />
         <Routes>
