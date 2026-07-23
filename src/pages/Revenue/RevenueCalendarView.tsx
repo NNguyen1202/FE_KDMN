@@ -22,7 +22,7 @@ interface RevenueEvent extends EventInput {
   };
 }
 
-const RevenueCalendarView : React.FC = () => {
+const RevenueCalendarView: React.FC = () => {
   const navigate = useNavigate();
 
   const [events, setEvents] = useState<RevenueEvent[]>([]);
@@ -68,9 +68,26 @@ const RevenueCalendarView : React.FC = () => {
         title="KDMN Calendar Dashboard"
         description="This is Calendar Dashboard page for KDMN"
       />
-      <div className="rounded-2xl border  border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
-        <div className="custom-calendar">
+      <div
+        className="
+overflow-hidden
+rounded-2xl
+border
+border-gray-200
+bg-white
+shadow-sm
+transition-colors
+dark:border-gray-700
+dark:bg-gray-900
+"
+      >
+        <div className="custom-calendar p-4">
           <FullCalendar
+            dayMaxEvents={2}
+            nowIndicator
+            fixedWeekCount={false}
+            stickyHeaderDates
+            selectMirror
             ref={calendarRef}
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
             initialView="dayGridMonth"
@@ -97,18 +114,29 @@ const RevenueCalendarView : React.FC = () => {
 };
 
 const renderRevenueContent = (eventInfo: any) => {
-  const { totalRevenue, totalCustomers} =
-    eventInfo.event.extendedProps;
+  const { totalRevenue, totalCustomers } = eventInfo.event.extendedProps;
 
   return (
-    <div className="rounded-lg bg-green-50 p-2 text-xs">
-      <div className="font-semibold text-black">
-        {totalRevenue.toLocaleString()}đ
+    <div
+      className="
+rounded-lg
+border
+border-green-200
+bg-green-50
+p-2
+text-xs
+transition
+dark:border-green-800
+dark:bg-green-900/20
+"
+    >
+      <div className="font-semibold text-green-700 dark:text-green-300">
+        💰 {Number(totalRevenue).toLocaleString("vi-VN")} ₫
       </div>
 
-      {/* <div className="font-semibold text-black">{totalRecords} giao dịch</div> */}
-
-      <div className="font-semibold text-black">{totalCustomers} khách</div>
+      <div className="text-gray-700 dark:text-gray-300">
+        👥 {totalCustomers} khách
+      </div>
     </div>
   );
 };

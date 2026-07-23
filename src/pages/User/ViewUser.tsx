@@ -85,9 +85,9 @@ export default function ViewUser() {
   }
 
   return (
-    <div className="rounded-2xl border bg-white p-6">
+    <div className="rounded-2xl border bg-white p-6 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
       <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Chi tiết User</h2>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Chi tiết User</h2>
 
         <div className="flex gap-2">
           <button
@@ -99,7 +99,7 @@ export default function ViewUser() {
 
           <button
             onClick={() => navigate("/users")}
-            className="rounded-lg border px-4 py-2"
+            className="rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
           >
             Quay lại
           </button>
@@ -107,18 +107,18 @@ export default function ViewUser() {
       </div>
 
       <div className="space-y-6">
-        <div className="rounded-2xl border border-gray-200 p-6">
+        <div className="rounded-2xl border border-gray-200 p-6 dark:border-gray-700">
           <div className="flex flex-col gap-6 md:flex-row md:items-center">
             <img
               src={user.avatarUrl?.[0]}
               alt={user.fullName}
-              className="h-32 w-32 rounded-full border-4 border-gray-100 object-cover shadow-md"
+              className="h-32 w-32 rounded-full border-4 border-gray-100 object-cover shadow-md dark:border-gray-700"
             />
 
             <div className="flex-1">
-              <h3 className="text-3xl font-bold">{user.fullName}</h3>
+              <h3 className="text-3xl font-bold text-gray-900 dark:text-white">{user.fullName}</h3>
 
-              <p className="mt-1 text-gray-500">
+              <p className="mt-1 text-gray-500 dark:text-gray-400">
                 {roleName || "Chưa có vai trò"}
               </p>
 
@@ -159,38 +159,38 @@ export default function ViewUser() {
           </div>
         </div>
         <div className="md:col-span-2">
-          <div className="rounded-2xl border border-gray-200 p-6">
-            <h4 className="mb-5 text-lg font-semibold">Thông tin cá nhân</h4>
+          <div className="rounded-2xl border border-gray-200 p-6 dark:border-gray-700">
+            <h4 className="mb-5 text-lg font-semibold text-gray-900 dark:text-white">Thông tin cá nhân</h4>
 
             <div className="grid gap-6 md:grid-cols-2">
               <div>
-                <p className="text-sm text-gray-500">Họ tên</p>
-                <p className="font-medium">{user.fullName}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Họ tên</p>
+                <p className="font-medium text-gray-900 dark:text-white">{user.fullName}</p>
               </div>
 
               <div>
-                <p className="text-sm text-gray-500">Email</p>
-                <p className="font-medium">{user.email}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Email</p>
+                <p className="font-medium text-gray-900 dark:text-white">{user.email}</p>
               </div>
 
               <div>
-                <p className="text-sm text-gray-500">Số điện thoại</p>
-                <p className="font-medium">{user.phone}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Số điện thoại</p>
+                <p className="font-medium text-gray-900 dark:text-white">{user.phone}</p>
               </div>
 
               <div>
-                <p className="text-sm text-gray-500">Ngày sinh</p>
-                <p className="font-medium">{user.doB}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Ngày sinh</p>
+                <p className="font-medium text-gray-900 dark:text-white">{user.doB}</p>
               </div>
 
               <div>
-                <p className="text-sm text-gray-500">Vai trò</p>
-                <p className="font-medium">{roleName}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Vai trò</p>
+                <p className="font-medium text-gray-900 dark:text-white">{roleName}</p>
               </div>
 
               <div>
-                <p className="text-sm text-gray-500">Ngày tạo</p>
-                <p className="font-medium">{user.createdAt}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Ngày tạo</p>
+                <p className="font-medium text-gray-900 dark:text-white">{user.createdAt}</p>
               </div>
             </div>
           </div>
@@ -198,12 +198,12 @@ export default function ViewUser() {
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
               <div className="flex items-end gap-3">
                 <div>
-                  <label className="mb-1 block text-sm">Tháng</label>
+                  <label className="mb-1 block text-sm text-gray-700 dark:text-gray-300">Tháng</label>
 
                   <select
                     value={month}
                     onChange={(e) => setMonth(Number(e.target.value))}
-                    className="rounded-lg border px-3 py-2"
+                    className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                   >
                     {Array.from({ length: 12 }, (_, i) => (
                       <option key={i} value={i + 1}>
@@ -214,12 +214,12 @@ export default function ViewUser() {
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-sm">Năm</label>
+                  <label className="mb-1 block text-sm text-gray-700 dark:text-gray-300">Năm</label>
 
                   <select
                     value={year}
                     onChange={(e) => setYear(Number(e.target.value))}
-                    className="rounded-lg border px-3 py-2"
+                    className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                   >
                     {[2024, 2025, 2026, 2027].map((y) => (
                       <option key={y}>{y}</option>
@@ -228,24 +228,24 @@ export default function ViewUser() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-green-200 mt-5 bg-green-50 p-5">
-                <p className="text-sm text-gray-500">Tổng doanh thu</p>
+              <div className="mt-5 rounded-2xl border border-green-200 bg-green-50 p-5 dark:border-green-800 dark:bg-green-950/30">
+                <p className="text-sm text-gray-500 dark:text-gray-400">Tổng doanh thu</p>
 
                 <h2 className="mt-2 text-3xl font-bold text-green-600 whitespace-nowrap">
                   {(summary?.totalRevenue ?? 0).toLocaleString("vi-VN")} đ
                 </h2>
               </div>
 
-              <div className="rounded-2xl border border-blue-200 mt-5 bg-blue-50 p-5">
-                <p className="text-sm text-gray-500">Tổng giao dịch</p>
+              <div className="mt-5 rounded-2xl border border-blue-200 bg-blue-50 p-5 dark:border-blue-800 dark:bg-blue-950/30">
+                <p className="text-sm text-gray-500 dark:text-gray-400">Tổng giao dịch</p>
 
                 <h2 className="mt-2 text-3xl font-bold text-blue-600">
                   {summary?.totalRecords ?? 0}
                 </h2>
               </div>
 
-              <div className="rounded-2xl border border-purple-200 mt-5 bg-purple-50 p-5">
-                <p className="text-sm text-gray-500">Trạng thái</p>
+              <div className="mt-5 rounded-2xl border border-purple-200 bg-purple-50 p-5 dark:border-purple-800 dark:bg-purple-950/30">
+                <p className="text-sm text-gray-500 dark:text-gray-400">Trạng thái</p>
 
                 <h2 className="mt-2 text-3xl font-bold text-purple-600">
                   {user.isActive ? "Active" : "Inactive"}
@@ -253,15 +253,15 @@ export default function ViewUser() {
               </div>
             </div>
 
-            <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-6">
-              <h3 className="mb-5 text-lg font-semibold">
+            <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-900">
+              <h3 className="mb-5 text-lg font-semibold text-gray-900 dark:text-white">
                 Doanh thu theo sản phẩm
               </h3>
 
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                 {(products ?? []).map((item: any) => (
-                  <div key={item._id} className="rounded-xl border p-4">
-                    <p className="font-semibold">{item._id}</p>
+                  <div key={item._id} className="rounded-xl border border-gray-200 p-4 dark:border-gray-700 dark:bg-gray-800">
+                    <p className="font-semibold text-gray-900 dark:text-white">{item._id}</p>
 
                     <p className="mt-3 text-2xl font-bold text-green-600">
                       {item.revenue.toLocaleString("vi-VN")} đ
@@ -279,14 +279,14 @@ export default function ViewUser() {
               </div>
             </div>
 
-            <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-6">
-              <h3 className="mb-5 text-lg font-semibold">
+            <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-900">
+              <h3 className="mb-5 text-lg font-semibold text-gray-900 dark:text-white">
                 Danh sách giao dịch tháng {month}/{year}
               </h3>
 
               <div className="overflow-x-auto">
                 <table className="min-w-full">
-                  <thead className="border-b bg-gray-50">
+                  <thead className="border-b bg-gray-50 dark:border-gray-700 dark:bg-gray-800">
                     <tr>
                       <th className="px-4 py-3 text-left">Ngày</th>
                       <th className="px-4 py-3 text-left">Sản phẩm</th>
@@ -302,27 +302,27 @@ export default function ViewUser() {
                       salesRecords.map((item: any) => (
                         <tr
                           key={item._id}
-                          className="border-b hover:bg-gray-50"
+                          className="border-b border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
                         >
-                          <td className="px-4 py-3">
+                          <td className="px-4 py-3 text-gray-900 dark:text-white">
                             {new Date(item.reportDate).toLocaleDateString(
                               "vi-VN",
                             )}
                           </td>
 
-                          <td className="px-4 py-3 font-medium">
+                          <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">
                             {item.productType}
                           </td>
 
-                          <td className="px-4 py-3">
+                          <td className="px-4 py-3 text-gray-900 dark:text-white">
                             {sourceTypeMap[item.sourceType] || item.sourceType}
                           </td>
 
-                          <td className="px-4 py-3 text-center">
+                          <td className="px-4 py-3 text-gray-900 dark:text-white text-center">
                             {item.customerCount}
                           </td>
 
-                          <td className="px-4 py-3 text-center">
+                          <td className="px-4 py-3 text-gray-900 dark:text-white text-center">
                             {item.productQuantity}
                           </td>
 
@@ -335,7 +335,7 @@ export default function ViewUser() {
                       <tr>
                         <td
                           colSpan={6}
-                          className="py-6 text-center text-gray-500"
+                          className="py-6 text-center text-gray-500 dark:text-gray-400"
                         >
                           Không có giao dịch trong tháng này.
                         </td>

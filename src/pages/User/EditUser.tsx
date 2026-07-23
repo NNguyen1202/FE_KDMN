@@ -117,23 +117,30 @@ export default function EditUser() {
   };
 
   return (
-    <div className="rounded-2xl border bg-white p-6">
+    <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
       <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Sửa User</h2>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Sửa User
+        </h2>
 
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 rounded-lg border px-4 py-2"
+          className="flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
         >
           <ArrowLeft size={18} />
           Quay lại
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-6 text-gray-900 dark:text-white"
+      >
         <div className="grid gap-6 md:grid-cols-2">
           <div>
-            <label className="mb-2 block font-medium">Họ tên</label>
+            <label className="mb-2 block font-medium text-gray-700 dark:text-gray-200">
+              Họ tên
+            </label>
 
             <input
               value={form.fullName}
@@ -143,12 +150,14 @@ export default function EditUser() {
                   fullName: e.target.value,
                 })
               }
-              className="w-full rounded-lg border p-3"
+              className="w-full rounded-lg border border-gray-300 bg-white p-3 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
             />
           </div>
 
           <div>
-            <label className="mb-2 block font-medium">Email</label>
+            <label className="mb-2 block font-medium text-gray-700 dark:text-gray-200">
+              Email
+            </label>
 
             <input
               value={form.email}
@@ -158,12 +167,14 @@ export default function EditUser() {
                   email: e.target.value,
                 })
               }
-              className="w-full rounded-lg border p-3"
+              className="w-full rounded-lg border border-gray-300 bg-white p-3 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
             />
           </div>
 
           <div>
-            <label className="mb-2 block font-medium">Số điện thoại</label>
+            <label className="mb-2 block font-medium text-gray-700 dark:text-gray-200">
+              Số điện thoại
+            </label>
 
             <input
               value={form.phone}
@@ -173,12 +184,14 @@ export default function EditUser() {
                   phone: e.target.value,
                 })
               }
-              className="w-full rounded-lg border p-3"
+              className="w-full rounded-lg border border-gray-300 bg-white p-3 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
             />
           </div>
 
           <div>
-            <label className="mb-2 block font-medium">Ngày sinh</label>
+            <label className="mb-2 block font-medium text-gray-700 dark:text-gray-200">
+              Ngày sinh
+            </label>
 
             <input
               value={form.doB}
@@ -189,14 +202,16 @@ export default function EditUser() {
                 })
               }
               placeholder="dd/MM/yyyy"
-              className="w-full rounded-lg border p-3"
+              className="w-full rounded-lg border border-gray-300 bg-white p-3 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
             />
           </div>
         </div>
 
         <div>
           {isAdmin && (
-            <label className="mb-2 block font-medium">Avatar URL</label>
+            <label className="mb-2 block font-medium text-gray-700 dark:text-gray-200">
+              Avatar URL
+            </label>
           )}
 
           {isAdmin && (
@@ -208,7 +223,7 @@ export default function EditUser() {
                   avatarUrl: e.target.value,
                 })
               }
-              className="w-full rounded-lg border p-3"
+              className="w-full rounded-lg border border-gray-300 bg-white p-3 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
             />
           )}
 
@@ -216,13 +231,13 @@ export default function EditUser() {
             <img
               src={form.avatarUrl}
               alt="Preview"
-              className="mt-4 h-32 w-32 rounded-full border object-cover"
+              className="mt-4 h-32 w-32 rounded-full border border-gray-300 object-cover dark:border-gray-700"
             />
           )}
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
-          <label className="flex items-center gap-2">
+          <label className="flex items-center gap-2 text-gray-700 dark:text-gray-200">
             <input
               type="checkbox"
               checked={form.isActive}
@@ -236,7 +251,7 @@ export default function EditUser() {
             Đang hoạt động
           </label>
 
-          <label className="flex items-center gap-2">
+          <label className="flex items-center gap-2 text-gray-700 dark:text-gray-200">
             <input
               type="checkbox"
               checked={form.isVerifiedEmail}
@@ -250,7 +265,7 @@ export default function EditUser() {
             Email xác thực
           </label>
 
-          <label className="flex items-center gap-2">
+          <label className="flex items-center gap-2 text-gray-700 dark:text-gray-200">
             <input
               type="checkbox"
               checked={form.isVerifiedPhone}

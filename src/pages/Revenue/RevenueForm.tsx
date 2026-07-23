@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { createRevenue, updateRevenue } from "../../services/revenueService";
 import { getUsers } from "../../services/userService";
+import Select from "react-select";
 
 interface RevenueFormProps {
   reportDate: string;
@@ -12,6 +13,7 @@ interface RevenueFormProps {
 interface User {
   _id: string;
   fullName: string;
+  avatarUrl: string;
 }
 
 interface RevenueFormData {
@@ -58,6 +60,12 @@ export default function RevenueForm({
   const parseNumber = (value: string) => {
     return Number(value.replace(/\./g, "").replace(/,/g, ""));
   };
+
+  const userOptions = users.map((user) => ({
+    value: user._id,
+    label: user.fullName,
+    avatar: user.avatarUrl?.[0],
+  }));
 
   useEffect(() => {
     loadUsers();
@@ -161,35 +169,89 @@ export default function RevenueForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-5 text-gray-900 dark:text-white"
+    >
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="mb-1 block text-sm font-medium">Nhân viên</label>
+          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">
+            Nhân viên
+          </label>
 
-          <select
-            name="userId"
-            value={formData.userId}
-            onChange={handleChange}
-            className="w-full rounded-lg border px-3 py-2"
-          >
-            <option value="">Chọn nhân viên</option>
+          <Select
+            options={userOptions}
+            value={userOptions.find((item) => item.value === formData.userId)}
+            onChange={(option) =>
+              setFormData((prev) => ({
+                ...prev,
+                userId: option?.value || "",
+              }))
+            }
+            formatOptionLabel={(user) => (
+              <div className="flex items-center gap-2">
+                <img
+                  src={user.avatar || "/images/default-avatar.png"}
+                  className="h-7 w-7 rounded-full object-cover"
+                />
 
-            {users.map((user) => (
-              <option key={user._id} value={user._id}>
-                {user.fullName}
-              </option>
-            ))}
-          </select>
+                <span>{user.label}</span>
+              </div>
+            )}
+            styles={{
+              control: (base, state) => ({
+                ...base,
+                backgroundColor: "transparent",
+                borderColor: state.isFocused ? "#3b82f6" : "rgb(75 85 99)",
+                color: "inherit",
+                minHeight: "42px",
+              }),
+
+              menu: (base) => ({
+                ...base,
+                backgroundColor: "#111827",
+                zIndex: 9999,
+              }),
+
+              option: (base, state) => ({
+                ...base,
+                backgroundColor: state.isFocused ? "#374151" : "#111827",
+                color: "#ffffff",
+                cursor: "pointer",
+              }),
+
+              singleValue: (base) => ({
+                ...base,
+                color: "#ffffff",
+              }),
+
+              input: (base) => ({
+                ...base,
+                color: "#ffffff",
+              }),
+
+              placeholder: (base) => ({
+                ...base,
+                color: "#9ca3af",
+              }),
+            }}
+          />
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium">Sản phẩm</label>
+          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">
+            Sản phẩm
+          </label>
 
           <select
             name="productType"
             value={formData.productType}
             onChange={handleChange}
-            className="w-full rounded-lg border px-3 py-2"
+            className="
+w-full rounded-lg border px-3 py-2
+bg-white text-gray-900 border-gray-300
+dark:bg-gray-800 dark:border-gray-700 dark:text-white
+"
           >
             <option value="">Chọn sản phẩm</option>
 
@@ -202,13 +264,19 @@ export default function RevenueForm({
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium">Nguồn</label>
+          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">
+            Nguồn
+          </label>
 
           <select
             name="sourceType"
             value={formData.sourceType}
             onChange={handleChange}
-            className="w-full rounded-lg border px-3 py-2"
+            className="
+w-full rounded-lg border px-3 py-2
+bg-white text-gray-900 border-gray-300
+dark:bg-gray-800 dark:border-gray-700 dark:text-white
+"
           >
             <option value="">Chọn nguồn</option>
 
@@ -219,7 +287,9 @@ export default function RevenueForm({
         </div>
         {formData.sourceType === "CTV_DaiLy" && (
           <div>
-            <label className="mb-1 block text-sm font-medium">Chiết khấu</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">
+              Chiết khấu
+            </label>
 
             <div className="relative">
               <input
@@ -229,7 +299,11 @@ export default function RevenueForm({
                 max={100}
                 value={formData.discountPercent}
                 onChange={handleChange}
-                className="w-full rounded-lg border py-2 pl-3 pr-10"
+                className="
+w-full rounded-lg border py-2 pl-3 pr-10
+bg-white text-gray-900 border-gray-300
+dark:bg-gray-800 dark:border-gray-700 dark:text-white
+"
               />
 
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
@@ -240,19 +314,25 @@ export default function RevenueForm({
         )}
 
         <div>
-          <label className="mb-1 block text-sm font-medium">Số khách</label>
+          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">
+            Số khách
+          </label>
 
           <input
             type="number"
             name="customerCount"
             value={formData.customerCount}
             onChange={handleChange}
-            className="w-full rounded-lg border px-3 py-2"
+            className="
+w-full rounded-lg border px-3 py-2
+bg-white text-gray-900 border-gray-300
+dark:bg-gray-800 dark:border-gray-700 dark:text-white
+"
           />
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium">
+          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">
             Số lượng sản phẩm
           </label>
 
@@ -261,12 +341,16 @@ export default function RevenueForm({
             name="productQuantity"
             value={formData.productQuantity}
             onChange={handleChange}
-            className="w-full rounded-lg border px-3 py-2"
+            className="
+w-full rounded-lg border px-3 py-2
+bg-white text-gray-900 border-gray-300
+dark:bg-gray-800 dark:border-gray-700 dark:text-white
+"
           />
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium">
+          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">
             Giá trị hợp đồng
           </label>
 
@@ -277,17 +361,21 @@ export default function RevenueForm({
               value={formatNumber(formData.revenue)}
               onChange={handleChange}
               inputMode="numeric"
-              className="w-full rounded-lg border py-2 pl-3 pr-12"
+              className="
+w-full rounded-lg border py-2 pl-3 pr-12
+bg-white text-gray-900 border-gray-300
+dark:bg-gray-800 dark:border-gray-700 dark:text-white
+"
             />
 
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400">
               VNĐ
             </span>
           </div>
 
           {formData.sourceType === "CTV_DaiLy" && (
             <div className="relative mt-3">
-              <label className="mb-1 block text-sm font-medium">
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">
                 Doanh thu thực nhận
               </label>
 
@@ -295,7 +383,14 @@ export default function RevenueForm({
                 type="text"
                 readOnly
                 value={formatNumber(actualRevenue)}
-                className="w-full rounded-lg border bg-gray-100 py-2 pl-3 pr-12 font-semibold text-green-600"
+                className="
+w-full rounded-lg border py-2 pl-3 pr-12
+bg-gray-100 border-gray-300
+font-semibold text-green-600
+dark:bg-gray-800
+dark:border-gray-700
+dark:text-green-400
+"
               />
 
               <span className="absolute right-3 top-[45px] -translate-y-1/2 text-sm text-gray-500">
@@ -306,19 +401,25 @@ export default function RevenueForm({
         </div>
 
         <div className="col-span-2">
-          <label className="mb-1 block text-sm font-medium">Ghi chú</label>
+          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">
+            Ghi chú
+          </label>
 
           <textarea
             rows={4}
             name="note"
             value={formData.note}
             onChange={handleChange}
-            className="w-full rounded-lg border px-3 py-2"
+            className="
+w-full rounded-lg border px-3 py-2
+bg-white text-gray-900 border-gray-300
+dark:bg-gray-800 dark:border-gray-700 dark:text-white
+"
           />
         </div>
       </div>
 
-      <div className="flex justify-end gap-3 border-t pt-4">
+      <div className="flex justify-end gap-3 border-t border-gray-200 pt-4 dark:border-gray-700">
         <button
           type="submit"
           disabled={loading}
