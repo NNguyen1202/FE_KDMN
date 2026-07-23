@@ -29,7 +29,7 @@ export default function RevenueDayDetail() {
 
   const [summary, setSummary] = useState<any>({});
 
-  const currentDate = date || "";
+  const currentDate = date ?? "";
 
   const firstDayOfMonth = currentDate.substring(0, 8) + "01";
 
@@ -90,10 +90,18 @@ export default function RevenueDayDetail() {
     }
   };
 
-  useEffect(() => {
-    loadData();
-    loadRangeSummary();
-  }, [date]);
+ useEffect(() => {
+  const firstDay = currentDate.substring(0, 8) + "01";
+
+  setFromDate(firstDay);
+  setToDate(currentDate);
+
+  loadData();
+}, [date]);
+
+useEffect(() => {
+  loadRangeSummary();
+}, [fromDate, toDate]);
 
   return (
     <>
@@ -102,28 +110,73 @@ export default function RevenueDayDetail() {
         description="Revenue Day Detail"
       />
       <div className="space-y-5">
-        <div className="mb-6 flex bg-white rounded-xl border-stroke items-center gap-4">
+        <div
+          className="
+mb-6
+flex
+flex-wrap
+items-center
+justify-between
+gap-4
+rounded-2xl
+border
+border-gray-200
+bg-white
+p-5
+shadow-sm
+dark:border-gray-700
+dark:bg-gray-900
+"
+        >
           <button
             onClick={() => navigate("/revenue-report")}
-            className="flex items-center gap-2 rounded-lg border px-4 py-2 hover:bg-gray-50"
+            className="
+flex
+items-center
+gap-2
+rounded-lg
+border
+border-gray-300
+bg-white
+px-4
+py-2
+transition
+hover:bg-gray-50
+dark:border-gray-600
+dark:bg-gray-800
+dark:text-white
+dark:hover:bg-gray-700
+"
           >
             ← Quay lại
           </button>
 
-          <h1 className="text-2xl font-bold">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             Báo cáo doanh thu ngày {formatDate(date!)}
           </h1>
         </div>
 
         <div className="grid grid-cols-1 gap-5 xl:grid-cols-4">
-          <div className="xl:col-span-3 rounded-xl border border-stroke bg-white p-5 shadow-sm">
-            <h3 className="mb-4 text-lg font-semibold">
+          <div
+            className="
+xl:col-span-3
+rounded-2xl
+border
+border-gray-200
+bg-white
+p-6
+shadow-sm
+dark:border-gray-700
+dark:bg-gray-900
+"
+          >
+            <h3 className="mb-5 text-lg font-semibold text-gray-900 dark:text-white">
               Báo cáo khoảng thời gian
             </h3>
 
             <div className="flex flex-wrap items-end gap-4">
               <div>
-                <label className="mb-2 block text-sm font-medium">
+                <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Từ ngày
                 </label>
 
@@ -133,12 +186,26 @@ export default function RevenueDayDetail() {
                     setFromDate(date?.toISOString().split("T")[0] || "")
                   }
                   dateFormat="dd/MM/yyyy"
-                  className=" rounded-lg border border-stroke px-4 py-2"
+                  className="
+w-44
+rounded-lg
+border
+border-gray-300
+bg-white
+px-4
+py-2
+text-gray-900
+outline-none
+focus:border-brand-500
+dark:border-gray-600
+dark:bg-gray-800
+dark:text-white
+"
                 />
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium">
+                <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Đến ngày
                 </label>
 
@@ -148,33 +215,80 @@ export default function RevenueDayDetail() {
                     setToDate(date?.toISOString().split("T")[0] || "")
                   }
                   dateFormat="dd/MM/yyyy"
-                  className=" rounded-lg border border-stroke px-4 py-2"
+                  className="
+w-44
+rounded-lg
+border
+border-gray-300
+bg-white
+px-4
+py-2
+text-gray-900
+outline-none
+focus:border-brand-500
+dark:border-gray-600
+dark:bg-gray-800
+dark:text-white
+"
                 />
               </div>
 
               <button
                 onClick={loadRangeSummary}
-                className="rounded-lg bg-primary px-5 py-2 text-black"
+                className="
+rounded-lg
+bg-brand-500
+px-5
+py-2
+font-medium
+text-white
+transition
+hover:bg-brand-600
+"
               >
                 Xem báo cáo
               </button>
             </div>
           </div>
 
-          <div className="flex items-center justify-center rounded-xl border border-stroke bg-white p-5 shadow-sm">
+          <div className="
+flex
+items-center
+justify-center
+rounded-2xl
+border
+border-gray-200
+bg-white
+p-5
+shadow-sm
+dark:border-gray-700
+dark:bg-gray-900
+">
             <button
               onClick={() => {
                 setEditingRecord(null);
                 openModal();
               }}
-              className="rounded-lg bg-primary px-6 py-3 flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2 text-white hover:bg-brand-600 hover:bg-opacity-90"
+              className="
+flex
+items-center
+gap-2
+rounded-lg
+bg-brand-500
+px-6
+py-3
+font-medium
+text-white
+transition
+hover:bg-brand-600
+"
             >
               + Thêm doanh thu
             </button>
           </div>
         </div>
 
-        <div className="flex justify-end"></div>
+
 
         <div className="space-y-6">
           <RevenueSummary

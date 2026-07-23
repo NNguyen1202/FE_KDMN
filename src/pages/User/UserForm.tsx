@@ -2,14 +2,6 @@
 import { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-// import { toast } from "react-toastify";
-
-// const ROLE_MAP = {
-//   "Admin": "67f87c9ac19b91da666bbdc5",
-//   "Manager": "6a3a30ff5b1107c9a166df50",
-//   "Business specialist": "6a3a31285b1107c9a166df56",
-//   "Probationary employee": "6a3a31395b1107c9a166df5a",
-// };
 
 interface UserFormData {
   fullName: string;
@@ -103,15 +95,17 @@ export default function UserForm({
     onSubmit(form);
   };
 
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-6 text-gray-900 dark:text-white"
+    >
       {/* Thông tin cá nhân */}
-      <div className="rounded-2xl border border-stroke bg-white p-6 shadow-sm">
-        <h3 className="mb-6 text-lg font-semibold">Thông tin cá nhân</h3>
+      <div className="rounded-2xl border border-stroke bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+        <h3 className="mb-6 text-lg font-semibold text-gray-900 dark:text-white">Thông tin cá nhân</h3>
 
         <div className="mb-8">
-          <label className="mb-3 block text-sm font-medium">Ảnh đại diện</label>
+          <label className="mb-3 block text-sm font-medium text-gray-700 dark:text-gray-200">Ảnh đại diện</label>
 
           <div className="flex items-center gap-6">
             <img
@@ -121,7 +115,7 @@ export default function UserForm({
                   "https://ui-avatars.com/api/?name=User";
               }}
               alt="Avatar"
-              className="h-28 w-28 rounded-full border-4 border-gray-200 object-cover"
+              className="h-28 w-28 rounded-full border-4 border-gray-200 object-cover dark:border-gray-700"
             />
 
             <div className="flex-1">
@@ -131,10 +125,10 @@ export default function UserForm({
                 value={form.avatarUrl}
                 onChange={handleChange}
                 placeholder="https://example.com/avatar.jpg"
-                className="w-full rounded-lg border border-stroke px-4 py-2.5"
+                className="w-full rounded-lg border border-stroke bg-white px-4 py-2.5 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
               />
 
-              <p className="mt-2 text-xs text-gray-500">
+              <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
                 Nhập URL ảnh đại diện.
               </p>
             </div>
@@ -142,7 +136,7 @@ export default function UserForm({
         </div>
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           <div>
-            <label className="mb-2 block text-sm font-medium">Họ và tên</label>
+            <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-200">Họ và tên</label>
 
             <input
               name="fullName"
@@ -153,7 +147,7 @@ export default function UserForm({
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium">
+            <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-200">
               Số điện thoại
             </label>
 
@@ -166,7 +160,7 @@ export default function UserForm({
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium">Ngày sinh</label>
+            <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-200">Ngày sinh</label>
 
             <DatePicker
               selected={form.doB}
@@ -180,18 +174,18 @@ export default function UserForm({
               showYearDropdown
               scrollableYearDropdown
               yearDropdownItemNumber={100}
-              className="w-full rounded-lg border border-stroke px-4 py-2.5"
+              className="w-full rounded-lg border border-stroke bg-white px-4 py-2.5 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
             />
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium">Giới tính</label>
+            <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-200">Giới tính</label>
 
             <select
               name="gender"
               value={form.gender}
               onChange={handleChange}
-              className="w-full rounded-lg border border-stroke px-4 py-2.5"
+              className="w-full rounded-lg border border-stroke bg-white px-4 py-2.5 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
             >
               <option value="male">Nam</option>
               <option value="female">Nữ</option>
@@ -201,12 +195,12 @@ export default function UserForm({
       </div>
 
       {/* Tài khoản */}
-      <div className="rounded-2xl border border-stroke bg-white p-6 shadow-sm">
+      <div className="rounded-2xl border border-stroke bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
         <h3 className="mb-6 text-lg font-semibold">Thông tin tài khoản</h3>
 
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           <div>
-            <label className="mb-2 block text-sm font-medium">Email</label>
+            <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-200">Email</label>
 
             <input
               name="email"
@@ -218,13 +212,13 @@ export default function UserForm({
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium">Vai trò</label>
+            <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-200">Vai trò</label>
 
             <select
               name="roleID"
               value={form.roleID}
               onChange={handleChange}
-              className="w-full rounded-lg border border-stroke px-4 py-2.5"
+              className="w-full rounded-lg border border-stroke bg-white px-4 py-2.5 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
             >
               <option value="67f87c9ac19b91da666bbdc5">Quản trị viên</option>
               <option value="6a3a30ff5b1107c9a166df50">Quản lý</option>
@@ -240,7 +234,7 @@ export default function UserForm({
           {!initialValues && (
             <>
               <div>
-                <label className="mb-2 block text-sm font-medium">
+                <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-200">
                   Mật khẩu
                 </label>
 
@@ -254,7 +248,7 @@ export default function UserForm({
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium">
+                <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-200">
                   Xác nhận mật khẩu
                 </label>
 
@@ -275,7 +269,7 @@ export default function UserForm({
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-lg border border-stroke px-5 py-2.5 hover:bg-gray-50"
+          className="rounded-lg border border-stroke px-5 py-2.5 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
         >
           Hủy
         </button>

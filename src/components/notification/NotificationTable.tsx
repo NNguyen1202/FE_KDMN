@@ -12,15 +12,21 @@ type Props = {
 };
 
 const moduleColor: Record<string, string> = {
-  USER: "bg-blue-100 text-blue-700",
-  ROLE: "bg-purple-100 text-purple-700",
-  SALES_RECORD: "bg-green-100 text-green-700",
-  AGENCY: "bg-orange-100 text-orange-700",
-  PROVINCE: "bg-cyan-100 text-cyan-700",
-  MANAGEMENT_AREA: "bg-pink-100 text-pink-700",
-  AGENCY_CONTACT: "bg-yellow-100 text-yellow-700",
-  ONLINE_REGISTRATION: "bg-indigo-100 text-indigo-700",
-  PAYMENT_ACCOUNT: "bg-red-100 text-red-700",
+  USER: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
+  ROLE: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300",
+  SALES_RECORD:
+    "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
+  AGENCY:
+    "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300",
+  PROVINCE: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300",
+  MANAGEMENT_AREA:
+    "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300",
+  AGENCY_CONTACT:
+    "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300",
+  ONLINE_REGISTRATION:
+    "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300",
+  PAYMENT_ACCOUNT:
+    "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
 };
 
 const moduleName: Record<string, string> = {
@@ -77,7 +83,7 @@ export default function NotificationTable({
   }, []);
   if (loading) {
     return (
-      <div className="rounded-2xl border bg-white p-10 text-center dark:bg-gray-900">
+      <div className="rounded-2xl border border-gray-200 bg-white p-10 text-center text-gray-900 dark:border-gray-800 dark:bg-gray-900 dark:text-white">
         Đang tải...
       </div>
     );
@@ -89,19 +95,34 @@ export default function NotificationTable({
         <table className="min-w-full">
           <thead className="bg-gray-50 dark:bg-gray-800">
             <tr>
-              <th className="px-5 py-3 text-left">Tiêu đề</th>
-              <th className="px-5 py-3 text-left">Module</th>
-              <th className="px-5 py-3 text-left">Người thực hiện</th>
-              <th className="px-5 py-3 text-center">Trạng thái</th>
-              <th className="px-5 py-3 text-center">Thời gian</th>
-              <th className="px-5 py-3 text-center">Thao tác</th>
+              <th className="px-5 py-3 text-left text-gray-700 dark:text-gray-300">
+                Tiêu đề
+              </th>
+              <th className="px-5 py-3 text-left text-gray-700 dark:text-gray-300">
+                Module
+              </th>
+              <th className="px-5 py-3 text-left text-gray-700 dark:text-gray-300">
+                Người thực hiện
+              </th>
+              <th className="px-5 py-3 text-center text-gray-700 dark:text-gray-300">
+                Trạng thái
+              </th>
+              <th className="px-5 py-3 text-center text-gray-700 dark:text-gray-300">
+                Thời gian
+              </th>
+              <th className="px-5 py-3 text-center text-gray-700 dark:text-gray-300">
+                Thao tác
+              </th>
             </tr>
           </thead>
 
           <tbody>
             {data.length === 0 ? (
               <tr>
-                <td colSpan={6} className="py-10 text-center text-gray-500">
+                <td
+                  colSpan={6}
+                  className="py-10 text-center text-gray-500 dark:text-gray-400"
+                >
                   Không có dữ liệu.
                 </td>
               </tr>
@@ -119,14 +140,16 @@ export default function NotificationTable({
                       ),
                     );
                   }}
-                  className={`border-t transition hover:bg-gray-50 dark:hover:bg-gray-800 ${
-                    !item.isRead ? "bg-blue-50/40" : ""
+                  className={`border-t border-gray-200 transition hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800 ${
+                    !item.isRead ? "bg-blue-50/40 dark:bg-blue-900/20" : ""
                   }`}
                 >
                   <td className="px-5 py-4">
-                    <div className="font-semibold">{item.title}</div>
+                    <div className="font-semibold text-gray-900 dark:text-white">
+                      {item.title}
+                    </div>
 
-                    <div className="mt-1 text-sm text-gray-500">
+                    <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                       {item.message}
                     </div>
                   </td>
@@ -134,28 +157,31 @@ export default function NotificationTable({
                   <td className="px-5 py-4">
                     <span
                       className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                        moduleColor[item.module] ?? "bg-gray-100 text-gray-700"
+                        moduleColor[item.module] ??
+                        "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
                       }`}
                     >
                       {moduleName[item.module] ?? item.module}
                     </span>
                   </td>
 
-                  <td className="px-5 py-4">{item.actorName}</td>
+                  <td className="px-5 py-4 text-gray-900 dark:text-gray-300">
+                    {item.actorName}
+                  </td>
 
                   <td className="px-5 py-4 text-center">
                     {item.isRead ? (
-                      <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
+                      <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700 dark:bg-green-900/100 dark:text-green-300">
                         Đã đọc
                       </span>
                     ) : (
-                      <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700">
+                      <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700 dark:bg-red-900/100 dark:text-red-300">
                         Chưa đọc
                       </span>
                     )}
                   </td>
 
-                  <td className="px-5 py-4 text-center text-sm">
+                  <td className="px-5 py-4 text-center text-sm text-gray-600 dark:text-gray-400">
                     {item.createdAt}
                   </td>
 

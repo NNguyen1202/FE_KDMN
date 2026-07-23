@@ -28,12 +28,16 @@ export default function UserCreate() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-gray-900 dark:text-white">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Thêm người dùng</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Thêm người dùng
+          </h2>
 
-          <p className="mt-1 text-gray-500">Tạo tài khoản mới cho nhân viên</p>
+          <p className="mt-1 text-gray-500 dark:text-gray-400">
+            Tạo tài khoản mới cho nhân viên
+          </p>
         </div>
       </div>
 

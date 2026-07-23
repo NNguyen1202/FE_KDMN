@@ -42,9 +42,11 @@ export default function EmployeeTargetTable() {
 
   return (
     <>
-      <div className="rounded-xl border bg-white">
-        <div className="flex items-center justify-between border-b p-5">
-          <h2 className="text-xl font-semibold">Doanh thu dự kiến</h2>
+      <div className="rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+        <div className="flex items-center justify-between border-b border-gray-200 p-5 dark:border-gray-700">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+            Doanh thu dự kiến
+          </h2>
 
           <button
             onClick={() => {
@@ -58,43 +60,62 @@ export default function EmployeeTargetTable() {
 
         <table className="w-full">
           <thead>
-            <tr className="border-b">
-              <th className="px-5 py-3 text-left">Nhân viên</th>
+            <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800">
+              <th className="px-5 py-3 text-left text-gray-700 dark:text-gray-200">
+                Nhân viên
+              </th>
 
-              <th className="text-center">Tháng</th>
+              <th className="text-center text-gray-700 dark:text-gray-200">
+                Tháng
+              </th>
 
-              <th className="text-center">Năm</th>
+              <th className="text-center text-gray-700 dark:text-gray-200">
+                Năm
+              </th>
 
-              <th className="text-center">Doanh thu dự kiến</th>
+              <th className="text-center text-gray-700 dark:text-gray-200">
+                Doanh thu dự kiến
+              </th>
 
-              <th className="text-center">Thao tác</th>
+              <th className="text-center text-gray-700 dark:text-gray-200">
+                Thao tác
+              </th>
             </tr>
           </thead>
 
           <tbody>
             {!loading &&
               data.map((item) => (
-                <tr key={item._id} className="border-b hover:bg-gray-50">
-                  <td className="px-5 py-4">{item.userId?.fullName}</td>
+                <tr
+                  key={item._id}
+                  className="border-b border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
+                >
+                  <td className="px-5 py-4 text-gray-900 dark:text-white">
+                    {item.userId?.fullName}
+                  </td>
 
-                  <td className="text-center">{item.month}</td>
+                  <td className="text-center text-gray-900 dark:text-white">
+                    {item.month}
+                  </td>
 
-                  <td className="text-center">{item.year}</td>
+                  <td className="text-center text-gray-900 dark:text-white">
+                    {item.year}
+                  </td>
 
-                  <td className="text-center font-semibold text-green-600">
+                  <td className="text-center font-semibold text-green-600 dark:text-green-400">
                     {Number(item.targetRevenue).toLocaleString("vi-VN")}₫
                   </td>
 
-                  <td className="space-x-2 text-center">
+                  <td className="space-x-2 text-center text-gray-900 dark:text-white">
                     <button
-                      className="rounded bg-blue-500 px-3 py-1 text-white"
+                      className="rounded bg-blue-500 px-3 py-1 text-white hover:bg-blue-600"
                       onClick={() => setOpenModal(true)}
                     >
                       Quản lý
                     </button>
 
                     <button
-                      className="rounded bg-red-500 px-3 py-1 text-white"
+                      className="rounded bg-red-500 px-3 py-1 text-white hover:bg-red-600"
                       onClick={() => handleDelete(item._id)}
                     >
                       Xóa
@@ -102,6 +123,16 @@ export default function EmployeeTargetTable() {
                   </td>
                 </tr>
               ))}
+            {!loading && data.length === 0 && (
+              <tr>
+                <td
+                  colSpan={5}
+                  className="py-8 text-center text-gray-500 dark:text-gray-400"
+                >
+                  Chưa có dữ liệu
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

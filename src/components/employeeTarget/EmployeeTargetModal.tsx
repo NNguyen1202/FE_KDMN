@@ -63,7 +63,11 @@ export default function EmployeeTargetModal({
       });
 
       const rows = users
-        .filter((user: any) => user.roleID?.roleName !== "Admin")
+        .filter(
+          (user: any) =>
+            user.roleID?.roleName !== "Admin" &&
+            user.roleID?.roleName !== "Manager",
+        )
         .map((user: any) => ({
           userId: user._id,
           fullName: user.fullName,
@@ -121,25 +125,32 @@ export default function EmployeeTargetModal({
   return (
     <Modal isOpen={isOpen} onClose={closeModal} className="max-w-3xl">
       <div className="w-[700px] max-w-[90vw]">
-        <div className="border-b px-6 py-4">
-          <h2 className="text-xl font-bold">
+        <div className="border-b border-stroke px-6 py-4 dark:border-gray-700">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
             KPI Doanh thu tháng {month}/{year}
           </h2>
         </div>
 
-        <div className="max-h-[500px] overflow-y-auto p-6">
+        <div className="max-h-[500px] overflow-y-auto p-6 text-gray-900 dark:text-white">
           <table className="w-full">
             <thead>
-              <tr className="border-b">
-                <th className="py-3 text-left">Nhân viên</th>
+              <tr className="border-b border-stroke dark:border-gray-700">
+                <th className="py-3 text-left text-gray-700 dark:text-gray-300">
+                  Nhân viên
+                </th>
 
-                <th className="py-3 text-right">KPI doanh thu</th>
+                <th className="py-3 text-right text-gray-700 dark:text-gray-300">
+                  KPI doanh thu
+                </th>
               </tr>
             </thead>
 
             <tbody>
               {targets.map((item) => (
-                <tr key={item.userId} className="border-b">
+                <tr
+                  key={item.userId}
+                  className="border-b border-stroke dark:border-gray-700"
+                >
                   <td className="py-3">
                     <div className="flex items-center gap-3">
                       <img
@@ -147,7 +158,9 @@ export default function EmployeeTargetModal({
                         className="h-10 w-10 rounded-full"
                       />
 
-                      <span className="font-medium">{item.fullName}</span>
+                      <span className="font-medium text-gray-900 dark:text-white">
+                        {item.fullName}
+                      </span>
                     </div>
                   </td>
 
@@ -155,14 +168,14 @@ export default function EmployeeTargetModal({
                     <div className="relative">
                       <input
                         type="text"
-                        className="w-56 rounded-lg border border-gray-300 px-3 py-2 text-right focus:border-brand-500 focus:outline-none"
+                        className="w-56 rounded-lg border border-gray-300 bg-white px-3 py-2 text-right text-gray-900 focus:border-brand-500 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-white"
                         value={formatNumber(item.targetRevenue)}
                         onChange={(e) =>
                           handleChange(item.userId, e.target.value)
                         }
                       />
 
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400">
                         VNĐ
                       </span>
                     </div>
@@ -173,8 +186,11 @@ export default function EmployeeTargetModal({
           </table>
         </div>
 
-        <div className="flex justify-end gap-3 border-t px-6 py-4">
-          <button onClick={closeModal} className="rounded-lg border px-5 py-2">
+        <div className="flex justify-end gap-3 border-t border-stroke px-6 py-4 dark:border-gray-700">
+          <button
+            onClick={closeModal}
+            className="rounded-lg border border-stroke px-5 py-2 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+          >
             Hủy
           </button>
 

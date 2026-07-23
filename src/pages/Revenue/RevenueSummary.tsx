@@ -27,12 +27,26 @@ export default function RevenueSummary({
   summary,
 }: Props) {
   return (
-    <div className="rounded-2xl border border-stroke bg-white p-5 shadow-sm">
-      <div className="flex items-start justify-between">
+    <div
+      className="
+rounded-2xl
+border
+border-gray-200
+bg-white
+p-6
+shadow-sm
+transition-colors
+dark:border-gray-700
+dark:bg-gray-900
+"
+    >
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
-          <p className="text-sm text-gray-500">{title}</p>
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+            {title}
+          </p>
 
-          <h2 className="mt-3 text-3xl font-bold text-brand-500">
+          <h2 className="mt-3 text-3xl font-bold text-brand-600 dark:text-brand-400">
             {formatCurrency(summary.totalRevenue || 0)}
           </h2>
         </div>
@@ -40,22 +54,42 @@ export default function RevenueSummary({
         {children}
       </div>
 
-      <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
         {summary?.products?.map((item: ProductRevenue) => (
           <div
             key={item.productType}
-            className="rounded-xl border border-gray-200 p-4"
+            className="
+rounded-2xl
+border
+border-gray-200
+bg-white
+p-5
+transition-all
+duration-200
+hover:-translate-y-1
+hover:shadow-md
+dark:border-gray-700
+dark:bg-gray-800
+"
           >
-            <p className="font-semibold">{item.productType}</p>
+            <p className="text-base font-semibold text-gray-900 dark:text-white">
+              📦 {item.productType}
+            </p>
 
             <div className="mt-4">
-              <p className="text-xs text-gray-500">Khách hàng</p>
+              <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                Khách hàng
+              </p>
 
-              <p className="text-xl font-semibold">{item.customers}</p>
+              <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                {item.customers}
+              </p>
             </div>
 
             <div className="mt-4">
-              <p className="text-xs text-gray-500">Doanh thu</p>
+              <p className="text-lg font-bold text-green-600 dark:text-green-400">
+                Doanh thu
+              </p>
 
               <p className="text-lg font-bold text-green-600">
                 {formatCurrency(item.revenue)}

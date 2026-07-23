@@ -855,3 +855,54 @@ span.flatpickr-weekday,
     transform: translateX(0);
   }
 }
+
+.dark .fc {
+    background: transparent;
+    color: #e5e7eb;
+}
+
+.dark .fc-theme-standard td,
+.dark .fc-theme-standard th {
+    border-color: #374151;
+}
+
+.dark .fc-scrollgrid {
+    border-color: #374151;
+}
+
+.dark .fc-toolbar-title {
+    color: #fff;
+}
+
+.dark .fc-col-header-cell {
+    background: #111827;
+}
+
+.dark .fc-daygrid-day {
+    background: #111827;
+}
+
+.dark .fc-day-today {
+    background: rgba(59,130,246,.12) !important;
+}
+
+.dark .fc-button {
+    background: #2563eb !important;
+    border: none !important;
+}
+
+.dark .fc-button:hover {
+    background: #1d4ed8 !important;
+}
+
+.dark .fc-button-active {
+    background: #1e40af !important;
+}
+
+.dark .fc-daygrid-day-number {
+    color: #e5e7eb;
+}
+
+.dark .fc-col-header-cell-cushion {
+    color: white;
+}

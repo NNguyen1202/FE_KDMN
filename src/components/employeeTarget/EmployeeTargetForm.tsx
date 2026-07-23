@@ -97,10 +97,13 @@ export default function EmployeeTargetForm({ record, onSuccess }: Props) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-5 text-gray-900 dark:text-white"
+    >
       <div className="grid grid-cols-2 gap-4">
         <div className="col-span-2">
-          <label className="mb-1 block text-sm font-medium">Nhân viên</label>
+          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Nhân viên</label>
 
           <select
             name="userId"
@@ -119,7 +122,7 @@ export default function EmployeeTargetForm({ record, onSuccess }: Props) {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium">Tháng</label>
+          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Tháng</label>
 
           <input
             type="number"
@@ -131,7 +134,7 @@ export default function EmployeeTargetForm({ record, onSuccess }: Props) {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium">Năm</label>
+          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Năm</label>
 
           <input
             type="number"
@@ -143,7 +146,7 @@ export default function EmployeeTargetForm({ record, onSuccess }: Props) {
         </div>
 
         <div className="col-span-2">
-          <label className="mb-1 block text-sm font-medium">
+          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
             Doanh thu dự kiến
           </label>
 
