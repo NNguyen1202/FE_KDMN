@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import SignIn from "./pages/AuthPages/SignIn";
 import SignUp from "./pages/AuthPages/SignUp";
 import NotFound from "./pages/OtherPage/NotFound";
@@ -34,11 +34,12 @@ import EmployeeTargetPage from "./pages/EmployeeTarget";
 import MoonFestivalDecoration from "./components/common/MoonFestivalDecoration";
 
 export default function App() {
+   console.log("APP RENDER");
   return (
     <>
-    <MoonFestivalDecoration />
       <Router>
         <ScrollToTop />
+        <MoonFestivalDecoration />
         <Routes>
           {/* Dashboard Layout */}
           <Route element={<AppLayout />}>
