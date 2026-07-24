@@ -5,6 +5,7 @@ import { useSidebar } from "../context/SidebarContext";
 import { ThemeToggleButton } from "../components/common/ThemeToggleButton";
 import NotificationDropdown from "../components/header/NotificationDropdown";
 import UserDropdown from "../components/header/UserDropdown";
+import { updateSettings } from "../services/userService";
 
 const AppHeader: React.FC = () => {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
@@ -24,6 +25,37 @@ const AppHeader: React.FC = () => {
   };
 
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const [moonEffect, setMoonEffect] = useState(true);
+
+  const handleToggleMoon = async () => {
+  const value = !moonEffect;
+
+  try {
+    const res = await updateSettings({
+      moonFestivalEffect: value,
+    });
+
+    localStorage.setItem(
+      "user",
+      JSON.stringify(res.data.data)
+    );
+
+    setMoonEffect(
+      res.data.data.settings.moonFestivalEffect
+    );
+
+    window.dispatchEvent(new Event("moon-effect-changed"));
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+    setMoonEffect(user?.settings?.moonFestivalEffect ?? true);
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -157,6 +189,12 @@ const AppHeader: React.FC = () => {
           } items-center justify-between w-full gap-4 px-5 py-4 lg:flex shadow-theme-md lg:justify-end lg:px-0 lg:shadow-none`}
         >
           <div className="flex items-center gap-2 2xsm:gap-3">
+            <button
+              onClick={handleToggleMoon}
+              className="font-semibold text-gray-900 dark:text-white"
+            >
+              {moonEffect ? "Tắt hiệu ứng 🌕" : "Mở hiệu ứng 🌑"}
+            </button>
             {/* <!-- Dark Mode Toggler --> */}
             <ThemeToggleButton />
             {/* <!-- Dark Mode Toggler --> */}

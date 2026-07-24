@@ -39,10 +39,17 @@ export default function SignInForm() {
           fullName: data.fullName,
           email: data.email,
           phone: data.phone,
+          settings: data.settings
         }),
       );
 
+      console.log("LocalStorage: ", localStorage);
+      
+
       navigate("/", { replace: true });
+      requestAnimationFrame(() => {
+  window.dispatchEvent(new Event("moon-effect-changed"));
+});
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       alert(error?.response?.data?.message || "Sai email hoặc mật khẩu");

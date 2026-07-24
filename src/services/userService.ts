@@ -16,3 +16,6 @@ export const getSalesByUser = (id: string) =>
   api.get(`/sales-record/user/${id}`);
 
 export const getRoleById = (id: string) => api.get(`/role/${id}`);
+
+export const updateSettings = (data: { moonFestivalEffect: boolean }) =>
+  api.put("/user/settings", data);
