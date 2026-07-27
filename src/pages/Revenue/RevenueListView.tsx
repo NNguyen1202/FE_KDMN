@@ -14,6 +14,8 @@ import { getAllSales, deleteRevenue } from "../../services/revenueService";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import PageMeta from "../../components/common/PageMeta";
+import { formatLocalDate } from "../../utils/formatLocalDate";
+import Pagination from "../../components/common/Pagination";
 
 export default function RevenueListView() {
   const [records, setRecords] = useState<any[]>([]);
@@ -34,20 +36,34 @@ export default function RevenueListView() {
 
   const [toDate, setToDate] = useState(lastDay);
 
+  const [page, setPage] = useState(1);
+
+  const limit = 10;
+
+  const [pagination, setPagination] = useState({
+    page: 1,
+    pages: 1,
+    total: 0,
+    limit,
+  });
+
   const loadData = useCallback(async () => {
     try {
       const res = await getAllSales({
-        fromDate: fromDate.toISOString().split("T")[0],
-        toDate: toDate.toISOString().split("T")[0],
+        fromDate: formatLocalDate(fromDate),
+        toDate: formatLocalDate(toDate),
+        page,
+        limit,
       });
 
       setRecords(res.data.records || []);
       setSummary(res.data.summary || {});
+      setPagination(res.data.pagination);
     } catch (err) {
       console.error(err);
       toast.error("Không tải được dữ liệu");
     }
-  }, [fromDate, toDate]);
+  }, [fromDate, toDate, page]);
 
   useEffect(() => {
     loadData();
@@ -106,7 +122,9 @@ export default function RevenueListView() {
           {/* Filter */}
           <div className="grid grid-cols-1 gap-5 lg:grid-cols-6">
             <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-200">Từ ngày</label>
+              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-200">
+                Từ ngày
+              </label>
 
               <DatePicker
                 selected={fromDate}
@@ -126,7 +144,9 @@ dark:text-white
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-200">Đến ngày</label>
+              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-200">
+                Đến ngày
+              </label>
 
               <DatePicker
                 selected={toDate}
@@ -146,9 +166,9 @@ dark:text-white
             </div>
 
             <div className="flex items-end gap-3 lg:col-span-2">
-
               <button
                 onClick={() => {
+                  setPage(1);
                   setFromDate(firstDay);
                   setToDate(lastDay);
                 }}
@@ -179,7 +199,9 @@ dark:hover:bg-gray-800
           />
 
           <div className="rounded-2xl border border-stroke bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-900">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Tổng khách hàng</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Tổng khách hàng
+            </p>
 
             <h2 className="mt-3 text-3xl font-bold text-blue-600 dark:text-blue-400">
               {summary?.totalCustomers || 0}
@@ -187,7 +209,9 @@ dark:hover:bg-gray-800
           </div>
 
           <div className="rounded-2xl border border-stroke bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-900">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Tổng sản phẩm</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Tổng sản phẩm
+            </p>
 
             <h2 className="mt-3 text-3xl font-bold text-green-600 dark:text-green-400">
               {summary?.totalProducts || 0}
@@ -195,9 +219,11 @@ dark:hover:bg-gray-800
           </div>
 
           <div className="rounded-2xl border border-stroke bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-900">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Tổng bản ghi</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Tổng bản ghi
+            </p>
 
-            <h2 className="mt-3 text-3xl font-bold text-orange-500 dark:text-orange-400"> 
+            <h2 className="mt-3 text-3xl font-bold text-orange-500 dark:text-orange-400">
               {records.length}
             </h2>
           </div>
@@ -208,6 +234,12 @@ dark:hover:bg-gray-800
           records={records}
           onEdit={handleEdit}
           onDelete={handleDelete}
+        />
+        <Pagination
+          page={pagination.page}
+          pages={pagination.pages}
+          total={pagination.total}
+          onChange={setPage}
         />
 
         <RevenueModal

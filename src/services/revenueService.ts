@@ -20,7 +20,12 @@ export const getSalesByUser = (userId: string, month?: number, year?: number) =>
     },
   });
 
-export const searchSales = (params: any) =>
+export const searchSales =  (params: {
+  fromDate?: string;
+  toDate?: string;
+  page?: number;
+  limit?: number;
+})=>
   api.get("/sales-record/search", { params });
 
 export const getSalesRecordById = (id: string) => {

@@ -8,11 +8,11 @@ interface Props {
 }
 
 const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString("vi-VN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
+  if (!dateString) return "";
+
+  const [year, month, day] = dateString.substring(0, 10).split("-");
+
+  return `${day}/${month}/${year}`;
 };
 
 const formatMoney = (money: number) => {
@@ -25,12 +25,61 @@ const sourceTypeMap: Record<string, string> = {
   CTV_DaiLy: "CTV / Đại lý",
 };
 
+const productConfig: Record<
+  string,
+  {
+    icon: string;
+    className: string;
+  }
+> = {
+  "EasyHRM MASS": {
+    icon: "👨🏻‍💼",
+    className: "bg-blue-100 text-blue-700",
+  },
+
+  "EasyHRM PROJECT": {
+    icon: "🏢",
+    className: "bg-violet-100 text-violet-700",
+  },
+
+  EasyDocs: {
+    icon: "📄",
+    className: "bg-slate-100 text-slate-700",
+  },
+
+  "iCare DN": {
+    icon: "🏥",
+    className: "bg-green-100 text-green-700",
+  },
+
+  "iCare HKD": {
+    icon: "🩺",
+    className: "bg-orange-100 text-orange-700",
+  },
+};
+
+const sourceColor = (source: string) => {
+  switch (source) {
+    case "Marketing":
+      return "bg-blue-50 text-blue-700";
+
+    case "ChuDong":
+      return "bg-green-50 text-green-700";
+
+    case "CTV_DaiLy":
+      return "bg-orange-50 text-orange-700";
+
+    default:
+      return "bg-gray-100 text-gray-700";
+  }
+};
+
 export default function RevenueTable({ records, onEdit, onDelete }: Props) {
   return (
     <div className="overflow-hidden rounded-2xl border border-stroke bg-white dark:border-gray-700 dark:bg-gray-900">
       <div className="border-b border-stroke px-6 py-4 dark:border-gray-700">
-        <h3 className="font-semibold text-gray-900 dark:text-white">
-          Danh sách doanh thu
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+          📋 Danh sách doanh thu
         </h3>
       </div>
 
@@ -76,18 +125,50 @@ export default function RevenueTable({ records, onEdit, onDelete }: Props) {
             {records.map((item: any) => (
               <tr
                 key={item._id}
-                className="border-b border-gray-200 transition hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
+                className="border-b border-gray-200 transition hover:bg-brand-50 dark:border-gray-700 dark:hover:bg-brand-800"
               >
-                <td className="p-3 text-center text-gray-900 dark:text-gray-100">
-                  {item.userId?.fullName}
+                <td className="p-4">
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={
+                        item.userId?.avatarUrl ||
+                        "/images/user/default-avatar.png"
+                      }
+                      className="h-10 w-10 rounded-full object-cover"
+                    />
+
+                    <div>
+                      <p className="font-semibold text-gray-900 dark:text-white">
+                        {item.userId?.fullName}
+                      </p>
+
+                      <p className="text-xs text-gray-500">
+                        {item.userId?.email}
+                      </p>
+                    </div>
+                  </div>
                 </td>
 
-                <td className="p-3 text-center text-gray-900 dark:text-gray-100">
-                  {item.productType}
+                <td className="p-4 text-center">
+                  <span
+                    className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium ${
+                      productConfig[item.productType]?.className
+                    }`}
+                  >
+                    {productConfig[item.productType]?.icon}
+
+                    {item.productType}
+                  </span>
                 </td>
 
-                <td className="p-3 text-center text-gray-900 dark:text-gray-100">
-                  {sourceTypeMap[item.sourceType] || item.sourceType}
+                <td className="p-4 text-center">
+                  <span
+                    className={`rounded-full px-3 py-1 text-sm font-medium ${sourceColor(
+                      item.sourceType,
+                    )}`}
+                  >
+                    {sourceTypeMap[item.sourceType]}
+                  </span>
                 </td>
 
                 <td className="p-3 text-center text-gray-900 dark:text-gray-100">
@@ -98,8 +179,12 @@ export default function RevenueTable({ records, onEdit, onDelete }: Props) {
                   {item.productQuantity}
                 </td>
 
-                <td className="p-3 text-center font-semibold text-emerald-600 dark:text-emerald-400">
-                  {formatMoney(item.revenue)}
+                <td className="p-4">
+                  <div className="text-center">
+                    <p className="text-lg font-bold text-green-600">
+                      {formatMoney(item.revenue)}
+                    </p>
+                  </div>
                 </td>
 
                 <td className="p-3 text-center text-gray-500 dark:text-gray-400">

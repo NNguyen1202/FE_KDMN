@@ -21,6 +21,7 @@ import RevenueSummary from "./RevenueSummary";
 import { useModal } from "../../hooks/useModal";
 import RevenueModal from "./RevenueModal";
 import PageMeta from "../../components/common/PageMeta";
+import { formatLocalDate } from "../../utils/formatLocalDate";
 
 export default function RevenueDayDetail() {
   const { date } = useParams();
@@ -90,18 +91,18 @@ export default function RevenueDayDetail() {
     }
   };
 
- useEffect(() => {
-  const firstDay = currentDate.substring(0, 8) + "01";
+  useEffect(() => {
+    const firstDay = currentDate.substring(0, 8) + "01";
 
-  setFromDate(firstDay);
-  setToDate(currentDate);
+    setFromDate(firstDay);
+    setToDate(currentDate);
 
-  loadData();
-}, [date]);
+    loadData();
+  }, [date]);
 
-useEffect(() => {
-  loadRangeSummary();
-}, [fromDate, toDate]);
+  useEffect(() => {
+    loadRangeSummary();
+  }, [fromDate, toDate]);
 
   return (
     <>
@@ -156,25 +157,22 @@ dark:hover:bg-gray-700
           </h1>
         </div>
 
-        <div className="grid grid-cols-1 gap-5 xl:grid-cols-4">
-          <div
-            className="
-xl:col-span-3
-rounded-2xl
-border
-border-gray-200
-bg-white
-p-6
-shadow-sm
-dark:border-gray-700
-dark:bg-gray-900
-"
-          >
-            <h3 className="mb-5 text-lg font-semibold text-gray-900 dark:text-white">
-              Báo cáo khoảng thời gian
-            </h3>
+        <div className="grid grid-cols-1 gap-5 xl:grid-cols-5">
+          {/* Bộ lọc */}
+          <div className="xl:col-span-4 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+            <div className="mb-5 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  📅 Báo cáo khoảng thời gian
+                </h3>
 
-            <div className="flex flex-wrap items-end gap-4">
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                  Chọn khoảng thời gian để xem thống kê doanh thu
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
               <div>
                 <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Từ ngày
@@ -183,24 +181,10 @@ dark:bg-gray-900
                 <DatePicker
                   selected={fromDate ? new Date(fromDate) : null}
                   onChange={(date: Date | null) =>
-                    setFromDate(date?.toISOString().split("T")[0] || "")
+                    setFromDate(date ? formatLocalDate(date) : "")
                   }
                   dateFormat="dd/MM/yyyy"
-                  className="
-w-44
-rounded-lg
-border
-border-gray-300
-bg-white
-px-4
-py-2
-text-gray-900
-outline-none
-focus:border-brand-500
-dark:border-gray-600
-dark:bg-gray-800
-dark:text-white
-"
+                  className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                 />
               </div>
 
@@ -212,83 +196,37 @@ dark:text-white
                 <DatePicker
                   selected={toDate ? new Date(toDate) : null}
                   onChange={(date: Date | null) =>
-                    setToDate(date?.toISOString().split("T")[0] || "")
+                    setToDate(date ? formatLocalDate(date) : "")
                   }
                   dateFormat="dd/MM/yyyy"
-                  className="
-w-44
-rounded-lg
-border
-border-gray-300
-bg-white
-px-4
-py-2
-text-gray-900
-outline-none
-focus:border-brand-500
-dark:border-gray-600
-dark:bg-gray-800
-dark:text-white
-"
+                  className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                 />
               </div>
 
-              <button
-                onClick={loadRangeSummary}
-                className="
-rounded-lg
-bg-brand-500
-px-5
-py-2
-font-medium
-text-white
-transition
-hover:bg-brand-600
-"
-              >
-                Xem báo cáo
-              </button>
+              <div className="flex items-end">
+                <button
+                  onClick={loadRangeSummary}
+                  className="w-full rounded-lg bg-brand-500 px-5 py-2.5 font-medium text-white transition hover:bg-brand-600"
+                >
+                  📊 Xem báo cáo
+                </button>
+              </div>
             </div>
           </div>
 
-          <div className="
-flex
-items-center
-justify-center
-rounded-2xl
-border
-border-gray-200
-bg-white
-p-5
-shadow-sm
-dark:border-gray-700
-dark:bg-gray-900
-">
+          {/* Nút thêm */}
+          <div className="flex items-center justify-center rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
             <button
               onClick={() => {
                 setEditingRecord(null);
                 openModal();
               }}
-              className="
-flex
-items-center
-gap-2
-rounded-lg
-bg-brand-500
-px-6
-py-3
-font-medium
-text-white
-transition
-hover:bg-brand-600
-"
+              className="w-full rounded-xl bg-brand-500 px-6 py-3 font-semibold text-white transition hover:bg-brand-600"
             >
               + Thêm doanh thu
             </button>
           </div>
         </div>
-
-
 
         <div className="space-y-6">
           <RevenueSummary
