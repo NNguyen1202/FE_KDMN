@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 
-const items = ["🍂", "🍁", "✨", "🌸", "🥮", "⭐"];
+const items = ["🍺", "🍻", " 🍷", "🍂", "🍁", "✨", "🌸", "🥮", "⭐"];
 
 export default function FallingItems() {
   const [particles, setParticles] = useState<any[]>([]);

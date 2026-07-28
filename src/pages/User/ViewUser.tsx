@@ -33,6 +33,40 @@ export default function ViewUser() {
 
   const [salesRecords, setSalesRecords] = useState<any[]>([]);
 
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const loadCurrentUser = async () => {
+      try {
+        const currentUser = JSON.parse(localStorage.getItem("user") || "null");
+        console.log("Người dùng hiện tại: ", currentUser);
+
+        if (!currentUser?._id) return;
+
+        // Lấy user đầy đủ
+        const userRes = await getUserById(currentUser._id);
+        console.log("Người dùng lấy ID hiện tại: ", userRes);
+        const user = userRes.data.getUser;
+
+        if (!user?.roleID) return;
+
+        // Nếu roleID là ObjectId
+        const roleId =
+          typeof user.roleID === "string" ? user.roleID : user.roleID._id;
+
+        const roleRes = await getRoleById(roleId);
+
+        console.log("Lấy role người dùng: ", roleRes);
+
+        setIsAdmin(roleRes.data.roleName === "Admin");
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    loadCurrentUser();
+  }, []);
+
   useEffect(() => {
     if (id) {
       loadUser(id);
@@ -87,15 +121,19 @@ export default function ViewUser() {
   return (
     <div className="rounded-2xl border bg-white p-6 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
       <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Chi tiết User</h2>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Chi tiết User
+        </h2>
 
         <div className="flex gap-2">
-          <button
-            onClick={() => navigate(`/users/edit/${user._id}`)}
-            className="rounded-lg bg-amber-500 px-4 py-2 text-white"
-          >
-            Sửa User
-          </button>
+          {isAdmin && (
+            <button
+              onClick={() => navigate(`/users/edit/${user._id}`)}
+              className="rounded-lg bg-amber-500 px-4 py-2 text-white"
+            >
+              Sửa User
+            </button>
+          )}
 
           <button
             onClick={() => navigate("/users")}
@@ -116,7 +154,9 @@ export default function ViewUser() {
             />
 
             <div className="flex-1">
-              <h3 className="text-3xl font-bold text-gray-900 dark:text-white">{user.fullName}</h3>
+              <h3 className="text-3xl font-bold text-gray-900 dark:text-white">
+                {user.fullName}
+              </h3>
 
               <p className="mt-1 text-gray-500 dark:text-gray-400">
                 {roleName || "Chưa có vai trò"}
@@ -160,37 +200,63 @@ export default function ViewUser() {
         </div>
         <div className="md:col-span-2">
           <div className="rounded-2xl border border-gray-200 p-6 dark:border-gray-700">
-            <h4 className="mb-5 text-lg font-semibold text-gray-900 dark:text-white">Thông tin cá nhân</h4>
+            <h4 className="mb-5 text-lg font-semibold text-gray-900 dark:text-white">
+              Thông tin cá nhân
+            </h4>
 
             <div className="grid gap-6 md:grid-cols-2">
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Họ tên</p>
-                <p className="font-medium text-gray-900 dark:text-white">{user.fullName}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Họ tên
+                </p>
+                <p className="font-medium text-gray-900 dark:text-white">
+                  {user.fullName}
+                </p>
               </div>
 
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Email</p>
-                <p className="font-medium text-gray-900 dark:text-white">{user.email}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Email
+                </p>
+                <p className="font-medium text-gray-900 dark:text-white">
+                  {user.email}
+                </p>
               </div>
 
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Số điện thoại</p>
-                <p className="font-medium text-gray-900 dark:text-white">{user.phone}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Số điện thoại
+                </p>
+                <p className="font-medium text-gray-900 dark:text-white">
+                  {user.phone}
+                </p>
               </div>
 
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Ngày sinh</p>
-                <p className="font-medium text-gray-900 dark:text-white">{user.doB}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Ngày sinh
+                </p>
+                <p className="font-medium text-gray-900 dark:text-white">
+                  {user.doB}
+                </p>
               </div>
 
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Vai trò</p>
-                <p className="font-medium text-gray-900 dark:text-white">{roleName}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Vai trò
+                </p>
+                <p className="font-medium text-gray-900 dark:text-white">
+                  {roleName}
+                </p>
               </div>
 
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Ngày tạo</p>
-                <p className="font-medium text-gray-900 dark:text-white">{user.createdAt}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Ngày tạo
+                </p>
+                <p className="font-medium text-gray-900 dark:text-white">
+                  {user.createdAt}
+                </p>
               </div>
             </div>
           </div>
@@ -198,7 +264,9 @@ export default function ViewUser() {
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
               <div className="flex items-end gap-3">
                 <div>
-                  <label className="mb-1 block text-sm text-gray-700 dark:text-gray-300">Tháng</label>
+                  <label className="mb-1 block text-sm text-gray-700 dark:text-gray-300">
+                    Tháng
+                  </label>
 
                   <select
                     value={month}
@@ -214,7 +282,9 @@ export default function ViewUser() {
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-sm text-gray-700 dark:text-gray-300">Năm</label>
+                  <label className="mb-1 block text-sm text-gray-700 dark:text-gray-300">
+                    Năm
+                  </label>
 
                   <select
                     value={year}
@@ -229,7 +299,9 @@ export default function ViewUser() {
               </div>
 
               <div className="mt-5 rounded-2xl border border-green-200 bg-green-50 p-5 dark:border-green-800 dark:bg-green-950/30">
-                <p className="text-sm text-gray-500 dark:text-gray-400">Tổng doanh thu</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Tổng doanh thu
+                </p>
 
                 <h2 className="mt-2 text-3xl font-bold text-green-600 whitespace-nowrap">
                   {(summary?.totalRevenue ?? 0).toLocaleString("vi-VN")} đ
@@ -237,7 +309,9 @@ export default function ViewUser() {
               </div>
 
               <div className="mt-5 rounded-2xl border border-blue-200 bg-blue-50 p-5 dark:border-blue-800 dark:bg-blue-950/30">
-                <p className="text-sm text-gray-500 dark:text-gray-400">Tổng giao dịch</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Tổng giao dịch
+                </p>
 
                 <h2 className="mt-2 text-3xl font-bold text-blue-600">
                   {summary?.totalRecords ?? 0}
@@ -245,7 +319,9 @@ export default function ViewUser() {
               </div>
 
               <div className="mt-5 rounded-2xl border border-purple-200 bg-purple-50 p-5 dark:border-purple-800 dark:bg-purple-950/30">
-                <p className="text-sm text-gray-500 dark:text-gray-400">Trạng thái</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Trạng thái
+                </p>
 
                 <h2 className="mt-2 text-3xl font-bold text-purple-600">
                   {user.isActive ? "Active" : "Inactive"}
@@ -260,8 +336,13 @@ export default function ViewUser() {
 
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                 {(products ?? []).map((item: any) => (
-                  <div key={item._id} className="rounded-xl border border-gray-200 p-4 dark:border-gray-700 dark:bg-gray-800">
-                    <p className="font-semibold text-gray-900 dark:text-white">{item._id}</p>
+                  <div
+                    key={item._id}
+                    className="rounded-xl border border-gray-200 p-4 dark:border-gray-700 dark:bg-gray-800"
+                  >
+                    <p className="font-semibold text-gray-900 dark:text-white">
+                      {item._id}
+                    </p>
 
                     <p className="mt-3 text-2xl font-bold text-green-600">
                       {item.revenue.toLocaleString("vi-VN")} đ

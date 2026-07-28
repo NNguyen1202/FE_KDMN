@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { FiEdit2, FiTrash2 } from "react-icons/fi";
+import { FiEdit2, FiEye, FiTrash2 } from "react-icons/fi";
 
 interface Props {
   records: any[];
+  onView: (record: any) => void;
   onEdit: (record: any) => void;
   onDelete: (id: string) => void;
 }
@@ -74,7 +75,12 @@ const sourceColor = (source: string) => {
   }
 };
 
-export default function RevenueTable({ records, onEdit, onDelete }: Props) {
+export default function RevenueTable({
+  records,
+  onView,
+  onEdit,
+  onDelete,
+}: Props) {
   return (
     <div className="overflow-hidden rounded-2xl border border-stroke bg-white dark:border-gray-700 dark:bg-gray-900">
       <div className="border-b border-stroke px-6 py-4 dark:border-gray-700">
@@ -193,6 +199,25 @@ export default function RevenueTable({ records, onEdit, onDelete }: Props) {
 
                 <td className="p-3">
                   <div className="flex items-center justify-center gap-2">
+                    <button
+                      onClick={() => onView(item)}
+                      className="
+                        rounded-lg
+                        border
+                        border-emerald-200
+                        p-2
+                        text-emerald-600
+                        hover:bg-emerald-50
+
+                        dark:border-emerald-900
+                        dark:text-emerald-400
+                        dark:hover:bg-emerald-950
+                        "
+                      title="Xem chi tiết"
+                    >
+                      <FiEye size={16} />
+                    </button>
+
                     <button
                       onClick={() => onEdit(item)}
                       className="
