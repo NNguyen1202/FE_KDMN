@@ -32,6 +32,8 @@ import NotificationPage from "./pages/Notification";
 import EmployeeTargetPage from "./pages/EmployeeTarget";
 //import SakuraParticles from "./components/common/SakuraParticles";
 import MoonFestivalDecoration from "./components/common/MoonFestivalDecoration";
+import RevenueViewDetail from "./pages/Revenue/RevenueViewDetail";
+import RevenueListView from "./pages/Revenue/RevenueListView";
 
 export default function App() {
    console.log("APP RENDER");
@@ -82,10 +84,28 @@ export default function App() {
             />
 
             <Route
+              path="/revenue-report-list"
+              element={
+                <ProtectedRoute>
+                  <RevenueListView />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
               path="/revenue-report/day/:date"
               element={
                 <ProtectedRoute>
                   <RevenueDayDetail />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/sales-record/:id"
+              element={
+                <ProtectedRoute>
+                  <RevenueViewDetail />
                 </ProtectedRoute>
               }
             />

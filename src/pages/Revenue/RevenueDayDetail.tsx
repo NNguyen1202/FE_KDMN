@@ -72,6 +72,10 @@ export default function RevenueDayDetail() {
     setRangeSummary(res.data.data);
   };
 
+  const handleView = (record: any) => {
+    navigate(`/sales-record/${record._id}`);
+  };
+
   const handleEdit = (record: any) => {
     setEditingRecord(record);
     openModal();
@@ -238,6 +242,7 @@ dark:hover:bg-gray-700
           {rangeSummary && <RevenueRangeSummary data={rangeSummary} />}
           <RevenueTable
             records={records}
+            onView={handleView}
             onEdit={handleEdit}
             onDelete={handleDelete}
           />

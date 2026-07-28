@@ -16,6 +16,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import PageMeta from "../../components/common/PageMeta";
 import { formatLocalDate } from "../../utils/formatLocalDate";
 import Pagination from "../../components/common/Pagination";
+import { useNavigate } from "react-router";
 
 export default function RevenueListView() {
   const [records, setRecords] = useState<any[]>([]);
@@ -35,6 +36,8 @@ export default function RevenueListView() {
   const [fromDate, setFromDate] = useState(firstDay);
 
   const [toDate, setToDate] = useState(lastDay);
+
+  const navigate = useNavigate();
 
   const [page, setPage] = useState(1);
 
@@ -68,6 +71,10 @@ export default function RevenueListView() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  const handleView = (record: any) => {
+    navigate(`/sales-record/${record._id}`);
+  };
 
   const handleEdit = (record: any) => {
     setEditingRecord(record);
@@ -232,6 +239,7 @@ dark:hover:bg-gray-800
         {/* Table */}
         <RevenueTable
           records={records}
+          onView={handleView}
           onEdit={handleEdit}
           onDelete={handleDelete}
         />

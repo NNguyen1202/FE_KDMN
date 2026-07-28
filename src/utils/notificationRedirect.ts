@@ -4,7 +4,7 @@ export const getNotificationLink = (
 ) => {
   switch (referenceModel) {
     case "User":
-      return `/user/view/${referenceId}`;
+      return `/users/view/${referenceId}`;
 
     case "Role":
       return `/role/view/${referenceId}`;
