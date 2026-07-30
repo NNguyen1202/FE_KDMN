@@ -19,3 +19,16 @@ export const getRoleById = (id: string) => api.get(`/role/${id}`);
 
 export const updateSettings = (data: { moonFestivalEffect: boolean }) =>
   api.put("/user/settings", data);
+
+export const updateOpeningRevenue = (
+  id: string,
+  openingRevenue2026: number,
+) => {
+  return api.put(`/user/opening-revenue/${id}`, {
+    openingRevenue2026,
+  });
+};
+
+export const getYearRevenueByUser = (userId: string, year: number) => {
+  return api.get(`/sales-record/dashboard/year-summary/${userId}?year=${year}`);
+};

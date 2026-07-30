@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
+
 import { useNavigate, useParams } from "react-router";
 
 import { getUserById } from "../../services/userService";
@@ -10,7 +11,12 @@ import { getUserDashboard } from "../../services/dashboardService";
 import { getRoleById } from "../../services/userService";
 
 import { getRoleDisplayName } from "../../utils/role";
+
 import { getSalesByUser } from "../../services/revenueService";
+
+import { useModal } from "../../hooks/useModal";
+import OpeningRevenueModal from "../../components/user/OpeningRevenueModal";
+import { getYearRevenueByUser } from "../../services/userService";
 
 export default function ViewUser() {
   const { id } = useParams();
@@ -34,6 +40,14 @@ export default function ViewUser() {
   const [salesRecords, setSalesRecords] = useState<any[]>([]);
 
   const [isAdmin, setIsAdmin] = useState(false);
+
+  const {
+    isOpen: isOpeningRevenueOpen,
+    openModal: openOpeningRevenue,
+    closeModal: closeOpeningRevenue,
+  } = useModal();
+
+  const [yearRevenue, setYearRevenue] = useState<any>(null);
 
   useEffect(() => {
     const loadCurrentUser = async () => {
@@ -108,11 +122,67 @@ export default function ViewUser() {
     }
   };
 
+  useEffect(() => {
+    loadYearRevenue();
+  }, []);
+
+  const loadYearRevenue = async () => {
+    try {
+      const year = new Date().getFullYear();
+
+      const res = await getYearRevenueByUser(id!, year);
+
+      setYearRevenue(res.data.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const sourceTypeMap: Record<string, string> = {
     Marketing: "Marketing",
     ChuDong: "Chủ động",
     CTV_DaiLy: "CTV / Đại lý",
   };
+
+  const revenueColor = {
+    blue: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
+
+    orange:
+      "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300",
+
+    green:
+      "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
+  };
+
+  function RevenueItem({
+    title,
+    value,
+    color,
+    large,
+  }: {
+    title: string;
+    value: number;
+    color: keyof typeof revenueColor;
+    large?: boolean;
+  }) {
+    return (
+      <div className="rounded-xl border border-stroke p-5 dark:border-gray-700">
+        <div
+          className={`inline-flex rounded-lg px-3 py-1 text-sm font-medium ${revenueColor[color]}`}
+        >
+          {title}
+        </div>
+
+        <div
+          className={`mt-4 font-bold text-gray-900 dark:text-white ${
+            large ? "text-4xl" : "text-3xl"
+          }`}
+        >
+          {(value || 0).toLocaleString("vi-VN")} ₫
+        </div>
+      </div>
+    );
+  }
 
   if (!user) {
     return <div className="p-5">Đang tải...</div>;
@@ -124,6 +194,22 @@ export default function ViewUser() {
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
           Chi tiết User
         </h2>
+
+        <button
+          onClick={openOpeningRevenue}
+          className="
+            rounded-xl
+            bg-green-600
+            px-5
+            py-2.5
+            font-medium
+            text-white
+            transition
+            hover:bg-green-700
+            "
+        >
+          💰 Doanh thu đầu kỳ
+        </button>
 
         <div className="flex gap-2">
           {isAdmin && (
@@ -260,6 +346,59 @@ export default function ViewUser() {
               </div>
             </div>
           </div>
+
+          <div className="grid gap-6 xl:grid-cols-3">
+            {/* Doanh thu năm */}
+            <div className="xl:col-span-2 rounded-2xl border border-stroke bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                    Doanh thu năm {yearRevenue?.year}
+                  </h3>
+
+                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    Bao gồm doanh thu đầu kỳ và doanh thu phát sinh trên hệ
+                    thống
+                  </p>
+                </div>
+
+                <button
+                  onClick={openOpeningRevenue}
+                  className="rounded-xl bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600"
+                >
+                  Cập nhật
+                </button>
+              </div>
+
+              <div className="mt-7 grid gap-5 md:grid-cols-3">
+                <RevenueItem
+                  title="Đầu kỳ"
+                  value={yearRevenue?.openingRevenue || 0}
+                  color="blue"
+                />
+
+                <RevenueItem
+                  title="Hệ thống"
+                  value={yearRevenue?.systemRevenue || 0}
+                  color="orange"
+                />
+
+                <RevenueItem
+                  title="Tổng năm"
+                  value={yearRevenue?.totalRevenue || 0}
+                  color="green"
+                  large
+                />
+              </div>
+            </div>
+
+            {/* KPI */}
+            <YearProgressCard
+              totalRevenue={yearRevenue?.totalRevenue || 0}
+              targetRevenue={yearRevenue?.targetRevenue || 0}
+            />
+          </div>
+
           <div className="space-y-6">
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
               <div className="flex items-end gap-3">
@@ -427,6 +566,122 @@ export default function ViewUser() {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+      <OpeningRevenueModal
+        isOpen={isOpeningRevenueOpen}
+        closeModal={closeOpeningRevenue}
+        user={user}
+        onSuccess={() => {
+          loadYearRevenue();
+        }}
+      />
+    </div>
+  );
+}
+
+function YearProgressCard({
+  totalRevenue,
+  targetRevenue,
+}: {
+  totalRevenue: number;
+  targetRevenue: number;
+}) {
+  const percent = targetRevenue > 0 ? (totalRevenue / targetRevenue) * 100 : 0;
+
+  const displayPercent = Math.min(percent, 100);
+
+  const isExceeded = percent > 100;
+
+  return (
+    <div className="rounded-2xl border border-stroke bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white">
+            Tiến độ KPI năm
+          </h3>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Theo chỉ tiêu doanh thu
+          </p>
+        </div>
+
+        <div
+          className={`rounded-full px-3 py-1 text-sm font-semibold ${
+            isExceeded
+              ? "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300"
+              : percent >= 80
+              ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
+              : percent >= 50
+              ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300"
+              : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300"
+          }`}
+        >
+          {percent.toFixed(1)}%
+        </div>
+      </div>
+
+      <div className="mt-8">
+        <div className="mb-2 flex justify-between text-sm">
+          <span className="text-gray-500 dark:text-gray-400">Tiến độ</span>
+
+          <span className="font-medium text-gray-900 dark:text-white">
+            {totalRevenue.toLocaleString("vi-VN")} ₫
+          </span>
+        </div>
+
+        <div className="h-4 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+          <div
+            className={`h-full rounded-full transition-all duration-700 ${
+              isExceeded
+                ? "bg-violet-500"
+                : percent >= 80
+                ? "bg-green-500"
+                : percent >= 50
+                ? "bg-yellow-500"
+                : "bg-red-500"
+            }`}
+            style={{
+              width: `${displayPercent}%`,
+            }}
+          />
+        </div>
+
+        <div className="mt-5 space-y-2 text-sm">
+          <div className="flex justify-between">
+            <span className="text-gray-500 dark:text-gray-400">
+              Mục tiêu năm
+            </span>
+
+            <span className="font-semibold text-gray-900 dark:text-white">
+              {targetRevenue.toLocaleString("vi-VN")} ₫
+            </span>
+          </div>
+
+          <div className="flex justify-between">
+            <span className="text-gray-500 dark:text-gray-400">Đã đạt</span>
+
+            <span className="font-semibold text-green-600">
+              {totalRevenue.toLocaleString("vi-VN")} ₫
+            </span>
+          </div>
+
+          <div className="flex justify-between">
+            <span className="text-gray-500 dark:text-gray-400">Còn lại</span>
+
+            <span className="font-semibold text-orange-500">
+              {Math.max(targetRevenue - totalRevenue, 0).toLocaleString(
+                "vi-VN",
+              )}{" "}
+              ₫
+            </span>
+          </div>
+
+          {isExceeded && (
+            <div className="mt-5 rounded-xl bg-violet-100 p-3 text-center font-semibold text-violet-700 dark:bg-violet-900/30 dark:text-violet-300">
+              🎉 Đã vượt KPI {(percent - 100).toFixed(1)}%
+            </div>
+          )}
         </div>
       </div>
     </div>
