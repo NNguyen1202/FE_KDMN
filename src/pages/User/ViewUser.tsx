@@ -18,6 +18,13 @@ import { useModal } from "../../hooks/useModal";
 import OpeningRevenueModal from "../../components/user/OpeningRevenueModal";
 import { getYearRevenueByUser } from "../../services/userService";
 
+import {
+  getEmployeeTargetYearByUser,
+} from "../../services/employeeTargetYearService";
+
+import EmployeeTargetYearForm from "../../components/employeeTargetYear/EmployeeTargetYearForm";
+import { Modal } from "../../components/ui/modal";
+
 export default function ViewUser() {
   const { id } = useParams();
 
@@ -40,6 +47,14 @@ export default function ViewUser() {
   const [salesRecords, setSalesRecords] = useState<any[]>([]);
 
   const [isAdmin, setIsAdmin] = useState(false);
+
+  const {
+    isOpen: isTargetYearOpen,
+    openModal: openTargetYear,
+    closeModal: closeTargetYear,
+  } = useModal();
+
+  const [targetYear, setTargetYear] = useState<any>(null);
 
   const {
     isOpen: isOpeningRevenueOpen,
@@ -124,7 +139,8 @@ export default function ViewUser() {
 
   useEffect(() => {
     loadYearRevenue();
-  }, []);
+    loadTargetYear();
+  }, [id, year]);
 
   const loadYearRevenue = async () => {
     try {
@@ -135,6 +151,17 @@ export default function ViewUser() {
       setYearRevenue(res.data.data);
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const loadTargetYear = async () => {
+    try {
+      const res = await getEmployeeTargetYearByUser(id!, year);
+
+      setTargetYear(res.data.data);
+    } catch (err) {
+      console.error(err);
+      setTargetYear(null);
     }
   };
 
@@ -393,10 +420,19 @@ export default function ViewUser() {
             </div>
 
             {/* KPI */}
-            <YearProgressCard
-              totalRevenue={yearRevenue?.totalRevenue || 0}
-              targetRevenue={yearRevenue?.targetRevenue || 0}
-            />
+            <div className="space-y-4">
+              <YearProgressCard
+                totalRevenue={yearRevenue?.totalRevenue || 0}
+                targetRevenue={targetYear?.targetRevenue || 0}
+              />
+
+              <button
+                onClick={openTargetYear}
+                className="w-full rounded-xl bg-brand-500 py-2 font-medium text-white"
+              >
+                {targetYear ? "Cập nhật KPI năm" : "Nhập KPI năm"}
+              </button>
+            </div>
           </div>
 
           <div className="space-y-6">
@@ -576,6 +612,25 @@ export default function ViewUser() {
           loadYearRevenue();
         }}
       />
+
+      <Modal
+        isOpen={isTargetYearOpen}
+        onClose={closeTargetYear}
+        className="max-w-xl"
+      >
+        <div className="p-6">
+          <h2 className="mb-5 text-xl font-bold">KPI doanh thu năm</h2>
+
+          <EmployeeTargetYearForm
+            userId={user._id}
+            record={targetYear}
+            onSuccess={() => {
+              closeTargetYear();
+              loadTargetYear();
+            }}
+          />
+        </div>
+      </Modal>
     </div>
   );
 }

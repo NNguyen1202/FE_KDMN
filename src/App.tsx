@@ -30,13 +30,14 @@ import RevenueDayDetail from "./pages/Revenue/RevenueDayDetail";
 import BhxhPage from "./pages/BHXH/index";
 import NotificationPage from "./pages/Notification";
 import EmployeeTargetPage from "./pages/EmployeeTarget";
+import EmployeeTargetYearPage from "./pages/EmployeeTargetYear";
 //import SakuraParticles from "./components/common/SakuraParticles";
 import MoonFestivalDecoration from "./components/common/MoonFestivalDecoration";
 import RevenueViewDetail from "./pages/Revenue/RevenueViewDetail";
 import RevenueListView from "./pages/Revenue/RevenueListView";
 
 export default function App() {
-   console.log("APP RENDER");
+  console.log("APP RENDER");
   return (
     <>
       <Router>
@@ -73,6 +74,11 @@ export default function App() {
             <Route path="/notifications" element={<NotificationPage />} />
 
             <Route path="/employee-target" element={<EmployeeTargetPage />} />
+
+            <Route
+              path="/employee-target-year"
+              element={<EmployeeTargetYearPage />}
+            />
 
             <Route
               path="/revenue-report"
