@@ -68,8 +68,13 @@ const navItems: NavItem[] = [
   },
   {
     icon: <TargetIcon />,
-    name: "Doanh thu dự kiến",
+    name: "Doanh thu dự kiến theo tháng",
     path: "/employee-target",
+  },
+  {
+    icon: <TargetIcon />,
+    name: "Doanh thu dự kiến theo năm",
+    path: "/employee-target-year",
   },
   // {
   //   name: "Forms",
