@@ -159,7 +159,7 @@ dark:text-gray-100
           </div>
         </div>
 
-        <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-5">
           {[...(yearRevenue.products || [])]
             .sort((a: any, b: any) => b.revenue - a.revenue)
             .map((item: any) => (
@@ -180,28 +180,38 @@ dark:border-gray-700
 dark:bg-gray-900
 "
               >
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  {item._id}
-                </h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+                    {item._id}
+                  </h3>
 
-                <div className="mt-6">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Tổng khách hàng
-                  </p>
-
-                  <p className="text-3xl font-bold text-gray-800 dark:text-white">
-                    {item.customers}
-                  </p>
+                  <div className="rounded-full bg-brand-100 dark:bg-brand-900/30 px-3 py-1 text-xs font-semibold text-brand-600 dark:text-brand-300">
+                    🖤
+                  </div>
                 </div>
 
-                <div className="mt-6">
-                  <p className="text-sm text-green-600 dark:text-green-400">
-                    Doanh thu
-                  </p>
+                <div className="mt-6 flex items-center justify-between">
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-gray-400">
+                      Khách hàng
+                    </p>
 
-                  <p className="text-xl font-bold text-green-600">
-                    {formatCurrency(item.revenue)}
-                  </p>
+                    <p className="mt-1 text-3xl font-bold text-gray-800 dark:text-white">
+                      {item.customers}
+                    </p>
+                  </div>
+
+                  <div className="h-10 w-px bg-gray-200 dark:bg-gray-700" />
+
+                  <div className="text-right">
+                    <p className="text-xs uppercase tracking-wide text-gray-400">
+                      Doanh thu
+                    </p>
+
+                    <p className="mt-1 text-lg font-bold text-green-600">
+                      {formatCurrency(item.revenue)}
+                    </p>
+                  </div>
                 </div>
               </div>
             ))}
@@ -394,7 +404,9 @@ dark:border-gray-700
 dark:bg-gray-900
 "
         >
-          <p className="text-gray-500 dark:text-gray-400">Còn thiếu để đạt mục tiêu</p>
+          <p className="text-gray-500 dark:text-gray-400">
+            Còn thiếu để đạt mục tiêu
+          </p>
 
           <h2 className="mt-3 text-4xl font-bold text-red-500 dark:text-red-400">
             {formatCurrency(remainingRevenue)}
@@ -420,7 +432,9 @@ dark:border-gray-700
 dark:bg-gray-900
 "
         >
-          <p className="text-gray-500 dark:text-gray-400">Doanh thu năm hiện tại</p>
+          <p className="text-gray-500 dark:text-gray-400">
+            Doanh thu năm hiện tại
+          </p>
 
           <h2 className="mt-3 text-4xl font-bold text-green-600 dark:text-green-400">
             {formatCurrency(currentRevenue)}

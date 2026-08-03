@@ -1,22 +1,46 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useDashboard } from "../../context/DashboardContext";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import EmployeeTargetModal from "../employeeTarget/EmployeeTargetModal";
 import {} from "lucide-react";
 
-export default function TopEmployeesTable() {
-  const { dashboard } = useDashboard();
+import { getEmployeeTargets } from "../../services/employeeTargetService";
 
+export default function TopEmployeesTable() {
   const [openTargetModal, setOpenTargetModal] = useState(false);
 
-  const employees = dashboard?.employeeRevenue || [];
+  const { dashboard, month, year } = useDashboard();
+
+    const employees = dashboard?.employeeRevenue || [];
+
+  const [totalTargetRevenue, setTotalTargetRevenue] = useState(0);
+
+  useEffect(() => {
+    loadTargetRevenue();
+  }, [month, year]);
+
+  const loadTargetRevenue = async () => {
+    try {
+      const res = await getEmployeeTargets(month, year);
+
+      const total = (res.data.data || []).reduce(
+        (sum: number, item: any) => sum + Number(item.targetRevenue || 0),
+        0,
+      );
+
+      setTotalTargetRevenue(total);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   // Tổng KPI của tất cả nhân viên
-  const totalTargetRevenue = employees.reduce(
-    (sum: number, item: any) => sum + (item.targetRevenue || 0),
-    0,
-  );
+  // const totalTargetRevenue = employees.reduce(
+  //   (sum: number, item: any) => sum + (item.targetRevenue || 0),
+  //   0,
+  // );
 
   // Tổng doanh thu thực tế
   const totalRevenue = employees.reduce(

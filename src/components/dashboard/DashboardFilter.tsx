@@ -276,7 +276,7 @@ dark:bg-brand-600
           </div>
         </div>
 
-        <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-5">
           {[...(monthlyRevenue.products || [])]
             .sort((a: any, b: any) => b.revenue - a.revenue)
             .map((item: any) => (
