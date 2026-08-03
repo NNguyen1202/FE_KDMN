@@ -16,6 +16,11 @@ export default function EmployeeTargetYearTable() {
 
   const [year, setYear] = useState(new Date().getFullYear());
 
+  const totalTargetRevenue = data.reduce(
+    (sum, item) => sum + Number(item.targetRevenue || 0),
+    0,
+  );
+
   const loadData = useCallback(async () => {
     setLoading(true);
 
@@ -69,6 +74,24 @@ export default function EmployeeTargetYearTable() {
             >
               + Thêm
             </button>
+          </div>
+        </div>
+
+        <div className="m-5 rounded-2xl border border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 p-6 shadow-sm dark:border-green-800 dark:from-green-950/30 dark:to-emerald-950/30">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Tổng doanh thu dự kiến năm {year}
+              </p>
+
+              <h2 className="mt-2 text-3xl font-bold text-green-600 dark:text-green-400">
+                {totalTargetRevenue.toLocaleString("vi-VN")} ₫
+              </h2>
+            </div>
+
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-green-500 text-2xl text-white">
+              💰
+            </div>
           </div>
         </div>
 
