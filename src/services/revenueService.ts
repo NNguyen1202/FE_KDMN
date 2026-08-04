@@ -42,6 +42,20 @@ export const getRevenueByDay = (date: string) => {
 export const getRangeSummary = (from: string, to: string) =>
   api.get(`/sales-record/range-summary?from=${from}&to=${to}`);
 
+export interface RevenueSearchParams {
+  from: string;
+  to: string;
+  userId?: string;
+  productType?: string;
+  sourceType?: string;
+}
+
+export const searchRevenueByPeriod = (params: RevenueSearchParams) => {
+  return api.get("/sales-record/search-period", {
+    params,
+  });
+};
+
 export const getDashboardRevenue = () => api.get("/sales-record/dashboard");
 
 export const updateRevenue = (id: string, data: any) =>

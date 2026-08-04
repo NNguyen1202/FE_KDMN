@@ -10,7 +10,13 @@ import {
   TableIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
-import { BellIcon, TargetIcon, UserCircle2Icon, UserCog2Icon } from "lucide-react";
+import {
+  BellIcon,
+  LucideSearchCheck,
+  TargetIcon,
+  UserCircle2Icon,
+  UserCog2Icon,
+} from "lucide-react";
 
 type NavItem = {
   name: string;
@@ -67,14 +73,17 @@ const navItems: NavItem[] = [
     path: "/notifications",
   },
   {
-    icon: <TargetIcon />,
-    name: "Doanh thu dự kiến theo tháng",
-    path: "/employee-target",
+    icon: <LucideSearchCheck />,
+    name: "Tra cứu hoa hồng kỳ lương",
+    path: "/revenue/search",
   },
   {
+    name: "Doanh thu dự kiến",
     icon: <TargetIcon />,
-    name: "Doanh thu dự kiến theo năm",
-    path: "/employee-target-year",
+    subItems: [
+      { name: "Theo tháng", path: "/employee-target", pro: false },
+      { name: "Theo năm", path: "/employee-target-year", pro: false },
+    ],
   },
   // {
   //   name: "Forms",
