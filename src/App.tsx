@@ -35,6 +35,7 @@ import EmployeeTargetYearPage from "./pages/EmployeeTargetYear";
 import MoonFestivalDecoration from "./components/common/MoonFestivalDecoration";
 import RevenueViewDetail from "./pages/Revenue/RevenueViewDetail";
 import RevenueListView from "./pages/Revenue/RevenueListView";
+import RevenueSearchPage from "./pages/Revenue/RevenueSearchPage";
 
 export default function App() {
   console.log("APP RENDER");
@@ -79,6 +80,8 @@ export default function App() {
               path="/employee-target-year"
               element={<EmployeeTargetYearPage />}
             />
+
+            <Route path="/revenue/search" element={<RevenueSearchPage />} />
 
             <Route
               path="/revenue-report"
