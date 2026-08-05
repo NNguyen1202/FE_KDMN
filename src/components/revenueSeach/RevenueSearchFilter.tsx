@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { getUsers } from "../../services/userService";
 import { getPayrollMonths } from "../../utils/revenuePeriod";
+import { X } from "lucide-react";
 
 interface Props {
   filters: any;
@@ -25,6 +26,7 @@ export default function RevenueSearchFilter({
   const [showUserDropdown, setShowUserDropdown] = useState(false);
 
   const [searchUser, setSearchUser] = useState("");
+  const [selectedUserName, setSelectedUserName] = useState("");
   const userDropdownRef = useRef<HTMLDivElement>(null);
 
   const inputClass = `w-full h-11 rounded-xl border border-gray-300 bg-white px-3 text-sm text-gray-800 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white `;
@@ -154,22 +156,20 @@ relative
           >
             <input
               type="text"
-              value={
-                searchUser ||
-                users.find((u) => u._id === filters.userId)?.fullName ||
-                ""
-              }
-              onFocus={() => setShowUserDropdown(true)}
+              value={searchUser || selectedUserName}
+              onFocus={() => {
+                setSearchUser("");
+                setShowUserDropdown(true);
+              }}
               onChange={(e) => {
                 setSearchUser(e.target.value);
-
                 setShowUserDropdown(true);
               }}
               placeholder="Tìm nhân viên..."
               className={inputClass}
             />
 
-            {filters.userId && !searchUser && (
+            {filters.userId && selectedUserName && !searchUser && (
               <img
                 src={
                   users.find((u) => u._id === filters.userId)?.avatarUrl ||
@@ -187,6 +187,24 @@ object-cover
 "
               />
             )}
+            <button
+              type="button"
+              onClick={() => {
+                update("userId", "");
+                setSelectedUserName("");
+                setSearchUser("");
+              }}
+              className="
+absolute
+right-10
+top-1/2
+-translate-y-1/2
+text-gray-400
+hover:text-red-500
+"
+            >
+              <X size={16} />
+            </button>
           </div>
 
           {showUserDropdown && (
@@ -208,13 +226,11 @@ overflow-y-auto
             >
               <div
                 onClick={() => {
-                  setFilters((prev: any) => ({
-                    ...prev,
-
-                    userId: "",
-                  }));
+                  update("userId", "");
 
                   setSearchUser("");
+
+                  setSelectedUserName("");
 
                   setShowUserDropdown(false);
                 }}
@@ -233,13 +249,11 @@ dark:hover:bg-gray-800
                 <div
                   key={user._id}
                   onClick={() => {
-                    setFilters((prev: any) => ({
-                      ...prev,
+                    update("userId", user._id);
 
-                      userId: user._id,
-                    }));
+                    setSelectedUserName(user.fullName);
 
-                    setSearchUser(user.fullName);
+                    setSearchUser("");
 
                     setShowUserDropdown(false);
                   }}
