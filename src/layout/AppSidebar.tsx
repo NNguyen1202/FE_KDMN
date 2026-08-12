@@ -12,6 +12,7 @@ import {
 import { useSidebar } from "../context/SidebarContext";
 import {
   BellIcon,
+  FileText,
   LucideSearchCheck,
   TargetIcon,
   UserCircle2Icon,
@@ -66,6 +67,12 @@ const navItems: NavItem[] = [
     icon: <UserCircle2Icon />,
     name: "User Profile",
     path: "/profile",
+  },
+
+  {
+    name: "Báo giá",
+    path: "/quotation",
+    icon: <FileText className="h-5 w-5" />,
   },
   {
     icon: <BellIcon />,
