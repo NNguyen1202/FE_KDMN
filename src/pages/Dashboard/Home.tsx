@@ -10,6 +10,7 @@ import {
   useDashboard,
 } from "../../context/DashboardContext";
 import PageMeta from "../../components/common/PageMeta";
+import DashboardNavigator from "./DashboardNavigator";
 
 function DashboardContent() {
   const { month, year, setMonth, setYear, monthlyRevenue } = useDashboard();
@@ -17,7 +18,10 @@ function DashboardContent() {
   return (
     <>
       <PageMeta title="Dashboard" description="KDMN | Dashboard" />
-      <div className="space-y-8">
+
+      <DashboardNavigator />
+
+      <div id="dashboard-filter" className="space-y-8">
         {/* ================= THÁNG ================= */}
 
         <DashboardFilter
@@ -29,13 +33,14 @@ function DashboardContent() {
         />
 
         {/* ================= NĂM + KPI ================= */}
-
-        <RevenueCards />
+        <div id="revenue-cards">
+          <RevenueCards />
+        </div>
 
         {/* ================= BIỂU ĐỒ DOANH THU ================= */}
 
         <div className="grid grid-cols-12 gap-6">
-          <div className="col-span-12 xl:col-span-8">
+          <div id="revenue-chart" className="col-span-12 xl:col-span-8">
             <RevenueChart />
           </div>
 
@@ -46,11 +51,11 @@ function DashboardContent() {
 
         {/* ================= NHÂN VIÊN ================= */}
 
-        <div className="col-span-12 xl:col-span-8">
+        <div id="employee-chart" className="col-span-12 xl:col-span-8">
           <EmployeeRevenueChart />
         </div>
 
-        <div className="col-span-12 xl:col-span-8">
+        <div id="top-employees" className="col-span-12 xl:col-span-8">
           <TopEmployeesTable />
         </div>
       </div>

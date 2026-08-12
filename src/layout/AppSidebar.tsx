@@ -7,7 +7,7 @@ import {
   DollarLineIcon,
   HorizontaLDots,
   PieChartIcon,
-  TableIcon,
+  //TableIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 import {
@@ -41,22 +41,22 @@ const navItems: NavItem[] = [
     path: "/users",
     icon: <UserCog2Icon />,
   },
-  {
-    name: "BHXH",
-    icon: <TableIcon />,
-    subItems: [
-      // {
-      //   name: "User Management",
-      //   path: "/user-management",
-      //   pro: false,
-      // },
-      {
-        name: "iCare 2026",
-        path: "/bhxh",
-        pro: false,
-      },
-    ],
-  },
+  // {
+  //   name: "BHXH",
+  //   icon: <TableIcon />,
+  //   subItems: [
+  //     // {
+  //     //   name: "User Management",
+  //     //   path: "/user-management",
+  //     //   pro: false,
+  //     // },
+  //     {
+  //       name: "iCare 2026",
+  //       path: "/bhxh",
+  //       pro: false,
+  //     },
+  //   ],
+  // },
   // {
   //   icon: <CalenderIcon />,
   //   name: "Calendar",
@@ -417,6 +417,21 @@ const AppSidebar: React.FC = () => {
         </nav>
         {/* {isExpanded || isHovered || isMobileOpen ? <SidebarWidget /> : null} */}
       </div>
+
+      {/* Copyright */}
+      {(isExpanded || isHovered || isMobileOpen) && (
+        <div className="mt-auto border-t border-gray-200 dark:border-gray-800 px-2 py-4 text-center">
+          <p className="text-[15px] leading-5 text-gray-400 dark:text-gray-300">
+            COPYRIGHT © 2026
+          </p>
+          <p className="text-[15px] leading-5 text-gray-400 dark:text-gray-300">
+            Created by NNguyen1202
+          </p>
+          <p className="text-[14px] leading-4 text-gray-400 dark:text-gray-300">
+            All rights Reserved
+          </p>
+        </div>
+      )}
     </aside>
   );
 };
