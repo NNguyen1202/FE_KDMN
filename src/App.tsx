@@ -36,6 +36,7 @@ import MoonFestivalDecoration from "./components/common/MoonFestivalDecoration";
 import RevenueViewDetail from "./pages/Revenue/RevenueViewDetail";
 import RevenueListView from "./pages/Revenue/RevenueListView";
 import RevenueSearchPage from "./pages/Revenue/RevenueSearchPage";
+import QuotationPage from "./pages/Quotation/QuotationPage";
 
 export default function App() {
   console.log("APP RENDER");
@@ -118,6 +119,8 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
+
+            <Route path="/quotation" element={<QuotationPage />} />
 
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
