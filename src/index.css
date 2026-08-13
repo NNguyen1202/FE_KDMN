@@ -919,6 +919,8 @@ span.flatpickr-weekday,
   background: white;
 }
 
+
+
 /* =========================================================
    MULTI PAGE DOCUMENT - SCREEN
 ========================================================= */
@@ -1262,7 +1264,7 @@ span.flatpickr-weekday,
   }
 
   #quotation-print .quotation-header .text-\[13px\] {
-    font-size: 9px !important;
+    font-size: 12px !important;
     line-height: 1.3 !important;
   }
 
@@ -1292,7 +1294,7 @@ span.flatpickr-weekday,
   ===================================================== */
 
   #quotation-print .quotation-customer {
-    margin-bottom: 8px !important;
+    margin-bottom: 12px !important;
   }
 
   #quotation-print .quotation-customer > div {
@@ -1499,25 +1501,28 @@ span.flatpickr-weekday,
   ===================================================== */
 
   #quotation-print .quotation-section.mt-8 {
-    margin-top: 7px !important;
-    padding: 7px !important;
+  margin-top: 5px !important;
+  margin-bottom: 5px !important;
+  padding: 5px !important;
 
-    font-size: 13px !important;
-    line-height: 1.3 !important;
+  font-size: 12px !important;
+  line-height: 1.2 !important;
 
-    break-inside: avoid !important;
-    page-break-inside: avoid !important;
-  }
+  break-inside: avoid !important;
+  page-break-inside: avoid !important;
+}
 
-  #quotation-print .quotation-section.mt-8 ul {
-    margin-top: 3px !important;
+#quotation-print .quotation-section.mt-8 ul {
+  margin-top: 2px !important;
+  margin-bottom: 2px !important;
 
-    padding-left: 16px !important;
-  }
+  padding-left: 16px !important;
+}
 
-  #quotation-print .quotation-section.mt-8 li {
-    margin-bottom: 1px !important;
-  }
+#quotation-print .quotation-section.mt-8 li {
+  margin-bottom: 0 !important;
+  line-height: 1.2 !important;
+}
 
 
   /* =====================================================
@@ -1538,19 +1543,19 @@ span.flatpickr-weekday,
 
     background: #fff !important;
 
-    font-size: 12px !important;
-    line-height: 1.2 !important;
+    font-size: 11px !important;
+    line-height: 1 !important;
 
     break-inside: avoid !important;
     page-break-inside: avoid !important;
   }
 
   #quotation-print .quotation-contact p {
-    margin-top: 2px !important;
-    margin-bottom: 2px !important;
+    margin-top: 1px !important;
+    margin-bottom: 1px !important;
 
-    font-size: 12px !important;
-    line-height: 1.2 !important;
+    font-size: 11px !important;
+    line-height: 1 !important;
   }
 
 
@@ -1603,4 +1608,6 @@ span.flatpickr-weekday,
   #quotation-print-wrapper > *:not(#quotation-print) {
     display: none !important;
   }
+
+  
 }
