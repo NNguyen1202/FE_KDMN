@@ -1,7 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import Select from "react-select";
+import { getUsers } from "../../services/userService";
 
 type DeploymentType = "mass" | "onpremise";
 type CustomerSegment = "1-10" | "11-20" | "21-50" | "50+";
+
+interface User {
+  _id: string;
+  fullName: string;
+  phone?: string;
+  email?: string;
+  avatarUrl?: string | string[];
+  role?: string;
+}
 
 interface QuotationForm {
   customerName: string;
@@ -14,6 +25,9 @@ interface QuotationForm {
   onpremDiscount: number;
 
   customerSegment: CustomerSegment;
+
+  freeMonths: boolean;
+  giftedMonths: number;
 
   city: string;
   quotationDate: string;
@@ -116,6 +130,9 @@ const getMassAnnualPrice = (form: QuotationForm) => {
 export default function QuotationPage() {
   const [moduleDropdownOpen, setModuleDropdownOpen] = useState(false);
 
+  const [users, setUsers] = useState<User[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+
   const moduleDropdownRef = useRef<HTMLDivElement>(null);
 
   const [form, setForm] = useState<QuotationForm>({
@@ -134,6 +151,9 @@ export default function QuotationPage() {
     onpremDiscount: 0,
 
     customerSegment: "50+",
+
+    freeMonths: false,
+    giftedMonths: 1,
 
     mainUsers: 0,
     seasonalUsers: 0,
@@ -158,6 +178,27 @@ export default function QuotationPage() {
 
     selectedModules: [],
   });
+
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        setLoadingUsers(true);
+
+        const res = await getUsers();
+
+        const data = res?.data?.data || res?.data || [];
+
+        setUsers(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Không thể lấy danh sách nhân viên:", error);
+        setUsers([]);
+      } finally {
+        setLoadingUsers(false);
+      }
+    };
+
+    loadUsers();
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -185,6 +226,24 @@ export default function QuotationPage() {
       [key]: value,
     }));
   };
+
+  const consultantUsers = useMemo(() => {
+    return users.filter((user) => {
+      const role = String(user.role || "").toLowerCase();
+
+      return role !== "admin" && role !== "manager";
+    });
+  }, [users]);
+
+  const consultantOptions = consultantUsers.map((user) => ({
+    value: user._id,
+    label: user.fullName,
+    phone: user.phone || "",
+    email: user.email || "",
+    avatar: Array.isArray(user.avatarUrl)
+      ? user.avatarUrl[0]
+      : user.avatarUrl || "",
+  }));
 
   const massCalculation = useMemo(() => {
     const selectedSegment = CUSTOMER_SEGMENTS.find(
@@ -349,6 +408,9 @@ export default function QuotationPage() {
       seasonalPrice: 0,
 
       customerSegment: "50+",
+
+      freeMonths: false,
+      giftedMonths: 1,
 
       implementationFee: 4500000,
 
@@ -907,6 +969,51 @@ export default function QuotationPage() {
                         Mỗi năm có thể áp dụng một mức giảm giá khác nhau.
                       </p>
                     </div>
+                    <div>
+                      <div className="flex items-center gap-3">
+                        <label className="flex cursor-pointer items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={form.freeMonths}
+                            onChange={(e) =>
+                              setForm((prev) => ({
+                                ...prev,
+                                freeMonths: e.target.checked,
+                              }))
+                            }
+                            className="h-4 w-4 rounded border-gray-300"
+                          />
+
+                          <span className="text-sm text-gray-700 dark:text-gray-200">
+                            Tặng tháng sử dụng
+                          </span>
+                        </label>
+
+                        {form.freeMonths && (
+                          <div className="flex items-center gap-2">
+                            <select
+                              value={form.giftedMonths}
+                              onChange={(e) =>
+                                setForm((prev) => ({
+                                  ...prev,
+                                  giftedMonths: Number(e.target.value),
+                                }))
+                              }
+                              className="w-24 rounded border border-gray-300 px-2 py-1 text-sm dark:bg-gray-800 dark:text-white"
+                            >
+                              {Array.from(
+                                { length: 48 },
+                                (_, index) => index + 1,
+                              ).map((month) => (
+                                <option key={month} value={month}>
+                                  {month} tháng
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -949,6 +1056,13 @@ export default function QuotationPage() {
                       <strong className="text-green-600">
                         -{formatCurrency(massCalculation.discountAmount)}
                       </strong>
+                    </div>
+                  )}
+
+                  {form.freeMonths && (
+                    <div className="mt-2 flex justify-between text-sm">
+                      <span>Tặng</span>
+                      <strong>{form.giftedMonths} tháng</strong>
                     </div>
                   )}
 
@@ -1112,7 +1226,7 @@ export default function QuotationPage() {
                 4. Người phụ trách
               </h2>
 
-              <div className="space-y-4">
+              {/* <div className="space-y-4">
                 <Field
                   label="Họ tên"
                   value={form.consultantName}
@@ -1130,6 +1244,122 @@ export default function QuotationPage() {
                   value={form.consultantEmail}
                   onChange={(v) => update("consultantEmail", v)}
                 />
+              </div> */}
+
+              <div className="space-y-4">
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-200">
+                    Chuyên viên tư vấn
+                  </label>
+
+                  <Select
+                    isLoading={loadingUsers}
+                    isClearable
+                    options={consultantOptions}
+                    value={
+                      consultantOptions.find(
+                        (option) =>
+                          option.label === form.consultantName &&
+                          option.phone === form.consultantPhone &&
+                          option.email === form.consultantEmail,
+                      ) || null
+                    }
+                    onChange={(option) => {
+                      if (!option) {
+                        update("consultantName", "");
+                        update("consultantPhone", "");
+                        update("consultantEmail", "");
+                        return;
+                      }
+
+                      update("consultantName", option.label);
+                      update("consultantPhone", option.phone);
+                      update("consultantEmail", option.email);
+                    }}
+                    placeholder="Chọn chuyên viên tư vấn..."
+                    noOptionsMessage={() => "Không có nhân viên phù hợp"}
+                    formatOptionLabel={(user) => (
+                      <div className="flex items-center gap-3">
+                        {user.avatar ? (
+                          <img
+                            src={user.avatar}
+                            alt={user.label}
+                            className="h-8 w-8 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-xs font-semibold text-gray-600">
+                            {user.label?.charAt(0)?.toUpperCase()}
+                          </div>
+                        )}
+
+                        <div>
+                          <div className="font-medium dark:text-white">{user.label}</div>
+
+                          {user.phone && (
+                            <div className="text-xs text-gray-500 dark:text-white">
+                              {user.phone}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    styles={{
+                      control: (base, state) => ({
+                        ...base,
+                        minHeight: "42px",
+                        backgroundColor: "transparent",
+                        borderColor: state.isFocused
+                          ? "#3b82f6"
+                          : "rgb(209 213 219)",
+                      }),
+
+                      menu: (base) => ({
+                        ...base,
+                        zIndex: 9999,
+                      }),
+
+                      option: (base, state) => ({
+                        ...base,
+                        backgroundColor: state.isFocused
+                          ? "#1f1f1fff"
+                          : "#5a5a5aff",
+                        color: "#111827",
+                        cursor: "pointer",
+                      }),
+
+                      singleValue: (base) => ({
+                        ...base,
+                        color: "inherit",
+                      }),
+
+                      placeholder: (base) => ({
+                        ...base,
+                        color: "#9ca3af",
+                      }),
+                    }}
+                  />
+                </div>
+
+                {form.consultantName && (
+                  <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+                    <div className="space-y-1 text-sm">
+                      <div>
+                        <span className="font-medium">Họ tên:</span>{" "}
+                        {form.consultantName}
+                      </div>
+
+                      <div>
+                        <span className="font-medium">Điện thoại:</span>{" "}
+                        {form.consultantPhone || "-"}
+                      </div>
+
+                      <div>
+                        <span className="font-medium">Email:</span>{" "}
+                        {form.consultantEmail || "-"}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </section>
           </div>
@@ -1160,9 +1390,9 @@ export default function QuotationPage() {
                         Số 7, Ngách 97/1, Ngõ 97 Chính Kinh, Phường Thanh Xuân,
                         TP Hà Nội, Việt Nam
                         <br />
-                        Điện thoại: 0948 813 064
+                        Điện thoại: {form.consultantPhone}
                         <br />
-                        Email: nguyennh@icarevietnam.vn
+                        Email: {form.consultantEmail}
                       </div>
                     </div>
 
@@ -1184,7 +1414,7 @@ export default function QuotationPage() {
                 </div>
 
                 {/* CUSTOMER */}
-                <div className="mb-7 space-y-2 quotation-customer">
+                <div className="mb-2 space-y-2 quotation-customer">
                   <div className="text-[14px] leading-6 text-gray-900">
                     <span className="font-bold">Kính gửi:</span>{" "}
                     <span className="font-bold italic">
@@ -1624,23 +1854,6 @@ export default function QuotationPage() {
                   </div>
                 </div>
 
-                {/* {form.discounts
-                  .slice(0, form.duration)
-                  .some((discount) => discount > 0) && (
-                  <div className="mt-3 text-xs italic text-gray-600">
-                    Áp dụng mức giảm giá riêng cho từng năm:{" "}
-                    {form.discounts
-                      .slice(0, form.duration)
-                      .map((discount, index) => (
-                        <span key={index}>
-                          {index > 0 ? ", " : ""}
-                          Năm {index + 1}: {discount}%
-                        </span>
-                      ))}
-                    .
-                  </div>
-                )} */}
-
                 {/* NOTE */}
                 <div className="quotation-section mt-8 rounded-lg border border-gray-200 p-4 text-sm dark:border-gray-300">
                   <strong>Ghi chú:</strong>
@@ -1687,6 +1900,18 @@ export default function QuotationPage() {
                       </li>
                     )}
 
+                    {form.freeMonths && form.giftedMonths > 0 && (
+                      <li>
+                        Báo giá được áp dụng với ưu đãi:{" "}
+                        <div className="inline font-bold">
+                          🎁 Tặng {form.giftedMonths} tháng sử dụng.
+                        </div>{" "}
+                        <p className="inline">
+                          Chi tiết sẽ được ghi rõ trong hợp đồng
+                        </p>
+                      </li>
+                    )}
+
                     <li>
                       Phí tích hợp/phát triển tính năng phát sinh sẽ được đánh
                       giá và báo giá riêng theo yêu cầu.
@@ -1706,17 +1931,17 @@ export default function QuotationPage() {
                 <div className="quotation-footer">
                   {/* LEFT - CONTACT */}
                   <div className="quotation-footer-contact">
-                    <p className="text-sm leading-5">
+                    <p className=" leading-5">
                       Mọi thắc mắc, Quý khách vui lòng liên hệ:
                     </p>
 
-                    <p className="mt-1 text-sm font-semibold">
+                    <p className="font-semibold">
                       {form.consultantName} - Chuyên viên tư vấn
                     </p>
 
-                    <p className="text-sm">TEL/Zalo: {form.consultantPhone}</p>
+                    <p>TEL/Zalo: {form.consultantPhone}</p>
 
-                    <p className="text-sm">Email: {form.consultantEmail}</p>
+                    <p>Email: {form.consultantEmail}</p>
                   </div>
 
                   {/* RIGHT - COPYRIGHT */}
