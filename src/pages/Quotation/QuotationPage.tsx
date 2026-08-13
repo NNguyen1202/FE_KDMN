@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type DeploymentType = "mass" | "onpremise";
+type CustomerSegment = "1-10" | "11-20" | "21-50" | "50+";
 
 interface QuotationForm {
   customerName: string;
@@ -11,6 +12,8 @@ interface QuotationForm {
 
   showOnpremiseQuotation: boolean;
   onpremDiscount: number;
+
+  customerSegment: CustomerSegment;
 
   city: string;
   quotationDate: string;
@@ -26,7 +29,7 @@ interface QuotationForm {
   implementationFee: number;
 
   duration: 1 | 2 | 3;
-  discount: number;
+  discounts: [number, number, number];
 
   onpremLicenseMultiplier: number;
   onpremImplementationFee: number;
@@ -69,6 +72,47 @@ const EASYHRM_MODULES = [
   "Đảng uỷ",
 ];
 
+const CUSTOMER_SEGMENTS = [
+  {
+    value: "1-10" as CustomerSegment,
+    label: "1 - 10 nhân sự",
+    price: 1690000,
+    setupFee: 1000000,
+  },
+  {
+    value: "11-20" as CustomerSegment,
+    label: "11 - 20 nhân sự",
+    price: 2690000,
+    setupFee: 1000000,
+  },
+  {
+    value: "21-50" as CustomerSegment,
+    label: "21 - 50 nhân sự",
+    price: 5590000,
+    setupFee: 1000000,
+  },
+  {
+    value: "50+" as CustomerSegment,
+    label: "Trên 50 nhân sự",
+    price: 0,
+    setupFee: 4500000,
+  },
+];
+
+const getMassAnnualPrice = (form: QuotationForm) => {
+  if (form.customerSegment !== "50+") {
+    return (
+      CUSTOMER_SEGMENTS.find((item) => item.value === form.customerSegment)
+        ?.price ?? 0
+    );
+  }
+
+  return (
+    form.mainUsers * form.mainPrice * 12 +
+    form.seasonalUsers * form.seasonalPrice * 12
+  );
+};
+
 export default function QuotationPage() {
   const [moduleDropdownOpen, setModuleDropdownOpen] = useState(false);
 
@@ -89,6 +133,8 @@ export default function QuotationPage() {
     showOnpremiseQuotation: false,
     onpremDiscount: 0,
 
+    customerSegment: "50+",
+
     mainUsers: 0,
     seasonalUsers: 0,
 
@@ -98,7 +144,7 @@ export default function QuotationPage() {
     implementationFee: 4500000,
 
     duration: 1,
-    discount: 0,
+    discounts: [0, 0, 0],
 
     onpremLicenseMultiplier: 3.5,
     onpremImplementationFee: 15000000,
@@ -141,16 +187,77 @@ export default function QuotationPage() {
   };
 
   const massCalculation = useMemo(() => {
+    const selectedSegment = CUSTOMER_SEGMENTS.find(
+      (segment) => segment.value === form.customerSegment,
+    );
+
+    const isFixedPackage = form.customerSegment !== "50+";
+
+    // ============================
+    // GÓI CỐ ĐỊNH <= 50 NHÂN SỰ
+    // ============================
+    if (isFixedPackage && selectedSegment) {
+      const packagePrice = selectedSegment.price;
+
+      // Giá phần mềm 1 năm
+      const softwareYear = packagePrice;
+
+      // Mức giảm phụ thuộc vào THỜI HẠN ĐĂNG KÝ
+      // 1 năm -> discounts[0]
+      // 2 năm -> discounts[1]
+      // 3 năm -> discounts[2]
+      const discountRate = form.discounts[form.duration - 1] ?? 0;
+
+      // Tổng phần mềm trước giảm
+      const softwareBeforeDiscount = softwareYear * form.duration;
+
+      // Giảm trên TOÀN BỘ giá phần mềm của thời hạn đăng ký
+      const discountAmount = softwareBeforeDiscount * (discountRate / 100);
+
+      // Phần mềm sau giảm
+      const softwareTotal = softwareBeforeDiscount - discountAmount;
+
+      // Phí khởi tạo luôn tính 100%, không giảm
+      const total = softwareTotal + form.implementationFee;
+
+      return {
+        mainYear: packagePrice,
+        seasonalYear: 0,
+        softwareYear,
+        discountAmount,
+        softwareTotal,
+        total,
+        isFixedPackage: true,
+        packagePrice,
+      };
+    }
+
+    // ============================
+    // TRÊN 50 NHÂN SỰ
+    // ============================
     const mainYear = form.mainUsers * form.mainPrice * 12;
 
     const seasonalYear = form.seasonalUsers * form.seasonalPrice * 12;
 
+    // Tổng giá phần mềm 1 năm
     const softwareYear = mainYear + seasonalYear;
 
-    const discountAmount = softwareYear * form.duration * (form.discount / 100);
+    // Mức giảm phụ thuộc vào THỜI HẠN ĐĂNG KÝ
+    // 1 năm -> discounts[0]
+    // 2 năm -> discounts[1]
+    // 3 năm -> discounts[2]
+    const discountRate = form.discounts[form.duration - 1] ?? 0;
 
-    const softwareTotal = softwareYear * form.duration - discountAmount;
+    // Tổng phần mềm trước giảm
+    const softwareBeforeDiscount = softwareYear * form.duration;
 
+    // Giảm giá trên toàn bộ phần mềm
+    const discountAmount = softwareBeforeDiscount * (discountRate / 100);
+
+    // Phần mềm sau giảm
+    const softwareTotal = softwareBeforeDiscount - discountAmount;
+
+    // Phí khởi tạo không giảm
     const total = softwareTotal + form.implementationFee;
 
     return {
@@ -160,14 +267,17 @@ export default function QuotationPage() {
       discountAmount,
       softwareTotal,
       total,
+      isFixedPackage: false,
+      packagePrice: 0,
     };
   }, [
+    form.customerSegment,
     form.mainUsers,
     form.mainPrice,
     form.seasonalUsers,
     form.seasonalPrice,
     form.duration,
-    form.discount,
+    form.discounts,
     form.implementationFee,
   ]);
 
@@ -238,10 +348,12 @@ export default function QuotationPage() {
       mainPrice: 13000,
       seasonalPrice: 0,
 
+      customerSegment: "50+",
+
       implementationFee: 4500000,
 
       duration: 1,
-      discount: 0,
+      discounts: [0, 0, 0],
 
       onpremLicenseMultiplier: 3.5,
       onpremImplementationFee: 15000000,
@@ -269,6 +381,8 @@ export default function QuotationPage() {
       ],
     });
   };
+
+  const massAnnualPrice = useMemo(() => getMassAnnualPrice(form), [form]);
 
   return (
     <>
@@ -420,6 +534,85 @@ export default function QuotationPage() {
                 </h2>
 
                 <div className="space-y-4">
+                  {/* PHÂN KHÚC KHÁCH HÀNG */}
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-200">
+                      Phân khúc khách hàng
+                    </label>
+
+                    <div className="space-y-2">
+                      {CUSTOMER_SEGMENTS.map((segment) => {
+                        const checked = form.customerSegment === segment.value;
+
+                        return (
+                          <label
+                            key={segment.value}
+                            className={`flex cursor-pointer items-center justify-between rounded-xl border p-3 transition ${
+                              checked
+                                ? "border-orange-500 bg-orange-50 dark:bg-orange-950/20"
+                                : "border-gray-200 hover:border-orange-300 dark:border-gray-700"
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={() => {
+                                  update("customerSegment", segment.value);
+
+                                  // Các nhóm <= 50 dùng giá gói cố định
+                                  // và phí khởi tạo mặc định 1 triệu.
+                                  if (segment.value !== "50+") {
+                                    update(
+                                      "implementationFee",
+                                      segment.setupFee,
+                                    );
+                                  } else {
+                                    update("implementationFee", 4500000);
+                                  }
+                                }}
+                                className="h-4 w-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500"
+                              />
+
+                              <div>
+                                <div
+                                  className={`text-sm font-semibold ${
+                                    checked
+                                      ? "text-orange-700 dark:text-orange-400"
+                                      : "text-gray-700 dark:text-gray-200"
+                                  }`}
+                                >
+                                  {segment.label}
+                                </div>
+
+                                {segment.value !== "50+" ? (
+                                  <div className="mt-0.5 text-xs text-gray-500">
+                                    Gói: {formatCurrency(segment.price)} / năm
+                                  </div>
+                                ) : (
+                                  <div className="mt-0.5 text-xs text-gray-500">
+                                    Tính theo số lượng nhân sự
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            {checked && (
+                              <span className="rounded-full bg-orange-500 px-2 py-1 text-[10px] font-semibold text-white">
+                                Đang chọn
+                              </span>
+                            )}
+                          </label>
+                        );
+                      })}
+                    </div>
+
+                    <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                      Chỉ được chọn một phân khúc khách hàng.
+                    </p>
+                  </div>
+
+                  {/* SỐ NHÂN SỰ */}
                   <NumberField
                     label="Số nhân sự chính"
                     value={form.mainUsers}
@@ -444,11 +637,19 @@ export default function QuotationPage() {
                     onChange={(v) => update("seasonalPrice", v)}
                   />
 
-                  <NumberField
-                    label="Phí cài đặt & triển khai"
-                    value={form.implementationFee}
-                    onChange={(v) => update("implementationFee", v)}
-                  />
+                  {form.customerSegment !== "50+" ? (
+                    <NumberField
+                      label="Phí cài đặt & triển khai"
+                      value={form.implementationFee}
+                      onChange={(v) => update("implementationFee", v)}
+                    />
+                  ) : (
+                    <NumberField
+                      label="Phí cài đặt & triển khai"
+                      value={form.implementationFee}
+                      onChange={(v) => update("implementationFee", v)}
+                    />
+                  )}
 
                   <div className="mb-5" ref={moduleDropdownRef}>
                     <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-200">
@@ -650,35 +851,73 @@ export default function QuotationPage() {
 
                     <div>
                       <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-200">
-                        Mức giảm giá
+                        Mức giảm giá theo từng năm
                       </label>
 
-                      <select
-                        value={form.discount}
-                        onChange={(e) =>
-                          update("discount", Number(e.target.value))
-                        }
-                        className="w-full rounded-xl border border-gray-300 bg-white px-3 py-2.5 outline-none focus:border-orange-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                      >
-                        <option value={0}>Không giảm giá</option>
-                        <option value={5}>Giảm 5%</option>
-                        <option value={10}>Giảm 10%</option>
-                        <option value={15}>Giảm 15%</option>
-                        <option value={20}>Giảm 20%</option>
-                        <option value={25}>Giảm 25%</option>
-                        <option value={30}>Giảm 30%</option>
-                        <option value={35}>Giảm 35%</option>
-                        <option value={40}>Giảm 40%</option>
-                        <option value={45}>Giảm 45%</option>
-                        <option value={50}>Giảm 50%</option>
-                      </select>
+                      <div className="space-y-2">
+                        {Array.from({ length: form.duration }).map(
+                          (_, index) => {
+                            const year = index + 1;
+
+                            return (
+                              <div
+                                key={year}
+                                className="flex items-center gap-3"
+                              >
+                                <div className="w-20 shrink-0 text-sm font-medium text-gray-700 dark:text-gray-200">
+                                  Năm {year}
+                                </div>
+
+                                <select
+                                  value={form.discounts[index]}
+                                  onChange={(e) => {
+                                    const newDiscounts: [
+                                      number,
+                                      number,
+                                      number,
+                                    ] = [...form.discounts];
+
+                                    newDiscounts[index] = Number(
+                                      e.target.value,
+                                    );
+
+                                    update("discounts", newDiscounts);
+                                  }}
+                                  className="w-full rounded-xl border border-gray-300 bg-white px-3 py-2.5 outline-none focus:border-orange-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                                >
+                                  <option value={0}>Không giảm giá</option>
+                                  <option value={5}>Giảm 5%</option>
+                                  <option value={10}>Giảm 10%</option>
+                                  <option value={15}>Giảm 15%</option>
+                                  <option value={20}>Giảm 20%</option>
+                                  <option value={25}>Giảm 25%</option>
+                                  <option value={30}>Giảm 30%</option>
+                                  <option value={35}>Giảm 35%</option>
+                                  <option value={40}>Giảm 40%</option>
+                                  <option value={45}>Giảm 45%</option>
+                                  <option value={50}>Giảm 50%</option>
+                                </select>
+                              </div>
+                            );
+                          },
+                        )}
+                      </div>
+
+                      <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                        Mỗi năm có thể áp dụng một mức giảm giá khác nhau.
+                      </p>
                     </div>
                   </div>
                 </div>
 
                 <div className="mt-5 rounded-xl bg-gray-50 p-4 dark:bg-gray-800 dark:text-white">
                   <div className="flex justify-between text-sm">
-                    <span>Phần mềm / năm</span>
+                    <span>
+                      {massCalculation.isFixedPackage
+                        ? "Giá gói / năm"
+                        : "Phần mềm / năm"}
+                    </span>
+
                     <strong>
                       {formatCurrency(massCalculation.softwareYear)}
                     </strong>
@@ -689,14 +928,24 @@ export default function QuotationPage() {
                     <strong>{form.duration} năm</strong>
                   </div>
 
-                  <div className="mt-2 flex justify-between text-sm">
-                    <span>Giảm giá</span>
-                    <strong className="text-green-600">{form.discount}%</strong>
+                  <div className="mt-2 space-y-1 text-sm">
+                    <div className="font-medium">Giảm giá</div>
+
+                    {Array.from({ length: form.duration }).map((_, index) => (
+                      <div key={index} className="flex justify-between pl-3">
+                        <span>Năm {index + 1}</span>
+
+                        <strong className="text-green-600">
+                          {form.discounts[index]}%
+                        </strong>
+                      </div>
+                    ))}
                   </div>
 
-                  {form.discount > 0 && (
+                  {massCalculation.discountAmount > 0 && (
                     <div className="mt-2 flex justify-between text-sm">
-                      <span>Số tiền giảm</span>
+                      <span>Tổng tiền giảm</span>
+
                       <strong className="text-green-600">
                         -{formatCurrency(massCalculation.discountAmount)}
                       </strong>
@@ -892,7 +1141,7 @@ export default function QuotationPage() {
                 {/* LOGO */}
                 <div className="quotation-logo">
                   <img
-                    src="/public/images/Logo-1.jpg"
+                    src="https://i.ibb.co/21DLSLk0/Logo-1.jpg"
                     alt="SoftDreams"
                     className="mx-auto h-auto w-auto object-contain mt-0"
                   />
@@ -924,12 +1173,12 @@ export default function QuotationPage() {
                 </div>
 
                 {/* TITLE */}
-                <div className="py-8 text-center">
+                <div className="py-2 text-center">
                   <h1 className="text-xl font-bold uppercase tracking-wide">
                     BÁO GIÁ DỊCH VỤ
                   </h1>
 
-                  <h2 className="mt-2 text-xl font-bold text-orange-600">
+                  <h2 className="mt-1 text-xl font-bold text-orange-600">
                     QUẢN LÝ NHÂN SỰ EASYHRM
                   </h2>
                 </div>
@@ -966,7 +1215,6 @@ export default function QuotationPage() {
                   đã tin tưởng, đồng hành và quan tâm sử dụng giải pháp Quản lý
                   Nhân sự EasyHRM của chúng tôi.
                   <br />
-                  <br />
                   Trên cơ sở khảo sát nhu cầu ứng dụng phần mềm quản lý nhân sự
                   của Quý đơn vị, chúng tôi xin gửi danh mục chức năng phần mềm
                   và dự toán chi phí cụ thể như sau:
@@ -975,7 +1223,7 @@ export default function QuotationPage() {
                 {/* MASS */}
                 <SectionTitle>PHƯƠNG ÁN TRIỂN KHAI MASS</SectionTitle>
 
-                <p className="mb-4 text-sm">
+                <p className="mb-2 text-sm">
                   <strong>Giải pháp Server nhà cung cấp</strong>
                 </p>
 
@@ -1054,113 +1302,198 @@ export default function QuotationPage() {
                   </thead>
 
                   <tbody>
-                    {/* PHẦN MỀM CHÍNH */}
-                    <tr>
-                      <td className="border border-gray-300 px-2 py-1 text-center">
-                        1
-                      </td>
+                    {/* GÓI CỐ ĐỊNH */}
+                    {massCalculation.isFixedPackage ? (
+                      <>
+                        <tr>
+                          <td className="border border-gray-300 px-2 py-1 text-center">
+                            1
+                          </td>
 
-                      <td className="service-cell border border-gray-300 px-2 py-1 text-left">
-                        <div>Phần mềm nhân sự EasyHRM</div>
-                        <div>Gói Premium - {form.duration} năm</div>
-                      </td>
+                          <td className="service-cell border border-gray-300 px-2 py-1 text-left">
+                            <div>Phần mềm nhân sự EasyHRM</div>
 
-                      <td className="border border-gray-300 px-2 py-1 text-center">
-                        Gói/năm
-                      </td>
+                            <div>
+                              Gói Premium (
+                              {
+                                CUSTOMER_SEGMENTS.find(
+                                  (item) => item.value === form.customerSegment,
+                                )?.label
+                              }
+                              )
+                            </div>
+                          </td>
 
-                      <td className="border border-gray-300 px-2 py-1 text-center">
-                        {form.mainUsers}
-                      </td>
+                          <td className="border border-gray-300 px-2 py-1 text-center">
+                            Gói/năm
+                          </td>
 
-                      <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
-                        {formatCurrency(form.mainPrice)}
-                      </td>
+                          <td className="border border-gray-300 px-2 py-1 text-center">
+                            1
+                          </td>
 
-                      <td className="border border-gray-300 px-2 py-1 text-center whitespace-nowrap">
-                        {form.discount > 0 ? `${form.discount}%` : "-"}
-                      </td>
+                          <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
+                            {formatCurrency(massCalculation.softwareYear)}
+                          </td>
 
-                      <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
-                        {formatCurrency(
-                          form.mainUsers *
-                            form.mainPrice *
-                            12 *
-                            form.duration *
-                            (1 - form.discount / 100),
+                          <td className="border border-gray-300 px-2 py-1 text-center whitespace-nowrap">
+                            {form.discounts[0] > 0
+                              ? `${form.discounts[0]}%`
+                              : "-"}
+                          </td>
+
+                          <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
+                            {formatCurrency(
+                              massCalculation.softwareYear *
+                                (1 - (form.discounts[0] ?? 0) / 100),
+                            )}
+                          </td>
+                        </tr>
+
+                        {/* PHÍ KHỞI TẠO */}
+                        <tr>
+                          <td className="border border-gray-300 px-2 py-1 text-center">
+                            2
+                          </td>
+
+                          <td className="service-cell border border-gray-300 px-2 py-1 text-left">
+                            Phí khởi tạo và triển khai
+                          </td>
+
+                          <td className="border border-gray-300 px-2 py-1 text-center">
+                            VNĐ
+                          </td>
+
+                          <td className="border border-gray-300 px-2 py-1 text-center">
+                            {form.implementationFee > 0 ? 1 : 0}
+                          </td>
+
+                          <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
+                            {formatCurrency(form.implementationFee)}
+                          </td>
+
+                          <td className="border border-gray-300 px-2 py-1 text-center">
+                            -
+                          </td>
+
+                          <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
+                            {formatCurrency(form.implementationFee)}
+                          </td>
+                        </tr>
+                      </>
+                    ) : (
+                      <>
+                        {/* ================================
+                              LOGIC CŨ - TRÊN 50 NHÂN SỰ
+                          ================================= */}
+
+                        <tr>
+                          <td className="border border-gray-300 px-2 py-1 text-center">
+                            1
+                          </td>
+
+                          <td className="service-cell border border-gray-300 px-2 py-1 text-left">
+                            <div>Phần mềm nhân sự EasyHRM</div>
+                            <div>Gói Premium - 1 năm</div>
+                          </td>
+
+                          <td className="border border-gray-300 px-2 py-1 text-center">
+                            Gói/năm
+                          </td>
+
+                          <td className="border border-gray-300 px-2 py-1 text-center">
+                            {form.mainUsers}
+                          </td>
+
+                          <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
+                            {formatCurrency(form.mainPrice)}
+                          </td>
+
+                          <td className="border border-gray-300 px-2 py-1 text-center whitespace-nowrap">
+                            {form.discounts[0] > 0
+                              ? `${form.discounts[0]}%`
+                              : "-"}
+                          </td>
+                          <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
+                            {formatCurrency(
+                              form.mainUsers *
+                                form.mainPrice *
+                                12 *
+                                (1 - (form.discounts[0] ?? 0) / 100),
+                            )}
+                          </td>
+                        </tr>
+
+                        {form.seasonalUsers > 0 && (
+                          <tr className="quotation-table-row">
+                            <td className="border border-gray-300 px-2 py-1 text-center">
+                              2
+                            </td>
+
+                            <td className="service-cell border border-gray-300 px-2 py-1 text-left">
+                              Nhân sự thời vụ
+                            </td>
+
+                            <td className="border border-gray-300 px-2 py-1 text-center">
+                              Gói/năm
+                            </td>
+
+                            <td className="border border-gray-300 px-2 py-1 text-center">
+                              {form.seasonalUsers}
+                            </td>
+
+                            <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
+                              {formatCurrency(form.seasonalPrice)}
+                            </td>
+
+                            <td className="border border-gray-300 px-2 py-1 text-center">
+                              {form.discounts[0] > 0
+                                ? `${form.discounts[0]}%`
+                                : "-"}
+                            </td>
+
+                            <td className="border border-gray-300 px-2 py-1 text-center">
+                              {formatCurrency(
+                                form.seasonalUsers *
+                                  form.seasonalPrice *
+                                  12 *
+                                  (1 - (form.discounts[0] ?? 0) / 100),
+                              )}
+                            </td>
+                          </tr>
                         )}
-                      </td>
-                    </tr>
 
-                    {/* NHÂN SỰ THỜI VỤ */}
-                    {form.seasonalUsers > 0 && (
-                      <tr className="quotation-table-row">
-                        <td className="border border-gray-300 px-2 py-1 text-center">
-                          2
-                        </td>
+                        <tr>
+                          <td className="border border-gray-300 px-2 py-1 text-center">
+                            {form.seasonalUsers > 0 ? 3 : 2}
+                          </td>
 
-                        <td className="service-cell border border-gray-300 px-2 py-1 text-left">
-                          Nhân sự thời vụ
-                        </td>
+                          <td className="service-cell border border-gray-300 px-2 py-1 text-left">
+                            Phí cài đặt và triển khai
+                          </td>
 
-                        <td className="border border-gray-300 px-2 py-1 text-center">
-                          Gói/năm
-                        </td>
+                          <td className="border border-gray-300 px-2 py-1 text-center">
+                            VNĐ
+                          </td>
 
-                        <td className="border border-gray-300 px-2 py-1 text-center">
-                          {form.seasonalUsers}
-                        </td>
+                          <td className="border border-gray-300 px-2 py-1 text-center">
+                            {form.implementationFee > 0 ? 1 : 0}
+                          </td>
 
-                        <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
-                          {formatCurrency(form.seasonalPrice)}
-                        </td>
+                          <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
+                            {formatCurrency(form.implementationFee)}
+                          </td>
 
-                        <td className="border border-gray-300 px-2 py-1 text-center whitespace-nowrap">
-                          {form.discount > 0 ? `${form.discount}%` : "-"}
-                        </td>
+                          <td className="border border-gray-300 px-2 py-1 text-center">
+                            -
+                          </td>
 
-                        <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
-                          {formatCurrency(
-                            form.seasonalUsers *
-                              form.seasonalPrice *
-                              12 *
-                              form.duration *
-                              (1 - form.discount / 100),
-                          )}
-                        </td>
-                      </tr>
+                          <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
+                            {formatCurrency(form.implementationFee)}
+                          </td>
+                        </tr>
+                      </>
                     )}
-
-                    {/* PHÍ CÀI ĐẶT */}
-                    <tr>
-                      <td className="border border-gray-300 px-2 py-1 text-center">
-                        {form.seasonalUsers > 0 ? 3 : 2}
-                      </td>
-
-                      <td className="service-cell border border-gray-300 px-2 py-1 text-left">
-                        Phí cài đặt và triển khai
-                      </td>
-
-                      <td className="border border-gray-300 px-2 py-1 text-center">
-                        VNĐ
-                      </td>
-
-                      <td className="border border-gray-300 px-2 py-1 text-center">
-                        {form.implementationFee > 0 ? 1 : 0}
-                      </td>
-
-                      <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
-                        {formatCurrency(form.implementationFee)}
-                      </td>
-
-                      <td className="border border-gray-300 px-2 py-1 text-center">
-                        -
-                      </td>
-
-                      <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
-                        {formatCurrency(form.implementationFee)}
-                      </td>
-                    </tr>
                   </tbody>
 
                   <tfoot>
@@ -1173,18 +1506,140 @@ export default function QuotationPage() {
                       </td>
 
                       <td className="border border-gray-300 px-2 py-1 text-right font-bold text-orange-600 whitespace-nowrap">
-                        {formatCurrency(total)}
+                        {formatCurrency(
+                          (form.customerSegment !== "50+"
+                            ? CUSTOMER_SEGMENTS.find(
+                                (segment) =>
+                                  segment.value === form.customerSegment,
+                              )?.price ?? 0
+                            : form.mainUsers * form.mainPrice * 12 +
+                              form.seasonalUsers * form.seasonalPrice * 12) *
+                            (1 - (form.discounts[0] ?? 0) / 100) +
+                            form.implementationFee,
+                        )}
                       </td>
                     </tr>
                   </tfoot>
                 </table>
 
-                {form.discount > 0 && (
-                  <div className="mt-3 text-xs italic text-gray-600">
-                    Áp dụng giảm {form.discount}% phí phần mềm khi đăng ký{" "}
-                    {form.duration} năm.
+                {/* BẢNG GIÁ THEO THỜI HẠN */}
+                <div className="mt-2">
+                  <div className="mb-2 text-sm font-bold text-gray-900">
+                    Bảng giá theo thời hạn đăng ký
                   </div>
-                )}
+
+                  <table className="quotation-table w-full border-collapse text-sm">
+                    <thead>
+                      <tr className="bg-orange-500 text-white">
+                        <th className="border border-gray-300 px-2 py-1 text-center">
+                          Thời hạn
+                        </th>
+
+                        <th className="border border-gray-300 px-2 py-1 text-center">
+                          Giá phần mềm
+                        </th>
+
+                        <th className="border border-gray-300 px-2 py-1 text-center">
+                          Giảm giá
+                        </th>
+
+                        <th className="border border-gray-300 px-2 py-1 text-center">
+                          Phí khởi tạo
+                        </th>
+
+                        <th className="border border-gray-300 px-2 py-1 text-right">
+                          Tổng thanh toán
+                        </th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {[1, 2, 3].map((year) => {
+                        // Giá phần mềm của toàn bộ thời hạn
+                        const softwareBeforeDiscount = massAnnualPrice * year;
+
+                        // Mỗi thời hạn có MỘT mức giảm riêng
+                        // 1 năm -> discounts[0]
+                        // 2 năm -> discounts[1]
+                        // 3 năm -> discounts[2]
+                        const discountRate = form.discounts[year - 1] ?? 0;
+
+                        // Tiền giảm của chính thời hạn này
+                        const discountAmount =
+                          softwareBeforeDiscount * (discountRate / 100);
+
+                        // Tiền phần mềm sau giảm
+                        const softwareAfterDiscount =
+                          softwareBeforeDiscount - discountAmount;
+
+                        // Phí khởi tạo luôn cộng 100%, không giảm
+                        const total =
+                          softwareAfterDiscount + form.implementationFee;
+
+                        return (
+                          <tr key={year}>
+                            {/* THỜI HẠN */}
+                            <td className="border border-gray-300 px-2 py-1 text-center">
+                              {year} năm
+                            </td>
+
+                            {/* GIÁ PHẦN MỀM */}
+                            <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
+                              {formatCurrency(softwareBeforeDiscount)}
+                            </td>
+
+                            {/* GIẢM GIÁ CỦA CHÍNH THỜI HẠN NÀY */}
+                            <td className="border border-gray-300 px-2 py-1 text-center">
+                              {discountRate > 0 ? `${discountRate}%` : "-"}
+                            </td>
+
+                            {/* PHÍ KHỞI TẠO */}
+                            <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
+                              {formatCurrency(form.implementationFee)}
+                            </td>
+
+                            {/* TỔNG THANH TOÁN */}
+                            <td className="border border-gray-300 px-2 py-1 text-right font-bold whitespace-nowrap">
+                              {formatCurrency(total)}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+
+                  <div className="mt-2 text-xs italic text-gray-500">
+                    Giá trên đã áp dụng mức giảm giá theo từng năm đăng ký:{" "}
+                    {form.discounts
+                      .slice(0, form.duration)
+                      .map((discount, index) => (
+                        <span key={index}>
+                          {index > 0 ? ", " : ""}
+                          <strong>
+                            Năm {index + 1}: {discount}%
+                          </strong>
+                        </span>
+                      ))}{" "}
+                    theo chính sách thương mại được lựa chọn.
+                  </div>
+                </div>
+
+                {/* {form.discounts
+                  .slice(0, form.duration)
+                  .some((discount) => discount > 0) && (
+                  <div className="mt-3 text-xs italic text-gray-600">
+                    Áp dụng mức giảm giá riêng cho từng năm:{" "}
+                    {form.discounts
+                      .slice(0, form.duration)
+                      .map((discount, index) => (
+                        <span key={index}>
+                          {index > 0 ? ", " : ""}
+                          Năm {index + 1}: {discount}%
+                        </span>
+                      ))}
+                    .
+                  </div>
+                )} */}
 
                 {/* NOTE */}
                 <div className="quotation-section mt-8 rounded-lg border border-gray-200 p-4 text-sm dark:border-gray-300">
@@ -1192,17 +1647,16 @@ export default function QuotationPage() {
 
                   <ul className="mt-2 list-disc space-y-1 pl-5 text-gray-600">
                     <li>
-                      Phí cài đặt và triển khai chỉ 1 lần duy nhất (dành cho phí
-                      hỗ trợ triển khai, đào tạo, lưu trữ dữ liệu trên cloud của
-                      nhà cung cấp).
+                      Phí cài đặt và triển khai chỉ 1 lần duy nhất (phí hỗ trợ
+                      triển khai, đào tạo, lưu trữ dữ liệu trên cloud của nhà
+                      cung cấp).
                     </li>
 
                     <li>
                       Sau thời gian đăng ký lần đầu, phí gia hạn phần mềm sẽ là{" "}
                       {""}
                       <p className="inline italic font-bold">
-                        {formatCurrency(form.mainUsers * form.mainPrice * 12)}{" "}
-                        {""}
+                        {formatCurrency(massAnnualPrice)} {""}
                       </p>
                       <p className="inline">
                         cho năm tiếp theo dựa trên số lượng nhân sự tại thời
@@ -1212,12 +1666,26 @@ export default function QuotationPage() {
                     </li>
 
                     <li>
-                      Báo giá được tính theo số lượng nhân sự sử dụng phần mềm
-                      cụ thể: {""}
+                      Báo giá được áp dụng theo phân khúc khách hàng:{" "}
                       <p className="inline italic font-bold">
-                        {form.mainUsers} người dùng
+                        {
+                          CUSTOMER_SEGMENTS.find(
+                            (item) => item.value === form.customerSegment,
+                          )?.label
+                        }
                       </p>
+                      .
                     </li>
+
+                    {form.customerSegment === "50+" && (
+                      <li>
+                        Báo giá được tính theo số lượng nhân sự sử dụng phần mềm
+                        cụ thể:{" "}
+                        <p className="inline italic font-bold">
+                          {form.mainUsers} người dùng
+                        </p>
+                      </li>
+                    )}
 
                     <li>
                       Phí tích hợp/phát triển tính năng phát sinh sẽ được đánh
@@ -1267,7 +1735,7 @@ export default function QuotationPage() {
                   {/* LOGO PAGE 2 */}
                   <div className="quotation-logo">
                     <img
-                      src="/public/images/Logo-1.jpg"
+                      src="https://i.ibb.co/21DLSLk0/Logo-1.jpg"
                       alt="SoftDreams"
                       className="mx-auto h-auto w-auto object-contain mt-0"
                     />
@@ -1426,77 +1894,79 @@ export default function QuotationPage() {
                       </tr>
 
                       {/* Server ứng dụng App */}
-{form.onpremServerApp > 0 && (
-  <tr>
-    <td className="border border-gray-300 p-2 text-center">
-      {form.onpremDiscount > 0 ? 5 : 4}
-    </td>
+                      {form.onpremServerApp > 0 && (
+                        <tr>
+                          <td className="border border-gray-300 p-2 text-center">
+                            {form.onpremDiscount > 0 ? 5 : 4}
+                          </td>
 
-    <td className="border border-gray-300 p-2">
-      Server ứng dụng App
-    </td>
+                          <td className="border border-gray-300 p-2">
+                            Server ứng dụng App
+                          </td>
 
-    <td className="border border-gray-300 p-2 text-center">
-      Cái
-    </td>
+                          <td className="border border-gray-300 p-2 text-center">
+                            Cái
+                          </td>
 
-    <td className="border border-gray-300 p-2 text-right">
-      {formatCurrency(form.onpremServerApp)}
-    </td>
-  </tr>
-)}
+                          <td className="border border-gray-300 p-2 text-right">
+                            {formatCurrency(form.onpremServerApp)}
+                          </td>
+                        </tr>
+                      )}
 
-{/* Server cơ sở dữ liệu */}
-{form.onpremServerDatabase > 0 && (
-  <tr>
-    <td className="border border-gray-300 p-2 text-center">
-      {form.onpremDiscount > 0
-        ? form.onpremServerApp > 0
-          ? 6
-          : 5
-        : form.onpremServerApp > 0
-          ? 5
-          : 4}
-    </td>
+                      {/* Server cơ sở dữ liệu */}
+                      {form.onpremServerDatabase > 0 && (
+                        <tr>
+                          <td className="border border-gray-300 p-2 text-center">
+                            {form.onpremDiscount > 0
+                              ? form.onpremServerApp > 0
+                                ? 6
+                                : 5
+                              : form.onpremServerApp > 0
+                              ? 5
+                              : 4}
+                          </td>
 
-    <td className="border border-gray-300 p-2">
-      Server cơ sở dữ liệu
-    </td>
+                          <td className="border border-gray-300 p-2">
+                            Server cơ sở dữ liệu
+                          </td>
 
-    <td className="border border-gray-300 p-2 text-center">
-      Cái
-    </td>
+                          <td className="border border-gray-300 p-2 text-center">
+                            Cái
+                          </td>
 
-    <td className="border border-gray-300 p-2 text-right">
-      {formatCurrency(form.onpremServerDatabase)}
-    </td>
-  </tr>
-)}
+                          <td className="border border-gray-300 p-2 text-right">
+                            {formatCurrency(form.onpremServerDatabase)}
+                          </td>
+                        </tr>
+                      )}
 
-{/* Phí bảo trì */}
-<tr>
-  <td className="border border-gray-300 p-2 text-center">
-    {form.onpremDiscount > 0
-      ? 7
-      : form.onpremServerApp > 0 && form.onpremServerDatabase > 0
-        ? 6
-        : form.onpremServerApp > 0 || form.onpremServerDatabase > 0
-          ? 5
-          : 4}
-  </td>
+                      {/* Phí bảo trì */}
+                      <tr>
+                        <td className="border border-gray-300 p-2 text-center">
+                          {form.onpremDiscount > 0
+                            ? 7
+                            : form.onpremServerApp > 0 &&
+                              form.onpremServerDatabase > 0
+                            ? 6
+                            : form.onpremServerApp > 0 ||
+                              form.onpremServerDatabase > 0
+                            ? 5
+                            : 4}
+                        </td>
 
-  <td className="border border-gray-300 p-2">
-    Phí bảo trì hệ thống hàng năm
-  </td>
+                        <td className="border border-gray-300 p-2">
+                          Phí bảo trì hệ thống hàng năm
+                        </td>
 
-  <td className="border border-gray-300 p-2 text-center">
-    Phí
-  </td>
+                        <td className="border border-gray-300 p-2 text-center">
+                          Phí
+                        </td>
 
-  <td className="border border-gray-300 p-2 text-right">
-    {formatCurrency(onpremCalculation.maintenance)}
-  </td>
-</tr>
+                        <td className="border border-gray-300 p-2 text-right">
+                          {formatCurrency(onpremCalculation.maintenance)}
+                        </td>
+                      </tr>
                     </tbody>
 
                     <tfoot>
