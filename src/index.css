@@ -974,7 +974,7 @@ span.flatpickr-weekday,
 .quotation-footer-contact {
   flex: 1;
   min-width: 0;
-
+  font-size: 12px;
   text-align: left;
 }
 
@@ -1294,12 +1294,12 @@ span.flatpickr-weekday,
   ===================================================== */
 
   #quotation-print .quotation-customer {
-    margin-bottom: 12px !important;
+    margin-bottom: 8px !important;
   }
 
   #quotation-print .quotation-customer > div {
     font-size: 12px !important;
-    line-height: 1.35 !important;
+    line-height: 1 !important;
   }
 
 
