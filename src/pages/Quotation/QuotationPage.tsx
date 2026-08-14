@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useMemo, useRef, useState } from "react";
 import Select from "react-select";
 import { getUsers } from "../../services/userService";
@@ -11,7 +12,7 @@ interface User {
   phone?: string;
   email?: string;
   avatarUrl?: string | string[];
-  role?: string;
+  roleID?: any;
 }
 
 interface QuotationForm {
@@ -56,6 +57,9 @@ interface QuotationForm {
   consultantEmail: string;
 
   selectedModules: string[];
+
+  vneidEnabled: boolean;
+  selectedVneidPackages: string[];
 }
 
 const formatCurrency = (value: number) =>
@@ -81,6 +85,7 @@ const EASYHRM_MODULES = [
   "Kê khai BHXH",
   "Quản lý tài sản",
   "Đánh giá nhân sự",
+  "Quản lý công việc",
   "Quản lý đào tạo",
   "Mạng nội bộ",
   "Đảng uỷ",
@@ -112,6 +117,89 @@ const CUSTOMER_SEGMENTS = [
     setupFee: 4500000,
   },
 ];
+
+const VNEID_PACKAGES = [
+  {
+    id: "ERM100",
+    name: "Gói ERM100",
+    quantity: 100,
+    unitPrice: 12000,
+    beforeVat: 1200000,
+    vat: 8,
+    price: 1296000,
+    note: "Cho 100 lượt ký số qua VNeID",
+  },
+  {
+    id: "ERM300",
+    name: "Gói ERM300",
+    quantity: 300,
+    unitPrice: 10000,
+    beforeVat: 3000000,
+    vat: 8,
+    price: 3240000,
+    note: "Cho 300 lượt ký số qua VNeID",
+  },
+  {
+    id: "ERM500",
+    name: "Gói ERM500",
+    quantity: 500,
+    unitPrice: 9000,
+    beforeVat: 4500000,
+    vat: 8,
+    price: 4860000,
+    note: "Cho 500 lượt ký số qua VNeID",
+  },
+  {
+    id: "ERM1000",
+    name: "Gói ERM1000",
+    quantity: 1000,
+    unitPrice: 8000,
+    beforeVat: 8000000,
+    vat: 8,
+    price: 8640000,
+    note: "Cho 1000 lượt ký số qua VNeID",
+  },
+  {
+    id: "ERM3000",
+    name: "Gói ERM3000",
+    quantity: 3000,
+    unitPrice: 7000,
+    beforeVat: 21000000,
+    vat: 8,
+    price: 22680000,
+    note: "Cho 3000 lượt ký số qua VNeID",
+  },
+  {
+    id: "ERM5000",
+    name: "Gói ERM5000",
+    quantity: 5000,
+    unitPrice: 6000,
+    beforeVat: 30000000,
+    vat: 8,
+    price: 32400000,
+    note: "Cho 5000 lượt ký số qua VNeID",
+  },
+  {
+    id: "ERM10000",
+    name: "Gói ERM10000",
+    quantity: 10000,
+    unitPrice: 5000,
+    beforeVat: 50000000,
+    vat: 8,
+    price: 54000000,
+    note: "Cho 10000 lượt ký số qua VNeID",
+  },
+  {
+    id: "ERM30000",
+    name: "Gói ERM30000",
+    quantity: 30000,
+    unitPrice: 4000,
+    beforeVat: 120000000,
+    vat: 8,
+    price: 129600000,
+    note: "Cho 30000 lượt ký số qua VNeID",
+  },
+] as const;
 
 const getMassAnnualPrice = (form: QuotationForm) => {
   if (form.customerSegment !== "50+") {
@@ -177,6 +265,9 @@ export default function QuotationPage() {
     consultantEmail: "nguyennh@icarevietnam.vn",
 
     selectedModules: [],
+
+    vneidEnabled: false,
+    selectedVneidPackages: [],
   });
 
   useEffect(() => {
@@ -229,9 +320,12 @@ export default function QuotationPage() {
 
   const consultantUsers = useMemo(() => {
     return users.filter((user) => {
-      const role = String(user.role || "").toLowerCase();
+      const role = user?.roleID?._id || "";
 
-      return role !== "admin" && role !== "manager";
+      return (
+        role !== "67f87c9ac19b91da666bbdc5" &&
+        role !== "6a3a30ff5b1107c9a166df50"
+      );
     });
   }, [users]);
 
@@ -277,7 +371,17 @@ export default function QuotationPage() {
       const softwareTotal = softwareBeforeDiscount - discountAmount;
 
       // Phí khởi tạo luôn tính 100%, không giảm
-      const total = softwareTotal + form.implementationFee;
+      const vneidTotal = VNEID_PACKAGES.filter((pkg) =>
+        form.selectedVneidPackages.includes(pkg.id),
+      ).reduce((sum, pkg) => sum + pkg.price, 0);
+
+      const vneidPrice = VNEID_PACKAGES.filter((pkg) => {
+        const price = pkg.unitPrice || "";
+
+        return price;
+      });
+
+      const total = softwareTotal + form.implementationFee + vneidTotal;
 
       return {
         mainYear: packagePrice,
@@ -288,6 +392,8 @@ export default function QuotationPage() {
         total,
         isFixedPackage: true,
         packagePrice,
+        vneidTotal,
+        vneidPrice,
       };
     }
 
@@ -316,8 +422,12 @@ export default function QuotationPage() {
     // Phần mềm sau giảm
     const softwareTotal = softwareBeforeDiscount - discountAmount;
 
-    // Phí khởi tạo không giảm
-    const total = softwareTotal + form.implementationFee;
+    // Phí khởi tạo + gói lượt ký VNeID không giảm
+    const vneidTotal = VNEID_PACKAGES.filter((pkg) =>
+      form.selectedVneidPackages.includes(pkg.id),
+    ).reduce((sum, pkg) => sum + pkg.price, 0);
+
+    const total = softwareTotal + form.implementationFee + vneidTotal;
 
     return {
       mainYear,
@@ -328,6 +438,7 @@ export default function QuotationPage() {
       total,
       isFixedPackage: false,
       packagePrice: 0,
+      vneidTotal,
     };
   }, [
     form.customerSegment,
@@ -338,6 +449,7 @@ export default function QuotationPage() {
     form.duration,
     form.discounts,
     form.implementationFee,
+    form.selectedVneidPackages,
   ]);
 
   const onpremCalculation = useMemo(() => {
@@ -427,6 +539,9 @@ export default function QuotationPage() {
       consultantPhone: "0948 813 064",
       consultantEmail: "nguyennh@icarevietnam.vn",
 
+      vneidEnabled: false,
+      selectedVneidPackages: [],
+
       selectedModules: [
         "Tuyển dụng",
         "Thông tin nhân sự",
@@ -436,6 +551,7 @@ export default function QuotationPage() {
         "Booking",
         "Kê khai BHXH",
         "Quản lý tài sản",
+        "Quản lý công việc",
         "Đánh giá nhân sự",
         "Quản lý đào tạo",
         "Mạng nội bộ",
@@ -969,7 +1085,7 @@ export default function QuotationPage() {
                         Mỗi năm có thể áp dụng một mức giảm giá khác nhau.
                       </p>
                     </div>
-                    <div>
+                    <div className="rounded-xl border border-blue-200 bg-blue-50/60 p-4 dark:border-blue-900 dark:bg-blue-950/20">
                       <div className="flex items-center gap-3">
                         <label className="flex cursor-pointer items-center gap-2">
                           <input
@@ -990,7 +1106,7 @@ export default function QuotationPage() {
                         </label>
 
                         {form.freeMonths && (
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-right gap-2">
                             <select
                               value={form.giftedMonths}
                               onChange={(e) =>
@@ -1013,6 +1129,92 @@ export default function QuotationPage() {
                           </div>
                         )}
                       </div>
+                    </div>
+                    {/* GÓI LƯỢT KÝ VNeID */}
+                    <div className="rounded-xl border border-blue-200 bg-blue-50/60 p-4 dark:border-blue-900 dark:bg-blue-950/20">
+                      <label className="flex cursor-pointer items-start gap-3">
+                        <input
+                          type="checkbox"
+                          checked={form.vneidEnabled}
+                          onChange={(e) =>
+                            setForm((prev) => ({
+                              ...prev,
+                              vneidEnabled: e.target.checked,
+                              selectedVneidPackages: e.target.checked
+                                ? prev.selectedVneidPackages
+                                : [],
+                            }))
+                          }
+                          className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <div className="text-sm font-semibold text-gray-900 dark:text-white">
+                            Mua gói lượt ký VNeID
+                          </div>
+                          <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            Gói VNeID được cộng nguyên giá vào tổng báo giá,
+                            không áp dụng giảm giá EasyHRM.
+                          </div>
+                        </div>
+                      </label>
+
+                      {form.vneidEnabled && (
+                        <div className="mt-3 space-y-2 border-t border-blue-200 pt-3 dark:border-blue-900">
+                          <div className="text-xs font-medium text-gray-600 dark:text-gray-300">
+                            Chọn gói muốn mua (có thể chọn nhiều gói)
+                          </div>
+                          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                            {VNEID_PACKAGES.map((pkg) => {
+                              const checked =
+                                form.selectedVneidPackages.includes(pkg.id);
+                              return (
+                                <label
+                                  key={pkg.id}
+                                  className={`flex cursor-pointer items-center justify-between rounded-lg border p-2.5 transition ${
+                                    checked
+                                      ? "border-blue-500 bg-white dark:bg-gray-800"
+                                      : "border-gray-200 bg-white/70 hover:border-blue-300 dark:border-gray-700 dark:bg-gray-900/50"
+                                  }`}
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <input
+                                      type="checkbox"
+                                      checked={checked}
+                                      onChange={(e) =>
+                                        setForm((prev) => ({
+                                          ...prev,
+                                          selectedVneidPackages: e.target
+                                            .checked
+                                            ? [
+                                                ...prev.selectedVneidPackages,
+                                                pkg.id,
+                                              ]
+                                            : prev.selectedVneidPackages.filter(
+                                                (id) => id !== pkg.id,
+                                              ),
+                                        }))
+                                      }
+                                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    />
+                                    <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                                      {pkg.name}
+                                      <br/>
+                                      <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">{formatCurrency(pkg.price)}</span>
+                                    </span>
+                                    
+                                  </div>
+                                  
+                                </label>
+                              );
+                            })}
+                          </div>
+                          <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                            {form.selectedVneidPackages.length === 0
+                              ? "Chưa chọn gói cụ thể: bảng báo giá trang 2 sẽ hiển thị toàn bộ 8 gói."
+                              : `Đã chọn ${form.selectedVneidPackages.length} gói: bảng trang 2 chỉ hiển thị các gói đã chọn.`}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1063,6 +1265,15 @@ export default function QuotationPage() {
                     <div className="mt-2 flex justify-between text-sm">
                       <span>Tặng</span>
                       <strong>{form.giftedMonths} tháng</strong>
+                    </div>
+                  )}
+
+                  {massCalculation.vneidTotal > 0 && (
+                    <div className="mt-2 flex justify-between text-sm">
+                      <span>Gói lượt ký VNeID</span>
+                      <strong>
+                        {formatCurrency(massCalculation.vneidTotal)}
+                      </strong>
                     </div>
                   )}
 
@@ -1293,7 +1504,9 @@ export default function QuotationPage() {
                         )}
 
                         <div>
-                          <div className="font-medium dark:text-white">{user.label}</div>
+                          <div className="font-medium dark:text-white">
+                            {user.label}
+                          </div>
 
                           {user.phone && (
                             <div className="text-xs text-gray-500 dark:text-white">
@@ -1569,7 +1782,7 @@ export default function QuotationPage() {
                           <td className="border border-gray-300 px-2 py-1 text-center whitespace-nowrap">
                             {form.discounts[0] > 0
                               ? `${form.discounts[0]}%`
-                              : "-"}
+                              : "0%"}
                           </td>
 
                           <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
@@ -1610,6 +1823,43 @@ export default function QuotationPage() {
                             {formatCurrency(form.implementationFee)}
                           </td>
                         </tr>
+
+                        {massCalculation.vneidTotal > 0 && (
+                          <tr>
+                            <td className="border border-gray-300 px-2 py-1 text-center">
+                              3
+                            </td>
+                            <td className="service-cell border border-gray-300 px-2 py-1 text-left">
+                              Gói lượt ký số VNeID
+                              <div className="text-xs text-gray-500">
+                                {form.selectedVneidPackages
+                                  .map(
+                                    (id) =>
+                                      VNEID_PACKAGES.find(
+                                        (pkg) => pkg.id === id,
+                                      )?.name,
+                                  )
+                                  .filter(Boolean)
+                                  .join(", ")}
+                              </div>
+                            </td>
+                            <td className="border border-gray-300 px-2 py-1 text-center">
+                              Gói
+                            </td>
+                            <td className="border border-gray-300 px-2 py-1 text-center">
+                              {form.selectedVneidPackages.length}
+                            </td>
+                            <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
+                              {formatCurrency(massCalculation.vneidTotal)}
+                            </td>
+                            <td className="border border-gray-300 px-2 py-1 text-center">
+                              -
+                            </td>
+                            <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
+                              {formatCurrency(massCalculation.vneidTotal)}
+                            </td>
+                          </tr>
+                        )}
                       </>
                     ) : (
                       <>
@@ -1642,7 +1892,7 @@ export default function QuotationPage() {
                           <td className="border border-gray-300 px-2 py-1 text-center whitespace-nowrap">
                             {form.discounts[0] > 0
                               ? `${form.discounts[0]}%`
-                              : "-"}
+                              : "0%"}
                           </td>
                           <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
                             {formatCurrency(
@@ -1679,7 +1929,7 @@ export default function QuotationPage() {
                             <td className="border border-gray-300 px-2 py-1 text-center">
                               {form.discounts[0] > 0
                                 ? `${form.discounts[0]}%`
-                                : "-"}
+                                : "0%"}
                             </td>
 
                             <td className="border border-gray-300 px-2 py-1 text-center">
@@ -1722,6 +1972,43 @@ export default function QuotationPage() {
                             {formatCurrency(form.implementationFee)}
                           </td>
                         </tr>
+
+                        {massCalculation.vneidTotal > 0 && (
+                          <tr>
+                            <td className="border border-gray-300 px-2 py-1 text-center">
+                              {form.seasonalUsers > 0 ? 4 : 3}
+                            </td>
+                            <td className="service-cell border border-gray-300 px-2 py-1 text-left">
+                              Gói lượt ký số VNeID
+                            </td>
+                            <td className="border border-gray-300 px-2 py-1 text-center">
+                              Gói
+                            </td>
+                            <td className="border border-gray-300 px-2 py-1 text-center">
+                              {form.selectedVneidPackages.length}
+                            </td>
+                            <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
+                              {formatCurrency(
+                                Number(
+                                  form.selectedVneidPackages
+                                    .map(
+                                      (id) =>
+                                        VNEID_PACKAGES.find(
+                                          (pkg) => pkg.id === id,
+                                        )?.unitPrice,
+                                    )
+                                    .filter(Boolean),
+                                ),
+                              )}
+                            </td>
+                            <td className="border border-gray-300 px-2 py-1 text-center">
+                              -
+                            </td>
+                            <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
+                              {formatCurrency(massCalculation.vneidTotal)}
+                            </td>
+                          </tr>
+                        )}
                       </>
                     )}
                   </tbody>
@@ -1745,12 +2032,28 @@ export default function QuotationPage() {
                             : form.mainUsers * form.mainPrice * 12 +
                               form.seasonalUsers * form.seasonalPrice * 12) *
                             (1 - (form.discounts[0] ?? 0) / 100) +
-                            form.implementationFee,
+                            form.implementationFee +
+                            massCalculation.vneidTotal,
                         )}
                       </td>
                     </tr>
                   </tfoot>
                 </table>
+
+                {massCalculation.vneidTotal > 0 && (
+                  <div className="mt-2 text-xs italic text-gray-500">
+                    Gói lượt ký VNeID đã chọn:{" "}
+                    {form.selectedVneidPackages
+                      .map(
+                        (id) =>
+                          VNEID_PACKAGES.find((pkg) => pkg.id === id)?.name,
+                      )
+                      .filter(Boolean)
+                      .join(", ")}{" "}
+                    — {formatCurrency(massCalculation.vneidTotal)} (không áp
+                    dụng giảm giá).
+                  </div>
+                )}
 
                 {/* BẢNG GIÁ THEO THỜI HẠN */}
                 <div className="mt-2">
@@ -1804,7 +2107,9 @@ export default function QuotationPage() {
 
                         // Phí khởi tạo luôn cộng 100%, không giảm
                         const total =
-                          softwareAfterDiscount + form.implementationFee;
+                          softwareAfterDiscount +
+                          form.implementationFee +
+                          massCalculation.vneidTotal;
 
                         return (
                           <tr key={year}>
@@ -1820,7 +2125,7 @@ export default function QuotationPage() {
 
                             {/* GIẢM GIÁ CỦA CHÍNH THỜI HẠN NÀY */}
                             <td className="border border-gray-300 px-2 py-1 text-center">
-                              {discountRate > 0 ? `${discountRate}%` : "-"}
+                              {discountRate > 0 ? `${discountRate}%` : "0%"}
                             </td>
 
                             {/* PHÍ KHỞI TẠO */}
@@ -1912,6 +2217,22 @@ export default function QuotationPage() {
                       </li>
                     )}
 
+                    {massCalculation.vneidTotal > 0 && (
+                      <li>
+                        Khách hàng sử dụng gói lượt ký VNeID:{" "}
+                        {form.selectedVneidPackages
+                          .map(
+                            (id) =>
+                              VNEID_PACKAGES.find((pkg) => pkg.id === id)?.name,
+                          )
+                          .filter(Boolean)
+                          .join(", ")}{" "}
+                        với tổng giá trị{" "}
+                        {formatCurrency(massCalculation.vneidTotal)}. Gói VNeID
+                        không áp dụng chiết khấu của phần mềm EasyHRM.
+                      </li>
+                    )}
+
                     <li>
                       Phí tích hợp/phát triển tính năng phát sinh sẽ được đánh
                       giá và báo giá riêng theo yêu cầu.
@@ -1931,7 +2252,7 @@ export default function QuotationPage() {
                 <div className="quotation-footer">
                   {/* LEFT - CONTACT */}
                   <div className="quotation-footer-contact">
-                    <p className=" leading-5">
+                    <p className=" leading-4">
                       Mọi thắc mắc, Quý khách vui lòng liên hệ:
                     </p>
 
@@ -1954,6 +2275,213 @@ export default function QuotationPage() {
                   </div>
                 </div>
               </div>
+
+              {form.deployment === "mass" && form.vneidEnabled && (
+                <div className="quotation-page quotation-page-2">
+                  <div className="quotation-logo">
+                    <img
+                      src="https://i.ibb.co/21DLSLk0/Logo-1.jpg"
+                      alt="SoftDreams"
+                      className="mx-auto h-auto w-auto object-contain mt-0"
+                    />
+                  </div>
+
+                  <div className="quotation-header border-b border-orange-500 pb-4">
+                    <div className="flex items-start justify-between gap-8">
+                      <div className="min-w-0">
+                        <div className="mt-1 text-[13px] font-medium uppercase tracking-wide text-gray-900">
+                          CÔNG TY CỔ PHẦN ĐẦU TƯ CÔNG NGHỆ
+                          <br />
+                          VÀ THƯƠNG MẠI SOFTDREAMS
+                        </div>
+                        <div className="mt-2 text-[13px] leading-4 text-gray-600">
+                          Số 7, Ngách 97/1, Ngõ 97 Chính Kinh, Phường Thanh
+                          Xuân, TP Hà Nội, Việt Nam
+                          <br />
+                          Điện thoại: {form.consultantPhone}
+                          <br />
+                          Email: {form.consultantEmail}
+                        </div>
+                      </div>
+                      <div className="shrink-0 pt-1 text-right text-[13px] leading-4 text-gray-500">
+                        {form.city}, {formatDate(form.quotationDate)}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="py-5 text-center">
+                    <h1 className="text-xl font-bold uppercase tracking-wide">
+                      BẢNG BÁO GIÁ GÓI LƯỢT KÝ VNeID
+                    </h1>
+                    <p className="mt-1 text-xl font-bold text-orange-600">
+                      Dịch vụ ký số qua VNeID
+                    </p>
+                  </div>
+
+                  <div className="mb-2 space-y-2 quotation-customer">
+                    <div className="mb-4 text-sm leading-6">
+                      <strong>Kính gửi:</strong>{" "}
+                      <span className="font-bold italic">
+                        {form.customerName ||
+                          "........................................................"}
+                      </span>
+                    </div>
+
+                    <div className="mb-4 text-sm  leading-6">
+                      <strong>Mã số thuế:</strong>{" "}
+                      <span className="font-bold italic">
+                        {form.taxCode ||
+                          "........................................................"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <table className="quotation-table vneid-table w-full border-collapse text-[12px]">
+                    <colgroup>
+                      <col className="vneid-col-stt" />
+                      <col className="vneid-col-service" />
+                      <col className="vneid-col-unit" />
+                      <col className="vneid-col-quantity" />
+                      <col className="vneid-col-price" />
+                      <col className="vneid-col-before-vat" />
+                      <col className="vneid-col-vat" />
+                      <col className="vneid-col-after-vat" />
+                      <col className="vneid-col-note" />
+                    </colgroup>
+                    <thead>
+                      <tr className="bg-orange-500 text-white">
+                        <th className="border border-gray-300 px-1 py-1 text-center">
+                          STT
+                        </th>
+                        <th className="border border-gray-300 px-1 py-1 text-center">
+                          Gói dịch vụ
+                        </th>
+                        <th className="border border-gray-300 px-1 py-1 text-center">
+                          Đơn vị
+                          <br />
+                          tính
+                        </th>
+                        <th className="border border-gray-300 px-1 py-1 text-center">
+                          Số
+                          <br />
+                          lượt ký
+                        </th>
+                        <th className="border border-gray-300 px-1 py-1 text-center">
+                          Đơn giá
+                          <br />
+                          (VNĐ)
+                        </th>
+                        <th className="border border-gray-300 px-1 py-1 text-center">
+                          Thành tiền
+                          <br />
+                          trước thuế
+                          <br />
+                          (VNĐ)
+                        </th>
+                        <th className="border border-gray-300 px-1 py-1 text-center">
+                          VAT
+                          <br />
+                          (%)
+                        </th>
+                        <th className="border border-gray-300 px-1 py-1 text-center">
+                          Thành tiền
+                          <br />
+                          sau thuế
+                          <br />
+                          (VNĐ)
+                        </th>
+                        <th className="border border-gray-300 px-1 py-1 text-center">
+                          Ghi chú
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {VNEID_PACKAGES.map((pkg, index) => (
+                        <tr key={pkg.id}>
+                          <td className="border border-gray-300 px-1 py-1 text-center">
+                            {index + 1}
+                          </td>
+
+                          <td className="border border-gray-300 px-1 py-1 text-center font-medium">
+                            {pkg.name}
+                          </td>
+
+                          <td className="border border-gray-300 px-1 py-1 text-center">
+                            Lượt ký
+                          </td>
+
+                          <td className="border border-gray-300 px-1 py-1 text-center">
+                            {pkg.quantity.toLocaleString("vi-VN")}
+                          </td>
+
+                          <td className="border border-gray-300 px-1 py-1 text-center">
+                            {formatCurrency(pkg.unitPrice)}
+                          </td>
+
+                          <td className="border border-gray-300 px-1 py-1 text-right">
+                            {formatCurrency(pkg.beforeVat)}
+                          </td>
+
+                          <td className="border border-gray-300 px-1 py-1 text-center">
+                            {pkg.vat}%
+                          </td>
+
+                          <td className="border border-gray-300 px-1 py-1 text-right font-bold">
+                            {formatCurrency(pkg.price)}
+                          </td>
+
+                          <td className="border border-gray-300 px-1 py-1 text-center">
+                            {pkg.note}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+
+                  <div className="quotation-section mt-5 rounded-lg border border-gray-200 p-3 text-sm">
+                    <strong>Ghi chú:</strong>
+                    <ul className="mt-1 list-disc space-y-1 pl-5 text-gray-600">
+                      <li>
+                        Giá gói lượt ký VNeID đã bao gồm VAT 8% theo bảng giá.
+                      </li>
+                      <li>
+                        Gói lượt ký VNeID được cộng nguyên giá vào tổng báo giá
+                        và không áp dụng chiết khấu EasyHRM.
+                      </li>
+                      {/* {form.selectedVneidPackages.length === 0 ? (
+                        <li>
+                          Chưa chọn gói cụ thể, bảng trên hiển thị toàn bộ các
+                          gói đang cung cấp.
+                        </li>
+                      ) : (
+                        <li>
+                          Khách hàng đã chọn {form.selectedVneidPackages.length}{" "}
+                          gói với tổng giá trị{" "}
+                          {formatCurrency(massCalculation.vneidTotal)}.
+                        </li>
+                      )} */}
+                    </ul>
+                  </div>
+
+                  <div className="quotation-footer">
+                    <div className="quotation-footer-contact">
+                      <p className="leading-4">
+                        Mọi thắc mắc, Quý khách vui lòng liên hệ:
+                      </p>
+                      <p className="font-semibold">
+                        {form.consultantName} - Chuyên viên tư vấn
+                      </p>
+                      <p>TEL/Zalo: {form.consultantPhone}</p>
+                      <p>Email: {form.consultantEmail}</p>
+                    </div>
+                    <div className="quotation-footer-copyright">
+                      <div>COPYRIGHT © 2026</div>
+                      <div>Created by NNguyen1202</div>
+                      <div>All rights Reserved</div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {form.showOnpremiseQuotation && (
                 <div className="quotation-page quotation-page-2">
@@ -2258,19 +2786,17 @@ export default function QuotationPage() {
                   {/* FOOTER PAGE 2 */}
                   <div className="quotation-footer">
                     <div className="quotation-footer-contact">
-                      <p className="text-sm leading-5">
+                      <p className="leading-4">
                         Mọi thắc mắc, Quý khách vui lòng liên hệ:
                       </p>
 
-                      <p className="mt-1 text-sm font-semibold">
+                      <p className="font-semibold">
                         {form.consultantName} - Chuyên viên tư vấn
                       </p>
 
-                      <p className="text-sm">
-                        TEL/Zalo: {form.consultantPhone}
-                      </p>
+                      <p>TEL/Zalo: {form.consultantPhone}</p>
 
-                      <p className="text-sm">Email: {form.consultantEmail}</p>
+                      <p>Email: {form.consultantEmail}</p>
                     </div>
 
                     <div className="quotation-footer-copyright">
