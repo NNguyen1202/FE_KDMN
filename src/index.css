@@ -1311,7 +1311,7 @@ span.flatpickr-weekday,
     margin-top: 0 !important;
     margin-bottom: 8px !important;
 
-    font-size: 13px !important;
+    font-size: 12px !important;
     line-height: 1.45 !important;
   }
 
@@ -1330,7 +1330,7 @@ span.flatpickr-weekday,
   }
 
   #quotation-print .quotation-section h3 {
-    font-size: 13px !important;
+    font-size: 12px !important;
     line-height: 1.25 !important;
   }
 
@@ -1342,7 +1342,7 @@ span.flatpickr-weekday,
   #quotation-print .mb-4.text-sm {
     margin-bottom: 5px !important;
 
-    font-size: 13px !important;
+    font-size: 12px !important;
   }
 
 
@@ -1354,7 +1354,7 @@ span.flatpickr-weekday,
     margin-bottom: 7px !important;
     padding: 8px !important;
 
-    font-size: 13px !important;
+    font-size: 12px !important;
     line-height: 1.35 !important;
 
     break-inside: avoid !important;
@@ -1381,7 +1381,7 @@ span.flatpickr-weekday,
 
     margin: 0 !important;
 
-    font-size: 13px !important;
+    font-size: 12px !important;
 
     break-inside: avoid !important;
     page-break-inside: avoid !important;
@@ -1503,10 +1503,10 @@ span.flatpickr-weekday,
   #quotation-print .quotation-section.mt-8 {
   margin-top: 5px !important;
   margin-bottom: 5px !important;
-  padding: 5px !important;
+  padding: 2px !important;
 
   font-size: 12px !important;
-  line-height: 1.2 !important;
+  line-height: 1.1 !important;
 
   break-inside: avoid !important;
   page-break-inside: avoid !important;
@@ -1521,7 +1521,7 @@ span.flatpickr-weekday,
 
 #quotation-print .quotation-section.mt-8 li {
   margin-bottom: 0 !important;
-  line-height: 1.2 !important;
+  line-height: 1.1 !important;
 }
 
 
@@ -1610,4 +1610,105 @@ span.flatpickr-weekday,
   }
 
   
+}
+/* =========================================================
+   VNEID SIGNATURE PACKAGE TABLE - PAGE 2
+========================================================= */
+
+#quotation-print .vneid-quotation-page {
+  padding-left: 10mm !important;
+  padding-right: 10mm !important;
+}
+
+#quotation-print .vneid-table {
+  font-size: 12px !important;
+  table-layout: fixed !important;
+}
+
+#quotation-print .vneid-table .vneid-col-stt {
+  width: 6% !important;
+}
+
+#quotation-print .vneid-table .vneid-col-service {
+  width: 16% !important;
+}
+
+#quotation-print .vneid-table .vneid-col-unit {
+  width: 9% !important;
+}
+
+#quotation-print .vneid-table .vneid-col-quantity {
+  width: 9% !important;
+}
+
+#quotation-print .vneid-table .vneid-col-price {
+  width: 13% !important;
+}
+
+#quotation-print .vneid-table .vneid-col-before-vat {
+  width: 20% !important;
+}
+
+#quotation-print .vneid-table .vneid-col-vat {
+  width: 6% !important;
+}
+
+#quotation-print .vneid-table .vneid-col-after-vat {
+  width: 20% !important;
+}
+
+#quotation-print .vneid-table .vneid-col-note {
+  width: 21% !important;
+}
+
+#quotation-print .vneid-table th,
+#quotation-print .vneid-table td {
+  padding: 2.5px 3px !important;
+  font-size: 12px !important;
+  line-height: 1.15 !important;
+  vertical-align: middle !important;
+  overflow-wrap: break-word !important;
+  word-break: normal !important;
+}
+
+#quotation-print .vneid-table th {
+  font-size: 12px !important;
+  line-height: 1.15 !important;
+}
+
+#quotation-print .vneid-table td:nth-child(5),
+#quotation-print .vneid-table td:nth-child(6),
+#quotation-print .vneid-table td:nth-child(8) {
+  white-space: normal !important;
+  word-break: keep-all !important;
+}
+
+#quotation-print .vneid-table .vneid-col-note {
+  white-space: normal !important;
+}
+
+@media print {
+  #quotation-print .vneid-quotation-page .quotation-logo {
+    height: 24mm !important;
+    margin-bottom: 2mm !important;
+  }
+
+  #quotation-print .vneid-quotation-page .quotation-header {
+    padding-bottom: 2mm !important;
+  }
+
+  #quotation-print .vneid-quotation-page .quotation-table {
+    margin-top: 0 !important;
+  }
+
+  #quotation-print .quotation-section.mt-5 {
+    margin-top: 15px !important;
+    margin-bottom: 5px !important;
+    padding: 2px !important;
+    font-size: 12px !important;
+    line-height: 1.1 !important;
+
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
 }
