@@ -1198,12 +1198,12 @@ export default function QuotationPage() {
                                     />
                                     <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
                                       {pkg.name}
-                                      <br/>
-                                      <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">{formatCurrency(pkg.price)}</span>
+                                      <br />
+                                      <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">
+                                        {formatCurrency(pkg.price)}
+                                      </span>
                                     </span>
-                                    
                                   </div>
-                                  
                                 </label>
                               );
                             })}
@@ -1830,18 +1830,7 @@ export default function QuotationPage() {
                               3
                             </td>
                             <td className="service-cell border border-gray-300 px-2 py-1 text-left">
-                              Gói lượt ký số VNeID
-                              <div className="text-xs text-gray-500">
-                                {form.selectedVneidPackages
-                                  .map(
-                                    (id) =>
-                                      VNEID_PACKAGES.find(
-                                        (pkg) => pkg.id === id,
-                                      )?.name,
-                                  )
-                                  .filter(Boolean)
-                                  .join(", ")}
-                              </div>
+                              Gói lượt ký số VNeID (VAT 8%)
                             </td>
                             <td className="border border-gray-300 px-2 py-1 text-center">
                               Gói
@@ -1850,7 +1839,18 @@ export default function QuotationPage() {
                               {form.selectedVneidPackages.length}
                             </td>
                             <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
-                              {formatCurrency(massCalculation.vneidTotal)}
+                              {formatCurrency(
+                                Number(
+                                  form.selectedVneidPackages
+                                    .map(
+                                      (id) =>
+                                        VNEID_PACKAGES.find(
+                                          (pkg) => pkg.id === id,
+                                        )?.unitPrice,
+                                    )
+                                    .filter(Boolean),
+                                ),
+                              )}
                             </td>
                             <td className="border border-gray-300 px-2 py-1 text-center">
                               -
@@ -1979,7 +1979,7 @@ export default function QuotationPage() {
                               {form.seasonalUsers > 0 ? 4 : 3}
                             </td>
                             <td className="service-cell border border-gray-300 px-2 py-1 text-left">
-                              Gói lượt ký số VNeID
+                              Gói lượt ký số VNeID (VAT 8%)
                             </td>
                             <td className="border border-gray-300 px-2 py-1 text-center">
                               Gói
@@ -2056,107 +2056,105 @@ export default function QuotationPage() {
                 )}
 
                 {/* BẢNG GIÁ THEO THỜI HẠN */}
-                <div className="mt-2">
-                  <div className="mb-2 text-sm font-bold text-gray-900">
-                    Bảng giá theo thời hạn đăng ký
-                  </div>
+                <p className="mt-2 mb-2 print:text-[12px] ">
+                  <strong>Bảng giá theo thời hạn đăng ký</strong>
+                </p>
 
-                  <table className="quotation-table w-full border-collapse text-sm">
-                    <thead>
-                      <tr className="bg-orange-500 text-white">
-                        <th className="border border-gray-300 px-2 py-1 text-center">
-                          Thời hạn
-                        </th>
+                <table className="quotation-table w-full border-collapse text-sm">
+                  <thead>
+                    <tr className="bg-orange-500 text-white">
+                      <th className="border border-gray-300 px-2 py-1 text-center">
+                        Thời hạn
+                      </th>
 
-                        <th className="border border-gray-300 px-2 py-1 text-center">
-                          Giá phần mềm
-                        </th>
+                      <th className="border border-gray-300 px-2 py-1 text-center">
+                        Giá phần mềm
+                      </th>
 
-                        <th className="border border-gray-300 px-2 py-1 text-center">
-                          Giảm giá
-                        </th>
+                      <th className="border border-gray-300 px-2 py-1 text-center">
+                        Giảm giá
+                      </th>
 
-                        <th className="border border-gray-300 px-2 py-1 text-center">
-                          Phí khởi tạo
-                        </th>
+                      <th className="border border-gray-300 px-2 py-1 text-center">
+                        Phí khởi tạo
+                      </th>
 
-                        <th className="border border-gray-300 px-2 py-1 text-right">
-                          Tổng thanh toán
-                        </th>
-                      </tr>
-                    </thead>
+                      <th className="border border-gray-300 px-2 py-1 text-right">
+                        Tổng thanh toán
+                      </th>
+                    </tr>
+                  </thead>
 
-                    <tbody>
-                      {[1, 2, 3].map((year) => {
-                        // Giá phần mềm của toàn bộ thời hạn
-                        const softwareBeforeDiscount = massAnnualPrice * year;
+                  <tbody>
+                    {[1, 2, 3].map((year) => {
+                      // Giá phần mềm của toàn bộ thời hạn
+                      const softwareBeforeDiscount = massAnnualPrice * year;
 
-                        // Mỗi thời hạn có MỘT mức giảm riêng
-                        // 1 năm -> discounts[0]
-                        // 2 năm -> discounts[1]
-                        // 3 năm -> discounts[2]
-                        const discountRate = form.discounts[year - 1] ?? 0;
+                      // Mỗi thời hạn có MỘT mức giảm riêng
+                      // 1 năm -> discounts[0]
+                      // 2 năm -> discounts[1]
+                      // 3 năm -> discounts[2]
+                      const discountRate = form.discounts[year - 1] ?? 0;
 
-                        // Tiền giảm của chính thời hạn này
-                        const discountAmount =
-                          softwareBeforeDiscount * (discountRate / 100);
+                      // Tiền giảm của chính thời hạn này
+                      const discountAmount =
+                        softwareBeforeDiscount * (discountRate / 100);
 
-                        // Tiền phần mềm sau giảm
-                        const softwareAfterDiscount =
-                          softwareBeforeDiscount - discountAmount;
+                      // Tiền phần mềm sau giảm
+                      const softwareAfterDiscount =
+                        softwareBeforeDiscount - discountAmount;
 
-                        // Phí khởi tạo luôn cộng 100%, không giảm
-                        const total =
-                          softwareAfterDiscount +
-                          form.implementationFee +
-                          massCalculation.vneidTotal;
+                      // Phí khởi tạo luôn cộng 100%, không giảm
+                      const total =
+                        softwareAfterDiscount +
+                        form.implementationFee +
+                        massCalculation.vneidTotal;
 
-                        return (
-                          <tr key={year}>
-                            {/* THỜI HẠN */}
-                            <td className="border border-gray-300 px-2 py-1 text-center">
-                              {year} năm
-                            </td>
+                      return (
+                        <tr key={year}>
+                          {/* THỜI HẠN */}
+                          <td className="border border-gray-300 px-2 py-1 text-center">
+                            {year} năm
+                          </td>
 
-                            {/* GIÁ PHẦN MỀM */}
-                            <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
-                              {formatCurrency(softwareBeforeDiscount)}
-                            </td>
+                          {/* GIÁ PHẦN MỀM */}
+                          <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
+                            {formatCurrency(softwareBeforeDiscount)}
+                          </td>
 
-                            {/* GIẢM GIÁ CỦA CHÍNH THỜI HẠN NÀY */}
-                            <td className="border border-gray-300 px-2 py-1 text-center">
-                              {discountRate > 0 ? `${discountRate}%` : "0%"}
-                            </td>
+                          {/* GIẢM GIÁ CỦA CHÍNH THỜI HẠN NÀY */}
+                          <td className="border border-gray-300 px-2 py-1 text-center">
+                            {discountRate > 0 ? `${discountRate}%` : "0%"}
+                          </td>
 
-                            {/* PHÍ KHỞI TẠO */}
-                            <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
-                              {formatCurrency(form.implementationFee)}
-                            </td>
+                          {/* PHÍ KHỞI TẠO */}
+                          <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
+                            {formatCurrency(form.implementationFee)}
+                          </td>
 
-                            {/* TỔNG THANH TOÁN */}
-                            <td className="border border-gray-300 px-2 py-1 text-right font-bold whitespace-nowrap">
-                              {formatCurrency(total)}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                          {/* TỔNG THANH TOÁN */}
+                          <td className="border border-gray-300 px-2 py-1 text-right font-bold whitespace-nowrap">
+                            {formatCurrency(total)}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
 
-                  <div className="mt-2 text-xs italic text-gray-500">
-                    Giá trên đã áp dụng mức giảm giá theo từng năm đăng ký:{" "}
-                    {form.discounts
-                      .slice(0, form.duration)
-                      .map((discount, index) => (
-                        <span key={index}>
-                          {index > 0 ? ", " : ""}
-                          <strong>
-                            Năm {index + 1}: {discount}%
-                          </strong>
-                        </span>
-                      ))}{" "}
-                    theo chính sách thương mại được lựa chọn.
-                  </div>
+                <div className="mt-2 text-xs italic text-gray-500">
+                  Giá trên đã áp dụng mức giảm giá theo từng năm đăng ký:{" "}
+                  {form.discounts
+                    .slice(0, form.duration)
+                    .map((discount, index) => (
+                      <span key={index}>
+                        {index > 0 ? ", " : ""}
+                        <strong>
+                          Năm {index + 1}: {discount}%
+                        </strong>
+                      </span>
+                    ))}{" "}
+                  theo chính sách thương mại được lựa chọn.
                 </div>
 
                 {/* NOTE */}
