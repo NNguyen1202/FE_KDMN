@@ -494,6 +494,38 @@ export default function QuotationPage() {
   }, [form.deployment, massCalculation.total, onpremCalculation.firstYear]);
 
   const printQuotation = () => {
+    // Ưu tiên Mã số thuế; nếu không có thì dùng Số lượng nhân sự.
+    const identifier =
+      form.taxCode.trim() ||
+      (form.customerSegment === "50+"
+        ? String(form.mainUsers)
+        : String(form.customerSegment));
+
+    console.log("iden: ", identifier);
+
+    // Ngày xuất PDF lấy ngày hiện tại.
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, "0");
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const year = now.getFullYear();
+
+    // Tên file
+    const safeIdentifier = identifier.replace(/[\\/:*?"<>|]/g, "-").trim();
+
+    const fileName = `Quotation_${safeIdentifier}user_${day}-${month}-${year}`;
+
+    // Chrome / Edge sẽ lấy document.title làm tên mặc định
+    // khi chọn Save as PDF.
+    const originalTitle = document.title;
+    document.title = fileName;
+
+    const restoreTitle = () => {
+      document.title = originalTitle;
+      window.removeEventListener("afterprint", restoreTitle);
+    };
+
+    window.addEventListener("afterprint", restoreTitle);
+
     window.print();
   };
 
