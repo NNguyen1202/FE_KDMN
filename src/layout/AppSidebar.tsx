@@ -29,7 +29,8 @@ type NavItem = {
 const navItems: NavItem[] = [
   {
     name: "Dashboard",
-    path: "/",
+    // path: "/",
+    path: "/home",
     icon: <DollarLineIcon />,
   },
   {
@@ -357,7 +358,8 @@ const AppSidebar: React.FC = () => {
           !isExpanded && !isHovered ? "lg:justify-center" : "justify-center"
         }`}
       >
-        <Link to="/">
+        {/* <Link to="/"> */}
+        <Link to="/home">
           {isExpanded || isHovered || isMobileOpen ? (
             <>
               <img
@@ -405,6 +407,7 @@ const AppSidebar: React.FC = () => {
               {renderMenuItems(navItems, "main")}
             </div>
             <div className="">
+              <img src="https://i.ibb.co/JW8tZV2n/image.png"></img>
               {/* <h2
                 className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
                   !isExpanded && !isHovered

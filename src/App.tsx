@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import SignIn from "./pages/AuthPages/SignIn";
 import SignUp from "./pages/AuthPages/SignUp";
 import NotFound from "./pages/OtherPage/NotFound";
@@ -37,132 +37,292 @@ import RevenueViewDetail from "./pages/Revenue/RevenueViewDetail";
 import RevenueListView from "./pages/Revenue/RevenueListView";
 import RevenueSearchPage from "./pages/Revenue/RevenueSearchPage";
 import QuotationPage from "./pages/Quotation/QuotationPage";
+import NationalDayPage from "./pages/Dashboard/NationalDayBanner";
 
-export default function App() {
-  console.log("APP RENDER");
+// export default function App() {
+//   console.log("APP RENDER");
+//   return (
+//     <>
+//       <Router>
+//         <ScrollToTop />
+//         <MoonFestivalDecoration />
+//         <Routes>
+//           {/* Dashboard Layout */}
+//           {/* =========================
+//                 MÀN HÌNH QUỐC KHÁNH
+//               ========================= */}
+//           {/* <Route path="/national-day" element={<NationalDayBanner />} />
+
+//           <Route element={<AppLayout />}>
+//             <Route
+//               index
+//               element={
+//                 <ProtectedRoute>
+//                   <Home />
+//                 </ProtectedRoute>
+//               }
+//             /> */}
+
+//           {/* Màn Quốc Khánh khi truy cập "/" */}
+//           <Route
+//             index
+//             element={
+//               <ProtectedRoute>
+//                 <NationalDayPage />
+//               </ProtectedRoute>
+//             }
+//           />
+
+//           {/* Màn Quốc Khánh nếu truy cập trực tiếp */}
+//           <Route
+//             path="/national-day"
+//             element={
+//               <ProtectedRoute>
+//                 <NationalDayPage />
+//               </ProtectedRoute>
+//             }
+//           />
+
+//           {/* Dashboard */}
+//           <Route element={<AppLayout />}>
+//             <Route path="/home" element={<Home />} />
+
+//             <Route path="/users" element={<UserManagement />} />
+
+//             <Route path="/users/create" element={<CreateUser />} />
+
+//             <Route path="/users/edit/:id" element={<EditUser />} />
+
+//             <Route path="/users/view/:id" element={<ViewUser />} />
+
+//             <Route path="/notifications" element={<NotificationPage />} />
+
+//             <Route path="/employee-target" element={<EmployeeTargetPage />} />
+
+//             <Route
+//               path="/employee-target-year"
+//               element={<EmployeeTargetYearPage />}
+//             />
+
+//             <Route path="/revenue/search" element={<RevenueSearchPage />} />
+
+//             <Route
+//               path="/revenue-report"
+//               element={
+//                 <ProtectedRoute>
+//                   <RevenueCalendar />
+//                 </ProtectedRoute>
+//               }
+//             />
+
+//             <Route
+//               path="/revenue-report-list"
+//               element={
+//                 <ProtectedRoute>
+//                   <RevenueListView />
+//                 </ProtectedRoute>
+//               }
+//             />
+
+//             <Route
+//               path="/revenue-report/day/:date"
+//               element={
+//                 <ProtectedRoute>
+//                   <RevenueDayDetail />
+//                 </ProtectedRoute>
+//               }
+//             />
+
+//             <Route
+//               path="/sales-record/:id"
+//               element={
+//                 <ProtectedRoute>
+//                   <RevenueViewDetail />
+//                 </ProtectedRoute>
+//               }
+//             />
+
+//             <Route path="/quotation" element={<QuotationPage />} />
+
+//             {/* Others Page */}
+//             <Route path="/profile" element={<UserProfiles />} />
+//             <Route path="/calendar" element={<Calendar />} />
+//             <Route path="/blank" element={<Blank />} />
+
+//             {/* Forms */}
+//             <Route path="/form-elements" element={<FormElements />} />
+
+//             {/* Tables */}
+//             {/* <Route path="/user-management" element={<BasicTables />} /> */}
+//             <Route
+//               path="/bhxh-tables"
+//               element={
+//                 <ProtectedRoute>
+//                   <BhxhTable />
+//                 </ProtectedRoute>
+//               }
+//             />
+//             <Route path="/bhxh" element={<BhxhPage />} />
+
+//             {/* Ui Elements */}
+//             <Route path="/alerts" element={<Alerts />} />
+//             <Route path="/avatars" element={<Avatars />} />
+//             <Route path="/badge" element={<Badges />} />
+//             <Route path="/buttons" element={<Buttons />} />
+//             <Route path="/images" element={<Images />} />
+//             <Route path="/videos" element={<Videos />} />
+
+//             {/* Charts */}
+//             <Route path="/line-chart" element={<LineChart />} />
+//             <Route path="/bar-chart" element={<BarChart />} />
+//           </Route>
+
+//           {/* Auth Layout */}
+//           <Route path="/signin" element={<SignIn />} />
+//           <Route path="/signup" element={<SignUp />} />
+
+//           {/* Fallback Route */}
+//           <Route path="*" element={<NotFound />} />
+//         </Routes>
+//       </Router>
+//     </>
+//   );
+// }
+
+function AppRoutes() {
+  const location = useLocation();
+
+  // Những trang KHÔNG hiển thị decoration
+  const hideDecorationRoutes = ["/signin", "/signup", "/national-day", "/"];
+
+  const showDecoration = !hideDecorationRoutes.includes(location.pathname);
+
   return (
     <>
-      <Router>
-        <ScrollToTop />
-        <MoonFestivalDecoration />
-        <Routes>
-          {/* Dashboard Layout */}
-          <Route element={<AppLayout />}>
-            <Route
-              index
-              element={
-                <ProtectedRoute>
-                  <Home />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/users" element={<UserManagement />} />
+      <ScrollToTop />
 
-            <Route path="/users/create" element={<CreateUser />} />
+      {/* Chỉ hiện sau khi vào Home hoặc các trang trong App */}
+      {showDecoration && <MoonFestivalDecoration />}
 
-            <Route path="/users/edit/:id" element={<EditUser />} />
+      <Routes>
+        {/* ===== MÀN HÌNH QUỐC KHÁNH ===== */}
+        <Route
+          index
+          element={
+            <ProtectedRoute>
+              <NationalDayPage />
+            </ProtectedRoute>
+          }
+        />
 
-            <Route path="/users/view/:id" element={<ViewUser />} />
+        <Route
+          path="/national-day"
+          element={
+            <ProtectedRoute>
+              <NationalDayPage />
+            </ProtectedRoute>
+          }
+        />
 
-            {/* <Route
-              path="/revenue-dashboard"
-              element={
-                <ProtectedRoute>
-                  <RevenueDashboard />
-                </ProtectedRoute>
-              }
-            /> */}
+        {/* ===== DASHBOARD ===== */}
+        <Route element={<AppLayout />}>
+          <Route path="/home" element={<Home />} />
 
-            <Route path="/notifications" element={<NotificationPage />} />
+          <Route path="/users" element={<UserManagement />} />
+          <Route path="/users/create" element={<CreateUser />} />
+          <Route path="/users/edit/:id" element={<EditUser />} />
+          <Route path="/users/view/:id" element={<ViewUser />} />
 
-            <Route path="/employee-target" element={<EmployeeTargetPage />} />
+          <Route path="/notifications" element={<NotificationPage />} />
 
-            <Route
-              path="/employee-target-year"
-              element={<EmployeeTargetYearPage />}
-            />
+          <Route path="/employee-target" element={<EmployeeTargetPage />} />
+          <Route
+            path="/employee-target-year"
+            element={<EmployeeTargetYearPage />}
+          />
 
-            <Route path="/revenue/search" element={<RevenueSearchPage />} />
+          <Route path="/revenue/search" element={<RevenueSearchPage />} />
 
-            <Route
-              path="/revenue-report"
-              element={
-                <ProtectedRoute>
-                  <RevenueCalendar />
-                </ProtectedRoute>
-              }
-            />
+          <Route
+            path="/revenue-report"
+            element={
+              <ProtectedRoute>
+                <RevenueCalendar />
+              </ProtectedRoute>
+            }
+          />
 
-            <Route
-              path="/revenue-report-list"
-              element={
-                <ProtectedRoute>
-                  <RevenueListView />
-                </ProtectedRoute>
-              }
-            />
+          <Route
+            path="/revenue-report-list"
+            element={
+              <ProtectedRoute>
+                <RevenueListView />
+              </ProtectedRoute>
+            }
+          />
 
-            <Route
-              path="/revenue-report/day/:date"
-              element={
-                <ProtectedRoute>
-                  <RevenueDayDetail />
-                </ProtectedRoute>
-              }
-            />
+          <Route
+            path="/revenue-report/day/:date"
+            element={
+              <ProtectedRoute>
+                <RevenueDayDetail />
+              </ProtectedRoute>
+            }
+          />
 
-            <Route
-              path="/sales-record/:id"
-              element={
-                <ProtectedRoute>
-                  <RevenueViewDetail />
-                </ProtectedRoute>
-              }
-            />
+          <Route
+            path="/sales-record/:id"
+            element={
+              <ProtectedRoute>
+                <RevenueViewDetail />
+              </ProtectedRoute>
+            }
+          />
 
-            <Route path="/quotation" element={<QuotationPage />} />
+          <Route path="/quotation" element={<QuotationPage />} />
 
-            {/* Others Page */}
-            <Route path="/profile" element={<UserProfiles />} />
-            <Route path="/calendar" element={<Calendar />} />
-            <Route path="/blank" element={<Blank />} />
+          <Route path="/profile" element={<UserProfiles />} />
+          <Route path="/calendar" element={<Calendar />} />
+          <Route path="/blank" element={<Blank />} />
+          <Route path="/form-elements" element={<FormElements />} />
 
-            {/* Forms */}
-            <Route path="/form-elements" element={<FormElements />} />
+          <Route
+            path="/bhxh-tables"
+            element={
+              <ProtectedRoute>
+                <BhxhTable />
+              </ProtectedRoute>
+            }
+          />
 
-            {/* Tables */}
-            {/* <Route path="/user-management" element={<BasicTables />} /> */}
-            <Route
-              path="/bhxh-tables"
-              element={
-                <ProtectedRoute>
-                  <BhxhTable />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/bhxh" element={<BhxhPage />} />
+          <Route path="/bhxh" element={<BhxhPage />} />
 
-            {/* Ui Elements */}
-            <Route path="/alerts" element={<Alerts />} />
-            <Route path="/avatars" element={<Avatars />} />
-            <Route path="/badge" element={<Badges />} />
-            <Route path="/buttons" element={<Buttons />} />
-            <Route path="/images" element={<Images />} />
-            <Route path="/videos" element={<Videos />} />
+          <Route path="/alerts" element={<Alerts />} />
+          <Route path="/avatars" element={<Avatars />} />
+          <Route path="/badge" element={<Badges />} />
+          <Route path="/buttons" element={<Buttons />} />
+          <Route path="/images" element={<Images />} />
+          <Route path="/videos" element={<Videos />} />
 
-            {/* Charts */}
-            <Route path="/line-chart" element={<LineChart />} />
-            <Route path="/bar-chart" element={<BarChart />} />
-          </Route>
+          <Route path="/line-chart" element={<LineChart />} />
+          <Route path="/bar-chart" element={<BarChart />} />
+        </Route>
 
-          {/* Auth Layout */}
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/signup" element={<SignUp />} />
+        {/* ===== AUTH ===== */}
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/signup" element={<SignUp />} />
 
-          {/* Fallback Route */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Router>
+        {/* ===== 404 ===== */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
     </>
+  );
+}
+
+export default function App() {
+  return (
+    <Router>
+      <AppRoutes />
+    </Router>
   );
 }

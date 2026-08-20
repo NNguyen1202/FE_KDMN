@@ -12,22 +12,26 @@ export default function AuthLayout({
     <div className="relative p-6 bg-white z-1 dark:bg-gray-900 sm:p-0">
       <div className="relative flex flex-col justify-center w-full h-screen lg:flex-row dark:bg-gray-900 sm:p-0">
         {children}
-        <div className="items-center hidden w-full h-full lg:w-1/2 bg-brand-950 dark:bg-white/5 lg:grid">
+        {/* <div className="items-center hidden w-auto h-full lg:w-1/2 bg-white dark:bg-white/5 lg:grid"> */}
+        <div className="items-center hidden w-auto h-full lg:w-1/2 bg-white dark:bg-gray-900 lg:grid">
           <div className="relative flex items-center justify-center z-1">
             {/* <!-- ===== Common Grid Shape Start ===== --> */}
             <GridShape />
-            <div className="flex flex-col items-center max-w-xs">
-              <Link to="/" className="block mb-4">
-                <img
+            {/* <div className="flex flex-col items-center max-w-xs"> */}
+            <div className="fixed w-172">
+              <Link to="/" className="">
+                {/* <img
                   width={231}
                   height={48}
                   src="/images/logo/logoEasyHRM1.png"
                   alt="Logo"
-                />
+                /> */}
+
+                <img className="ml-30" src="https://i.ibb.co/Tx3TCnCB/image.png"></img>
               </Link>
-              <p className="text-center text-gray-400 dark:text-white/60">
+              {/* <p className="text-center text-gray-400 dark:text-white/60">
                 Nền tảng quản lý nhân sự và quản lý doanh thu cho KDMN
-              </p>
+              </p> */}
             </div>
           </div>
         </div>
