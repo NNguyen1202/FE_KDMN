@@ -27,7 +27,7 @@ export default function AuthLayout({
                   alt="Logo"
                 /> */}
 
-                <img className="ml-30" src="https://i.ibb.co/Tx3TCnCB/image.png"></img>
+                <img  src="https://i.ibb.co/C5wFgwn3/h-nh-nh-2026-09-04-111452077.png"></img>
               </Link>
               {/* <p className="text-center text-gray-400 dark:text-white/60">
                 Nền tảng quản lý nhân sự và quản lý doanh thu cho KDMN

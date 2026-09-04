@@ -46,7 +46,7 @@ export default function SignInForm() {
       console.log("LocalStorage: ", localStorage);
       
 
-      navigate("/national-day", { replace: true });
+      navigate("/", { replace: true });
       requestAnimationFrame(() => {
   window.dispatchEvent(new Event("moon-effect-changed"));
 });
