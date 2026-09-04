@@ -1,4 +1,9 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
 import SignIn from "./pages/AuthPages/SignIn";
 import SignUp from "./pages/AuthPages/SignUp";
 import NotFound from "./pages/OtherPage/NotFound";
@@ -37,7 +42,6 @@ import RevenueViewDetail from "./pages/Revenue/RevenueViewDetail";
 import RevenueListView from "./pages/Revenue/RevenueListView";
 import RevenueSearchPage from "./pages/Revenue/RevenueSearchPage";
 import QuotationPage from "./pages/Quotation/QuotationPage";
-import NationalDayPage from "./pages/Dashboard/NationalDayBanner";
 
 // export default function App() {
 //   console.log("APP RENDER");
@@ -193,7 +197,7 @@ function AppRoutes() {
   const location = useLocation();
 
   // Những trang KHÔNG hiển thị decoration
-  const hideDecorationRoutes = ["/signin", "/signup", "/national-day", "/"];
+  const hideDecorationRoutes = ["/signin", "/signup"];
 
   const showDecoration = !hideDecorationRoutes.includes(location.pathname);
 
@@ -206,7 +210,7 @@ function AppRoutes() {
 
       <Routes>
         {/* ===== MÀN HÌNH QUỐC KHÁNH ===== */}
-        <Route
+        {/* <Route
           index
           element={
             <ProtectedRoute>
@@ -222,11 +226,18 @@ function AppRoutes() {
               <NationalDayPage />
             </ProtectedRoute>
           }
-        />
+        /> */}
 
         {/* ===== DASHBOARD ===== */}
         <Route element={<AppLayout />}>
-          <Route path="/home" element={<Home />} />
+          <Route
+            index
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            }
+          />
 
           <Route path="/users" element={<UserManagement />} />
           <Route path="/users/create" element={<CreateUser />} />

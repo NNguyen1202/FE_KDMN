@@ -407,7 +407,7 @@ const AppSidebar: React.FC = () => {
               {renderMenuItems(navItems, "main")}
             </div>
             <div className="">
-              <img src="https://i.ibb.co/JW8tZV2n/image.png"></img>
+              <img src="https://i.ibb.co/zWHHCySr/h-nh-nh-2026-09-04-111608886.png"></img>
               {/* <h2
                 className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
                   !isExpanded && !isHovered
