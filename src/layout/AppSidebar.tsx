@@ -30,7 +30,7 @@ const navItems: NavItem[] = [
   {
     name: "Dashboard",
     // path: "/",
-    path: "/home",
+    path: "/",
     icon: <DollarLineIcon />,
   },
   {
@@ -359,7 +359,7 @@ const AppSidebar: React.FC = () => {
         }`}
       >
         {/* <Link to="/"> */}
-        <Link to="/home">
+        <Link to="/">
           {isExpanded || isHovered || isMobileOpen ? (
             <>
               <img
