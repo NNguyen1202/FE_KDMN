@@ -60,6 +60,10 @@ interface QuotationForm {
 
   vneidEnabled: boolean;
   selectedVneidPackages: string[];
+
+  additionalUserEnabled: boolean;
+  additionalUsers: number;
+  additionalUserMonths: number;
 }
 
 const formatCurrency = (value: number) =>
@@ -201,6 +205,8 @@ const VNEID_PACKAGES = [
   },
 ] as const;
 
+const ADDITIONAL_USER_UNIT_PRICE = 10000;
+
 const getMassAnnualPrice = (form: QuotationForm) => {
   if (form.customerSegment !== "50+") {
     return (
@@ -268,6 +274,10 @@ export default function QuotationPage() {
 
     vneidEnabled: false,
     selectedVneidPackages: [],
+
+    additionalUserEnabled: false,
+    additionalUsers: 1,
+    additionalUserMonths: 1,
   });
 
   useEffect(() => {
@@ -485,21 +495,49 @@ export default function QuotationPage() {
     form.onpremServerDatabase,
   ]);
 
+  const additionalUserCalculation = useMemo(() => {
+    const users = Math.max(0, Number(form.additionalUsers) || 0);
+    const months = Math.max(0, Number(form.additionalUserMonths) || 0);
+
+    const unitPrice = ADDITIONAL_USER_UNIT_PRICE;
+
+    const total = users * months * unitPrice;
+
+    return {
+      users,
+      months,
+      unitPrice,
+      total,
+    };
+  }, [form.additionalUsers, form.additionalUserMonths]);
+
   const total = useMemo(() => {
+    if (form.additionalUserEnabled) {
+      return additionalUserCalculation.total;
+    }
+
     if (form.deployment === "mass") {
       return massCalculation.total;
     }
 
     return onpremCalculation.firstYear;
-  }, [form.deployment, massCalculation.total, onpremCalculation.firstYear]);
+  }, [
+    form.additionalUserEnabled,
+    additionalUserCalculation.total,
+    form.deployment,
+    massCalculation.total,
+    onpremCalculation.firstYear,
+  ]);
 
   const printQuotation = () => {
     // Ưu tiên Mã số thuế; nếu không có thì dùng Số lượng nhân sự.
     const identifier =
       form.taxCode.trim() ||
-      (form.customerSegment === "50+"
-        ? String(form.mainUsers)
-        : String(form.customerSegment));
+      (form.additionalUserEnabled
+        ? `MuaThem-${form.additionalUsers} nhân sự-${form.additionalUserMonths}Thang`
+        : form.customerSegment === "50+"
+        ? `${form.mainUsers} nhân sự`
+        : `${form.customerSegment} nhân sự`);
 
     console.log("iden: ", identifier);
 
@@ -512,7 +550,7 @@ export default function QuotationPage() {
     // Tên file
     const safeIdentifier = identifier.replace(/[\\/:*?"<>|]/g, "-").trim();
 
-    const fileName = `Quotation_${safeIdentifier}user_${day}-${month}-${year}`;
+    const fileName = `Báo giá_${safeIdentifier}_${day}-${month}-${year}`;
 
     // Chrome / Edge sẽ lấy document.title làm tên mặc định
     // khi chọn Save as PDF.
@@ -573,6 +611,10 @@ export default function QuotationPage() {
 
       vneidEnabled: false,
       selectedVneidPackages: [],
+
+      additionalUserEnabled: false,
+      additionalUsers: 1,
+      additionalUserMonths: 1,
 
       selectedModules: [
         "Tuyển dụng",
@@ -820,6 +862,93 @@ export default function QuotationPage() {
                     <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
                       Chỉ được chọn một phân khúc khách hàng.
                     </p>
+                  </div>
+
+                  {/* MUA THÊM USER */}
+                  <div className="rounded-xl border border-orange-200 bg-orange-50/70 p-4 dark:border-orange-900/50 dark:bg-orange-950/20">
+                    <label className="flex cursor-pointer items-start gap-3">
+                      <input
+                        type="checkbox"
+                        checked={form.additionalUserEnabled}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+
+                          setForm((prev) => ({
+                            ...prev,
+                            additionalUserEnabled: checked,
+
+                            // Khi tắt mua thêm User thì reset về mặc định
+                            ...(checked
+                              ? {}
+                              : {
+                                  additionalUsers: 1,
+                                  additionalUserMonths: 1,
+                                }),
+                          }));
+                        }}
+                        className="mt-1 h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                      />
+
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-semibold text-gray-900 dark:text-white">
+                          Mua thêm User
+                        </div>
+
+                        <div className="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-400">
+                          Mua bổ sung User ngoài số lượng đang sử dụng. Đơn giá
+                          cố định 10.000 VNĐ/User/tháng và không chịu thuế GTGT.
+                        </div>
+                      </div>
+
+                      {form.additionalUserEnabled && (
+                        <span className="shrink-0 rounded-full bg-orange-500 px-2 py-1 text-[10px] font-semibold text-white">
+                          Đang chọn
+                        </span>
+                      )}
+                    </label>
+
+                    {form.additionalUserEnabled && (
+                      <div className="mt-4 grid grid-cols-1 gap-3 border-t border-orange-200 pt-4 dark:border-orange-900/50 sm:grid-cols-2">
+                        <NumberField
+                          label="Số User mua thêm"
+                          value={form.additionalUsers}
+                          onChange={(v) =>
+                            update("additionalUsers", Math.max(0, v))
+                          }
+                        />
+
+                        <NumberField
+                          label="Số tháng"
+                          value={form.additionalUserMonths}
+                          onChange={(v) =>
+                            update("additionalUserMonths", Math.max(0, v))
+                          }
+                        />
+
+                        <div className="sm:col-span-2 rounded-lg border border-orange-200 bg-white p-3 dark:border-orange-900/50 dark:bg-gray-900">
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                              Đơn giá
+                            </span>
+
+                            <span className="text-sm font-bold text-orange-600 dark:text-orange-400">
+                              {formatCurrency(ADDITIONAL_USER_UNIT_PRICE)}
+                              {" / User / tháng"}
+                            </span>
+                          </div>
+
+                          <div className="mt-2 flex items-center justify-between gap-3 border-t border-gray-100 pt-2 dark:border-gray-800">
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                              Thành tiền
+                            </span>
+
+                            <span className="text-base font-bold text-gray-900 dark:text-white">
+                              {formatCurrency(additionalUserCalculation.total)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* SỐ NHÂN SỰ */}
@@ -1695,561 +1824,603 @@ export default function QuotationPage() {
                   và dự toán chi phí cụ thể như sau:
                 </p>
 
-                {/* MASS */}
-                <SectionTitle>PHƯƠNG ÁN TRIỂN KHAI MASS</SectionTitle>
+                {form.additionalUserEnabled ? (
+                  <>
+                    {/* ============================= */}
+                    {/* MUA THÊM USER */}
+                    {/* ============================= */}
 
-                <p className="mb-2 text-sm">
-                  <strong>Giải pháp Server nhà cung cấp</strong>
-                </p>
+                    <SectionTitle>BÁO GIÁ MUA THÊM USER</SectionTitle>
 
-                <div className="mb-5 rounded-lg bg-orange-50 p-4 text-sm">
-                  <strong>Bộ giải pháp EasyHRM - Premium</strong>
+                    <p className="mb-5 text-sm leading-6 text-gray-700">
+                      Theo nhu cầu sử dụng thêm User của Quý khách hàng,
+                      SoftDreams xin gửi báo giá dịch vụ mua thêm User EasyHRM
+                      như sau:
+                    </p>
 
-                  {form.selectedModules.length > 0 ? (
-                    <div className="mt-2 leading-6 text-gray-600">
-                      <strong>
-                        Bộ giải pháp bao gồm {form.selectedModules.length} phân
-                        hệ:
-                      </strong>{" "}
-                      {form.selectedModules.join(", ")}.
+                    {/* THÔNG TIN MUA THÊM */}
+                    <div className="mb-5 rounded-lg bg-orange-50 p-4 text-sm">
+                      <div className="font-bold text-gray-900">
+                        Dịch vụ mua thêm User EasyHRM
+                      </div>
+
+                      <div className="mt-2 leading-6 text-gray-700">
+                        Số User mua thêm:
+                        <strong className="ml-1">
+                          {additionalUserCalculation.users} User
+                        </strong>
+                      </div>
+
+                      <div className="leading-6 text-gray-700">
+                        Thời gian sử dụng:
+                        <strong className="ml-1">
+                          {additionalUserCalculation.months} tháng
+                        </strong>
+                      </div>
+
+                      <div className="leading-6 text-gray-700">
+                        Đơn giá:
+                        <strong className="ml-1">
+                          {formatCurrency(additionalUserCalculation.unitPrice)}{" "}
+                          / User / tháng
+                        </strong>
+                      </div>
                     </div>
-                  ) : (
-                    <div className="mt-2 italic text-gray-500">
-                      Chưa lựa chọn phân hệ.
-                    </div>
-                  )}
-                </div>
 
-                <table className="quotation-table w-full border-collapse text-sm">
-                  <colgroup>
-                    {/* STT */}
-                    <col className="col-stt" />
+                    {/* BẢNG BÁO GIÁ MUA THÊM USER */}
+                    <table className="quotation-table w-full border-collapse text-sm">
+                      <colgroup>
+                        <col className="col-stt" />
+                        <col className="col-service" />
+                        <col className="col-unit" />
+                        <col className="col-quantity" />
+                        <col className="col-price" />
+                        <col className="col-discount" />
+                        <col className="col-total" />
+                      </colgroup>
 
-                    {/* Gói dịch vụ */}
-                    <col className="col-service" />
+                      <thead>
+                        <tr className="bg-orange-500 text-white">
+                          <th className="border border-gray-300 px-1 py-1 text-center">
+                            STT
+                          </th>
 
-                    {/* Đơn vị */}
-                    <col className="col-unit" />
+                          <th className="border border-gray-300 px-1 py-1 text-center">
+                            Dịch vụ
+                          </th>
 
-                    {/* SL */}
-                    <col className="col-quantity" />
+                          <th className="border border-gray-300 px-1 py-1 text-center">
+                            Đơn vị
+                          <br />
+                          tính
+                          </th>
 
-                    {/* Đơn giá */}
-                    <col className="col-price" />
+                          <th className="border border-gray-300 px-1 py-1 text-center">
+                            SL
+                          </th>
 
-                    {/* Giảm giá */}
-                    <col className="col-discount" />
+                          <th className="border border-gray-300 px-1 py-1 text-center">
+                            Đơn giá
+                          <br />
+                          (VNĐ)
+                          </th>
 
-                    {/* Thành tiền */}
-                    <col className="col-total" />
-                  </colgroup>
+                          <th className="border border-gray-300 px-1 py-1 text-center">
+                            VAT
+                          <br />
+                          (%)
+                          </th>
 
-                  <thead>
-                    <tr className="bg-orange-500 text-white">
-                      <th className="border border-gray-300 px-2 py-1 text-center">
-                        STT
-                      </th>
+                          <th className="border border-gray-300 px-1 py-1 text-center">
+                            Thành tiền
+                            <br />
+                          (VNĐ)
+                          </th>
+                        </tr>
+                      </thead>
 
-                      <th className="border border-gray-300 px-2 py-1 text-center">
-                        Gói dịch vụ
-                      </th>
-
-                      <th className="border border-gray-300 px-2 py-1 text-center">
-                        Đơn vị
-                      </th>
-
-                      <th className="border border-gray-300 px-2 py-1 text-center">
-                        SL
-                      </th>
-
-                      <th className="border border-gray-300 px-2 py-1 text-center">
-                        Đơn giá
-                      </th>
-
-                      <th className="border border-gray-300 px-2 py-1 text-center whitespace-nowrap">
-                        Giảm giá
-                      </th>
-
-                      <th className="border border-gray-300 px-2 py-1 text-center">
-                        Thành tiền
-                      </th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {/* GÓI CỐ ĐỊNH */}
-                    {massCalculation.isFixedPackage ? (
-                      <>
+                      <tbody>
                         <tr>
-                          <td className="border border-gray-300 px-2 py-1 text-center">
+                          <td className="border border-gray-300 px-2 py-3 text-center">
                             1
                           </td>
 
-                          <td className="service-cell border border-gray-300 px-2 py-1 text-left">
+                          <td className="service-cell border border-gray-300 px-2 py-3">
                             <div>Phần mềm nhân sự EasyHRM</div>
-
                             <div>
-                              Gói Premium (
-                              {
-                                CUSTOMER_SEGMENTS.find(
-                                  (item) => item.value === form.customerSegment,
-                                )?.label
-                              }
-                              )
+                              Gói mua thêm số lượng nhân sự <div className="font-bold inline">({additionalUserCalculation.users} nhân sự)</div>
                             </div>
                           </td>
 
-                          <td className="border border-gray-300 px-2 py-1 text-center">
-                            Gói/năm
+                          <td className="border border-gray-300 px-2 py-3 text-center">
+                            User/tháng
                           </td>
 
-                          <td className="border border-gray-300 px-2 py-1 text-center">
-                            1
+                          <td className="border border-gray-300 px-2 py-3 text-center">
+                            {additionalUserCalculation.users}
                           </td>
 
-                          <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
-                            {formatCurrency(massCalculation.softwareYear)}
-                          </td>
-
-                          <td className="border border-gray-300 px-2 py-1 text-center whitespace-nowrap">
-                            {form.discounts[0] > 0
-                              ? `${form.discounts[0]}%`
-                              : "0%"}
-                          </td>
-
-                          <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
+                          <td className="border border-gray-300 px-2 py-3 text-right whitespace-nowrap">
                             {formatCurrency(
-                              massCalculation.softwareYear *
-                                (1 - (form.discounts[0] ?? 0) / 100),
+                              additionalUserCalculation.unitPrice,
                             )}
                           </td>
-                        </tr>
 
-                        {/* PHÍ KHỞI TẠO */}
+                          <td className="border border-gray-300 px-2 py-3 text-center">
+                            KCT
+                          </td>
+
+                          <td className="border border-gray-300 px-2 py-3 text-right font-bold whitespace-nowrap">
+                            {formatCurrency(additionalUserCalculation.total)}
+                          </td>
+                        </tr>
+                      </tbody>
+
+                      <tfoot>
                         <tr>
-                          <td className="border border-gray-300 px-2 py-1 text-center">
-                            2
+                          <td
+                            colSpan={5}
+                            className="border border-gray-300 px-2 py-3 text-right font-bold"
+                          >
+                            TỔNG CHI PHÍ
                           </td>
 
-                          <td className="service-cell border border-gray-300 px-2 py-1 text-left">
-                            Phí khởi tạo và triển khai
-                          </td>
-
-                          <td className="border border-gray-300 px-2 py-1 text-center">
-                            VNĐ
-                          </td>
-
-                          <td className="border border-gray-300 px-2 py-1 text-center">
-                            {form.implementationFee > 0 ? 1 : 0}
-                          </td>
-
-                          <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
-                            {formatCurrency(form.implementationFee)}
-                          </td>
-
-                          <td className="border border-gray-300 px-2 py-1 text-center">
-                            -
-                          </td>
-
-                          <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
-                            {formatCurrency(form.implementationFee)}
+                          <td
+                            colSpan={2}
+                            className="border border-gray-300 px-2 py-3 text-right font-bold text-orange-600 whitespace-nowrap"
+                          >
+                            {formatCurrency(additionalUserCalculation.total)}
                           </td>
                         </tr>
+                      </tfoot>
+                    </table>
 
-                        {massCalculation.vneidTotal > 0 && (
-                          <tr>
-                            <td className="border border-gray-300 px-2 py-1 text-center">
-                              3
-                            </td>
-                            <td className="service-cell border border-gray-300 px-2 py-1 text-left">
-                              Gói lượt ký số VNeID (VAT 8%)
-                            </td>
-                            <td className="border border-gray-300 px-2 py-1 text-center">
-                              Gói
-                            </td>
-                            <td className="border border-gray-300 px-2 py-1 text-center">
-                              {form.selectedVneidPackages.length}
-                            </td>
-                            <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
-                              {formatCurrency(
-                                Number(
-                                  form.selectedVneidPackages
-                                    .map(
-                                      (id) =>
-                                        VNEID_PACKAGES.find(
-                                          (pkg) => pkg.id === id,
-                                        )?.unitPrice,
-                                    )
-                                    .filter(Boolean),
-                                ),
-                              )}
-                            </td>
-                            <td className="border border-gray-300 px-2 py-1 text-center">
-                              -
-                            </td>
-                            <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
-                              {formatCurrency(massCalculation.vneidTotal)}
-                            </td>
-                          </tr>
-                        )}
-                      </>
-                    ) : (
-                      <>
-                        {/* ================================
+                    {/* GHI CHÚ MUA THÊM USER */}
+                    <div className="quotation-section mt-5 rounded-lg border border-gray-200 p-3 text-sm">
+                      <strong>Ghi chú:</strong>
+
+                      <ul className="mt-2 list-disc space-y-1 pl-5 text-gray-600">
+                        <li>
+                          Đơn giá mua thêm User:
+                          <strong className="ml-1">
+                            {formatCurrency(ADDITIONAL_USER_UNIT_PRICE)} / User
+                            / tháng.
+                          </strong>
+                        </li>
+
+                        <li>
+                          Số User mua thêm:
+                          <strong className="ml-1">
+                            {additionalUserCalculation.users} User.
+                          </strong>
+                        </li>
+
+                        <li>
+                          Thời gian sử dụng:
+                          <strong className="ml-1">
+                            {additionalUserCalculation.months} tháng.
+                          </strong>
+                        </li>
+
+                        <li>
+                          Thành tiền được tính theo công thức:
+                          <strong className="ml-1">
+                            Số User × Số tháng × 10.000 VNĐ.
+                          </strong>
+                        </li>
+
+                        <li>Gói mua thêm số lượng nhân sự tính vào thời hạn và số lượng nhân sự của gói chính hiện tại.</li>
+
+                        <li>Dịch vụ mua thêm User không chịu thuế GTGT.</li>
+                      </ul>
+                    </div>
+
+                    <div className="quotation-footer">
+                    <div className="quotation-footer-contact">
+                      <p className="leading-4">
+                        Mọi thắc mắc, Quý khách vui lòng liên hệ:
+                      </p>
+                      <p className="font-semibold">
+                        {form.consultantName} - Chuyên viên tư vấn
+                      </p>
+                      <p>TEL/Zalo: {form.consultantPhone}</p>
+                      <p>Email: {form.consultantEmail}</p>
+                    </div>
+                    <div className="quotation-footer-copyright">
+                      <div>COPYRIGHT © 2026</div>
+                      <div>Created by NNguyen1202</div>
+                      <div>All rights Reserved</div>
+                    </div>
+                  </div>
+                  </>
+                ) : (
+                  <>
+                    {/* ============================= */}
+                    {/* MASS BÌNH THƯỜNG */}
+                    {/* ============================= */}
+
+                    <SectionTitle>PHƯƠNG ÁN TRIỂN KHAI MASS</SectionTitle>
+
+                    <p className="mb-2 text-sm">
+                      <strong>Giải pháp Server nhà cung cấp</strong>
+                    </p>
+
+                    <div className="mb-5 rounded-lg bg-orange-50 p-4 text-sm">
+                      <strong>Bộ giải pháp EasyHRM - Premium</strong>
+
+                      {form.selectedModules.length > 0 ? (
+                        <div className="mt-2 leading-6 text-gray-600">
+                          <strong>
+                            Bộ giải pháp bao gồm {form.selectedModules.length}{" "}
+                            phân hệ:
+                          </strong>{" "}
+                          {form.selectedModules.join(", ")}.
+                        </div>
+                      ) : (
+                        <div className="mt-2 italic text-gray-500">
+                          Chưa lựa chọn phân hệ.
+                        </div>
+                      )}
+                    </div>
+
+                    <table className="quotation-table w-full border-collapse text-sm">
+                      <colgroup>
+                        {/* STT */}
+                        <col className="col-stt" />
+
+                        {/* Gói dịch vụ */}
+                        <col className="col-service" />
+
+                        {/* Đơn vị */}
+                        <col className="col-unit" />
+
+                        {/* SL */}
+                        <col className="col-quantity" />
+
+                        {/* Đơn giá */}
+                        <col className="col-price" />
+
+                        {/* Giảm giá */}
+                        <col className="col-discount" />
+
+                        {/* Thành tiền */}
+                        <col className="col-total" />
+                      </colgroup>
+
+                      <thead>
+                        <tr className="bg-orange-500 text-white">
+                          <th className="border border-gray-300 px-2 py-1 text-center">
+                            STT
+                          </th>
+
+                          <th className="border border-gray-300 px-2 py-1 text-center">
+                            Gói dịch vụ
+                          </th>
+
+                          <th className="border border-gray-300 px-2 py-1 text-center">
+                            Đơn vị
+                          </th>
+
+                          <th className="border border-gray-300 px-2 py-1 text-center">
+                            SL
+                          </th>
+
+                          <th className="border border-gray-300 px-2 py-1 text-center">
+                            Đơn giá
+                          </th>
+
+                          <th className="border border-gray-300 px-2 py-1 text-center whitespace-nowrap">
+                            Giảm giá
+                          </th>
+
+                          <th className="border border-gray-300 px-2 py-1 text-center">
+                            Thành tiền
+                          </th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        {/* GÓI CỐ ĐỊNH */}
+                        {massCalculation.isFixedPackage ? (
+                          <>
+                            <tr>
+                              <td className="border border-gray-300 px-2 py-1 text-center">
+                                1
+                              </td>
+
+                              <td className="service-cell border border-gray-300 px-2 py-1 text-left">
+                                <div>Phần mềm nhân sự EasyHRM</div>
+
+                                <div>
+                                  Gói Premium (
+                                  {
+                                    CUSTOMER_SEGMENTS.find(
+                                      (item) =>
+                                        item.value === form.customerSegment,
+                                    )?.label
+                                  }
+                                  )
+                                </div>
+                              </td>
+
+                              <td className="border border-gray-300 px-2 py-1 text-center">
+                                Gói/năm
+                              </td>
+
+                              <td className="border border-gray-300 px-2 py-1 text-center">
+                                1
+                              </td>
+
+                              <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
+                                {formatCurrency(massCalculation.softwareYear)}
+                              </td>
+
+                              <td className="border border-gray-300 px-2 py-1 text-center whitespace-nowrap">
+                                {form.discounts[0] > 0
+                                  ? `${form.discounts[0]}%`
+                                  : "0%"}
+                              </td>
+
+                              <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
+                                {formatCurrency(
+                                  massCalculation.softwareYear *
+                                    (1 - (form.discounts[0] ?? 0) / 100),
+                                )}
+                              </td>
+                            </tr>
+
+                            {/* PHÍ KHỞI TẠO */}
+                            <tr>
+                              <td className="border border-gray-300 px-2 py-1 text-center">
+                                2
+                              </td>
+
+                              <td className="service-cell border border-gray-300 px-2 py-1 text-left">
+                                Phí khởi tạo và triển khai
+                              </td>
+
+                              <td className="border border-gray-300 px-2 py-1 text-center">
+                                VNĐ
+                              </td>
+
+                              <td className="border border-gray-300 px-2 py-1 text-center">
+                                {form.implementationFee > 0 ? 1 : 0}
+                              </td>
+
+                              <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
+                                {formatCurrency(form.implementationFee)}
+                              </td>
+
+                              <td className="border border-gray-300 px-2 py-1 text-center">
+                                -
+                              </td>
+
+                              <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
+                                {formatCurrency(form.implementationFee)}
+                              </td>
+                            </tr>
+
+                            {massCalculation.vneidTotal > 0 && (
+                              <tr>
+                                <td className="border border-gray-300 px-2 py-1 text-center">
+                                  3
+                                </td>
+                                <td className="service-cell border border-gray-300 px-2 py-1 text-left">
+                                  Gói lượt ký số VNeID (VAT 8%)
+                                </td>
+                                <td className="border border-gray-300 px-2 py-1 text-center">
+                                  Gói
+                                </td>
+                                <td className="border border-gray-300 px-2 py-1 text-center">
+                                  {form.selectedVneidPackages.length}
+                                </td>
+                                <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
+                                  {formatCurrency(
+                                    Number(
+                                      form.selectedVneidPackages
+                                        .map(
+                                          (id) =>
+                                            VNEID_PACKAGES.find(
+                                              (pkg) => pkg.id === id,
+                                            )?.unitPrice,
+                                        )
+                                        .filter(Boolean),
+                                    ),
+                                  )}
+                                </td>
+                                <td className="border border-gray-300 px-2 py-1 text-center">
+                                  -
+                                </td>
+                                <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
+                                  {formatCurrency(massCalculation.vneidTotal)}
+                                </td>
+                              </tr>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            {/* ================================
                               LOGIC CŨ - TRÊN 50 NHÂN SỰ
                           ================================= */}
 
+                            <tr>
+                              <td className="border border-gray-300 px-2 py-1 text-center">
+                                1
+                              </td>
+
+                              <td className="service-cell border border-gray-300 px-2 py-1 text-left">
+                                <div>Phần mềm nhân sự EasyHRM</div>
+                                <div>Gói Premium - 1 năm</div>
+                              </td>
+
+                              <td className="border border-gray-300 px-2 py-1 text-center">
+                                Gói/năm
+                              </td>
+
+                              <td className="border border-gray-300 px-2 py-1 text-center">
+                                {form.mainUsers}
+                              </td>
+
+                              <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
+                                {formatCurrency(form.mainPrice)}
+                              </td>
+
+                              <td className="border border-gray-300 px-2 py-1 text-center whitespace-nowrap">
+                                {form.discounts[0] > 0
+                                  ? `${form.discounts[0]}%`
+                                  : "0%"}
+                              </td>
+                              <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
+                                {formatCurrency(
+                                  form.mainUsers *
+                                    form.mainPrice *
+                                    12 *
+                                    (1 - (form.discounts[0] ?? 0) / 100),
+                                )}
+                              </td>
+                            </tr>
+
+                            {form.seasonalUsers > 0 && (
+                              <tr className="quotation-table-row">
+                                <td className="border border-gray-300 px-2 py-1 text-center">
+                                  2
+                                </td>
+
+                                <td className="service-cell border border-gray-300 px-2 py-1 text-left">
+                                  Nhân sự thời vụ
+                                </td>
+
+                                <td className="border border-gray-300 px-2 py-1 text-center">
+                                  Gói/năm
+                                </td>
+
+                                <td className="border border-gray-300 px-2 py-1 text-center">
+                                  {form.seasonalUsers}
+                                </td>
+
+                                <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
+                                  {formatCurrency(form.seasonalPrice)}
+                                </td>
+
+                                <td className="border border-gray-300 px-2 py-1 text-center">
+                                  {form.discounts[0] > 0
+                                    ? `${form.discounts[0]}%`
+                                    : "0%"}
+                                </td>
+
+                                <td className="border border-gray-300 px-2 py-1 text-center">
+                                  {formatCurrency(
+                                    form.seasonalUsers *
+                                      form.seasonalPrice *
+                                      12 *
+                                      (1 - (form.discounts[0] ?? 0) / 100),
+                                  )}
+                                </td>
+                              </tr>
+                            )}
+
+                            <tr>
+                              <td className="border border-gray-300 px-2 py-1 text-center">
+                                {form.seasonalUsers > 0 ? 3 : 2}
+                              </td>
+
+                              <td className="service-cell border border-gray-300 px-2 py-1 text-left">
+                                Phí cài đặt và triển khai
+                              </td>
+
+                              <td className="border border-gray-300 px-2 py-1 text-center">
+                                VNĐ
+                              </td>
+
+                              <td className="border border-gray-300 px-2 py-1 text-center">
+                                {form.implementationFee > 0 ? 1 : 0}
+                              </td>
+
+                              <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
+                                {formatCurrency(form.implementationFee)}
+                              </td>
+
+                              <td className="border border-gray-300 px-2 py-1 text-center">
+                                -
+                              </td>
+
+                              <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
+                                {formatCurrency(form.implementationFee)}
+                              </td>
+                            </tr>
+
+                            {massCalculation.vneidTotal > 0 && (
+                              <tr>
+                                <td className="border border-gray-300 px-2 py-1 text-center">
+                                  {form.seasonalUsers > 0 ? 4 : 3}
+                                </td>
+                                <td className="service-cell border border-gray-300 px-2 py-1 text-left">
+                                  Gói lượt ký số VNeID (VAT 8%)
+                                </td>
+                                <td className="border border-gray-300 px-2 py-1 text-center">
+                                  Gói
+                                </td>
+                                <td className="border border-gray-300 px-2 py-1 text-center">
+                                  {form.selectedVneidPackages.length}
+                                </td>
+                                <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
+                                  {formatCurrency(
+                                    Number(
+                                      form.selectedVneidPackages
+                                        .map(
+                                          (id) =>
+                                            VNEID_PACKAGES.find(
+                                              (pkg) => pkg.id === id,
+                                            )?.unitPrice,
+                                        )
+                                        .filter(Boolean),
+                                    ),
+                                  )}
+                                </td>
+                                <td className="border border-gray-300 px-2 py-1 text-center">
+                                  -
+                                </td>
+                                <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
+                                  {formatCurrency(massCalculation.vneidTotal)}
+                                </td>
+                              </tr>
+                            )}
+                          </>
+                        )}
+                      </tbody>
+
+                      <tfoot>
                         <tr>
-                          <td className="border border-gray-300 px-2 py-1 text-center">
-                            1
+                          <td
+                            colSpan={6}
+                            className="border border-gray-300 px-2 py-1 text-right font-bold"
+                          >
+                            TỔNG CHI PHÍ
                           </td>
 
-                          <td className="service-cell border border-gray-300 px-2 py-1 text-left">
-                            <div>Phần mềm nhân sự EasyHRM</div>
-                            <div>Gói Premium - 1 năm</div>
-                          </td>
-
-                          <td className="border border-gray-300 px-2 py-1 text-center">
-                            Gói/năm
-                          </td>
-
-                          <td className="border border-gray-300 px-2 py-1 text-center">
-                            {form.mainUsers}
-                          </td>
-
-                          <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
-                            {formatCurrency(form.mainPrice)}
-                          </td>
-
-                          <td className="border border-gray-300 px-2 py-1 text-center whitespace-nowrap">
-                            {form.discounts[0] > 0
-                              ? `${form.discounts[0]}%`
-                              : "0%"}
-                          </td>
-                          <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
+                          <td className="border border-gray-300 px-2 py-1 text-right font-bold text-orange-600 whitespace-nowrap">
                             {formatCurrency(
-                              form.mainUsers *
-                                form.mainPrice *
-                                12 *
-                                (1 - (form.discounts[0] ?? 0) / 100),
+                              (form.customerSegment !== "50+"
+                                ? CUSTOMER_SEGMENTS.find(
+                                    (segment) =>
+                                      segment.value === form.customerSegment,
+                                  )?.price ?? 0
+                                : form.mainUsers * form.mainPrice * 12 +
+                                  form.seasonalUsers *
+                                    form.seasonalPrice *
+                                    12) *
+                                (1 - (form.discounts[0] ?? 0) / 100) +
+                                form.implementationFee +
+                                massCalculation.vneidTotal,
                             )}
                           </td>
                         </tr>
-
-                        {form.seasonalUsers > 0 && (
-                          <tr className="quotation-table-row">
-                            <td className="border border-gray-300 px-2 py-1 text-center">
-                              2
-                            </td>
-
-                            <td className="service-cell border border-gray-300 px-2 py-1 text-left">
-                              Nhân sự thời vụ
-                            </td>
-
-                            <td className="border border-gray-300 px-2 py-1 text-center">
-                              Gói/năm
-                            </td>
-
-                            <td className="border border-gray-300 px-2 py-1 text-center">
-                              {form.seasonalUsers}
-                            </td>
-
-                            <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
-                              {formatCurrency(form.seasonalPrice)}
-                            </td>
-
-                            <td className="border border-gray-300 px-2 py-1 text-center">
-                              {form.discounts[0] > 0
-                                ? `${form.discounts[0]}%`
-                                : "0%"}
-                            </td>
-
-                            <td className="border border-gray-300 px-2 py-1 text-center">
-                              {formatCurrency(
-                                form.seasonalUsers *
-                                  form.seasonalPrice *
-                                  12 *
-                                  (1 - (form.discounts[0] ?? 0) / 100),
-                              )}
-                            </td>
-                          </tr>
-                        )}
-
-                        <tr>
-                          <td className="border border-gray-300 px-2 py-1 text-center">
-                            {form.seasonalUsers > 0 ? 3 : 2}
-                          </td>
-
-                          <td className="service-cell border border-gray-300 px-2 py-1 text-left">
-                            Phí cài đặt và triển khai
-                          </td>
-
-                          <td className="border border-gray-300 px-2 py-1 text-center">
-                            VNĐ
-                          </td>
-
-                          <td className="border border-gray-300 px-2 py-1 text-center">
-                            {form.implementationFee > 0 ? 1 : 0}
-                          </td>
-
-                          <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
-                            {formatCurrency(form.implementationFee)}
-                          </td>
-
-                          <td className="border border-gray-300 px-2 py-1 text-center">
-                            -
-                          </td>
-
-                          <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
-                            {formatCurrency(form.implementationFee)}
-                          </td>
-                        </tr>
-
-                        {massCalculation.vneidTotal > 0 && (
-                          <tr>
-                            <td className="border border-gray-300 px-2 py-1 text-center">
-                              {form.seasonalUsers > 0 ? 4 : 3}
-                            </td>
-                            <td className="service-cell border border-gray-300 px-2 py-1 text-left">
-                              Gói lượt ký số VNeID (VAT 8%)
-                            </td>
-                            <td className="border border-gray-300 px-2 py-1 text-center">
-                              Gói
-                            </td>
-                            <td className="border border-gray-300 px-2 py-1 text-center">
-                              {form.selectedVneidPackages.length}
-                            </td>
-                            <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
-                              {formatCurrency(
-                                Number(
-                                  form.selectedVneidPackages
-                                    .map(
-                                      (id) =>
-                                        VNEID_PACKAGES.find(
-                                          (pkg) => pkg.id === id,
-                                        )?.unitPrice,
-                                    )
-                                    .filter(Boolean),
-                                ),
-                              )}
-                            </td>
-                            <td className="border border-gray-300 px-2 py-1 text-center">
-                              -
-                            </td>
-                            <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
-                              {formatCurrency(massCalculation.vneidTotal)}
-                            </td>
-                          </tr>
-                        )}
-                      </>
-                    )}
-                  </tbody>
-
-                  <tfoot>
-                    <tr>
-                      <td
-                        colSpan={6}
-                        className="border border-gray-300 px-2 py-1 text-right font-bold"
-                      >
-                        TỔNG CHI PHÍ
-                      </td>
-
-                      <td className="border border-gray-300 px-2 py-1 text-right font-bold text-orange-600 whitespace-nowrap">
-                        {formatCurrency(
-                          (form.customerSegment !== "50+"
-                            ? CUSTOMER_SEGMENTS.find(
-                                (segment) =>
-                                  segment.value === form.customerSegment,
-                              )?.price ?? 0
-                            : form.mainUsers * form.mainPrice * 12 +
-                              form.seasonalUsers * form.seasonalPrice * 12) *
-                            (1 - (form.discounts[0] ?? 0) / 100) +
-                            form.implementationFee +
-                            massCalculation.vneidTotal,
-                        )}
-                      </td>
-                    </tr>
-                  </tfoot>
-                </table>
-
-                {massCalculation.vneidTotal > 0 && (
-                  <div className="mt-2 text-xs italic text-gray-500">
-                    Gói lượt ký VNeID đã chọn:{" "}
-                    {form.selectedVneidPackages
-                      .map(
-                        (id) =>
-                          VNEID_PACKAGES.find((pkg) => pkg.id === id)?.name,
-                      )
-                      .filter(Boolean)
-                      .join(", ")}{" "}
-                    — {formatCurrency(massCalculation.vneidTotal)} (không áp
-                    dụng giảm giá).
-                  </div>
-                )}
-
-                {/* BẢNG GIÁ THEO THỜI HẠN */}
-                <p className="mt-2 mb-2 print:text-[12px] ">
-                  <strong>Bảng giá theo thời hạn đăng ký</strong>
-                </p>
-
-                <table className="quotation-table w-full border-collapse text-sm">
-                  <thead>
-                    <tr className="bg-orange-500 text-white">
-                      <th className="border border-gray-300 px-2 py-1 text-center">
-                        Thời hạn
-                      </th>
-
-                      <th className="border border-gray-300 px-2 py-1 text-center">
-                        Giá phần mềm
-                      </th>
-
-                      <th className="border border-gray-300 px-2 py-1 text-center">
-                        Giảm giá
-                      </th>
-
-                      <th className="border border-gray-300 px-2 py-1 text-center">
-                        Phí khởi tạo
-                      </th>
-
-                      <th className="border border-gray-300 px-2 py-1 text-right">
-                        Tổng thanh toán
-                      </th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {[1, 2, 3].map((year) => {
-                      // Giá phần mềm của toàn bộ thời hạn
-                      const softwareBeforeDiscount = massAnnualPrice * year;
-
-                      // Mỗi thời hạn có MỘT mức giảm riêng
-                      // 1 năm -> discounts[0]
-                      // 2 năm -> discounts[1]
-                      // 3 năm -> discounts[2]
-                      const discountRate = form.discounts[year - 1] ?? 0;
-
-                      // Tiền giảm của chính thời hạn này
-                      const discountAmount =
-                        softwareBeforeDiscount * (discountRate / 100);
-
-                      // Tiền phần mềm sau giảm
-                      const softwareAfterDiscount =
-                        softwareBeforeDiscount - discountAmount;
-
-                      // Phí khởi tạo luôn cộng 100%, không giảm
-                      const total =
-                        softwareAfterDiscount +
-                        form.implementationFee +
-                        massCalculation.vneidTotal;
-
-                      return (
-                        <tr key={year}>
-                          {/* THỜI HẠN */}
-                          <td className="border border-gray-300 px-2 py-1 text-center">
-                            {year} năm
-                          </td>
-
-                          {/* GIÁ PHẦN MỀM */}
-                          <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
-                            {formatCurrency(softwareBeforeDiscount)}
-                          </td>
-
-                          {/* GIẢM GIÁ CỦA CHÍNH THỜI HẠN NÀY */}
-                          <td className="border border-gray-300 px-2 py-1 text-center">
-                            {discountRate > 0 ? `${discountRate}%` : "0%"}
-                          </td>
-
-                          {/* PHÍ KHỞI TẠO */}
-                          <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
-                            {formatCurrency(form.implementationFee)}
-                          </td>
-
-                          {/* TỔNG THANH TOÁN */}
-                          <td className="border border-gray-300 px-2 py-1 text-right font-bold whitespace-nowrap">
-                            {formatCurrency(total)}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-
-                <div className="mt-2 text-xs italic text-gray-500">
-                  Giá trên đã áp dụng mức giảm giá theo từng năm đăng ký:{" "}
-                  {form.discounts
-                    .slice(0, form.duration)
-                    .map((discount, index) => (
-                      <span key={index}>
-                        {index > 0 ? ", " : ""}
-                        <strong>
-                          Năm {index + 1}: {discount}%
-                        </strong>
-                      </span>
-                    ))}{" "}
-                  theo chính sách thương mại được lựa chọn.
-                </div>
-
-                {/* NOTE */}
-                <div className="quotation-section mt-8 rounded-lg border border-gray-200 p-4 text-sm dark:border-gray-300">
-                  <strong>Ghi chú:</strong>
-
-                  <ul className="mt-2 list-disc space-y-1 pl-5 text-gray-600">
-                    <li>
-                      Phí cài đặt và triển khai chỉ 1 lần duy nhất (phí hỗ trợ
-                      triển khai, đào tạo, lưu trữ dữ liệu trên cloud của nhà
-                      cung cấp).
-                    </li>
-
-                    <li>
-                      Sau thời gian đăng ký lần đầu, phí gia hạn phần mềm sẽ là{" "}
-                      {""}
-                      <p className="inline italic font-bold">
-                        {formatCurrency(massAnnualPrice)} {""}
-                      </p>
-                      <p className="inline">
-                        cho năm tiếp theo dựa trên số lượng nhân sự tại thời
-                        điểm gia hạn hoặc theo thoả thuận từ khách hàng và đầu
-                        mối bán hàng.
-                      </p>
-                    </li>
-
-                    <li>
-                      Báo giá được áp dụng theo phân khúc khách hàng:{" "}
-                      <p className="inline italic font-bold">
-                        {
-                          CUSTOMER_SEGMENTS.find(
-                            (item) => item.value === form.customerSegment,
-                          )?.label
-                        }
-                      </p>
-                      .
-                    </li>
-
-                    {form.customerSegment === "50+" && (
-                      <li>
-                        Báo giá được tính theo số lượng nhân sự sử dụng phần mềm
-                        cụ thể:{" "}
-                        <p className="inline italic font-bold">
-                          {form.mainUsers} người dùng
-                        </p>
-                      </li>
-                    )}
-
-                    {form.freeMonths && form.giftedMonths > 0 && (
-                      <li>
-                        Báo giá được áp dụng với ưu đãi:{" "}
-                        <div className="inline font-bold">
-                          🎁 Tặng {form.giftedMonths} tháng sử dụng.
-                        </div>{" "}
-                        <p className="inline">
-                          Chi tiết sẽ được ghi rõ trong hợp đồng
-                        </p>
-                      </li>
-                    )}
+                      </tfoot>
+                    </table>
 
                     {massCalculation.vneidTotal > 0 && (
-                      <li>
-                        Khách hàng sử dụng gói lượt ký VNeID:{" "}
+                      <div className="mt-2 text-xs italic text-gray-500">
+                        Gói lượt ký VNeID đã chọn:{" "}
                         {form.selectedVneidPackages
                           .map(
                             (id) =>
@@ -2257,53 +2428,231 @@ export default function QuotationPage() {
                           )
                           .filter(Boolean)
                           .join(", ")}{" "}
-                        với tổng giá trị{" "}
-                        {formatCurrency(massCalculation.vneidTotal)}. Gói VNeID
-                        không áp dụng chiết khấu của phần mềm EasyHRM.
-                      </li>
+                        — {formatCurrency(massCalculation.vneidTotal)} (không áp
+                        dụng giảm giá).
+                      </div>
                     )}
 
-                    <li>
-                      Phí tích hợp/phát triển tính năng phát sinh sẽ được đánh
-                      giá và báo giá riêng theo yêu cầu.
-                    </li>
-
-                    <li>
-                      Giá trên áp dụng theo chính sách thương mại tại thời điểm
-                      báo giá.
-                    </li>
-
-                    <li>
-                      Đặc biệt phần mềm không thuộc sản phẩm chịu thuế GTGT.
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="quotation-footer">
-                  {/* LEFT - CONTACT */}
-                  <div className="quotation-footer-contact">
-                    <p className=" leading-4">
-                      Mọi thắc mắc, Quý khách vui lòng liên hệ:
+                    {/* BẢNG GIÁ THEO THỜI HẠN */}
+                    <p className="mt-2 mb-2 print:text-[12px] ">
+                      <strong>Bảng giá theo thời hạn đăng ký</strong>
                     </p>
 
-                    <p className="font-semibold">
-                      {form.consultantName} - Chuyên viên tư vấn
-                    </p>
+                    <table className="quotation-table w-full border-collapse text-sm">
+                      <thead>
+                        <tr className="bg-orange-500 text-white">
+                          <th className="border border-gray-300 px-2 py-1 text-center">
+                            Thời hạn
+                          </th>
 
-                    <p>TEL/Zalo: {form.consultantPhone}</p>
+                          <th className="border border-gray-300 px-2 py-1 text-center">
+                            Giá phần mềm
+                          </th>
 
-                    <p>Email: {form.consultantEmail}</p>
-                  </div>
+                          <th className="border border-gray-300 px-2 py-1 text-center">
+                            Giảm giá
+                          </th>
 
-                  {/* RIGHT - COPYRIGHT */}
-                  <div className="quotation-footer-copyright">
-                    <div>COPYRIGHT © 2026</div>
+                          <th className="border border-gray-300 px-2 py-1 text-center">
+                            Phí khởi tạo
+                          </th>
 
-                    <div>Created by NNguyen1202</div>
+                          <th className="border border-gray-300 px-2 py-1 text-right">
+                            Tổng thanh toán
+                          </th>
+                        </tr>
+                      </thead>
 
-                    <div>All rights Reserved</div>
-                  </div>
-                </div>
+                      <tbody>
+                        {[1, 2, 3].map((year) => {
+                          // Giá phần mềm của toàn bộ thời hạn
+                          const softwareBeforeDiscount = massAnnualPrice * year;
+
+                          // Mỗi thời hạn có MỘT mức giảm riêng
+                          // 1 năm -> discounts[0]
+                          // 2 năm -> discounts[1]
+                          // 3 năm -> discounts[2]
+                          const discountRate = form.discounts[year - 1] ?? 0;
+
+                          // Tiền giảm của chính thời hạn này
+                          const discountAmount =
+                            softwareBeforeDiscount * (discountRate / 100);
+
+                          // Tiền phần mềm sau giảm
+                          const softwareAfterDiscount =
+                            softwareBeforeDiscount - discountAmount;
+
+                          // Phí khởi tạo luôn cộng 100%, không giảm
+                          const total =
+                            softwareAfterDiscount +
+                            form.implementationFee +
+                            massCalculation.vneidTotal;
+
+                          return (
+                            <tr key={year}>
+                              {/* THỜI HẠN */}
+                              <td className="border border-gray-300 px-2 py-1 text-center">
+                                {year} năm
+                              </td>
+
+                              {/* GIÁ PHẦN MỀM */}
+                              <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
+                                {formatCurrency(softwareBeforeDiscount)}
+                              </td>
+
+                              {/* GIẢM GIÁ CỦA CHÍNH THỜI HẠN NÀY */}
+                              <td className="border border-gray-300 px-2 py-1 text-center">
+                                {discountRate > 0 ? `${discountRate}%` : "0%"}
+                              </td>
+
+                              {/* PHÍ KHỞI TẠO */}
+                              <td className="border border-gray-300 px-2 py-1 text-right whitespace-nowrap">
+                                {formatCurrency(form.implementationFee)}
+                              </td>
+
+                              {/* TỔNG THANH TOÁN */}
+                              <td className="border border-gray-300 px-2 py-1 text-right font-bold whitespace-nowrap">
+                                {formatCurrency(total)}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+
+                    <div className="mt-2 text-xs italic text-gray-500">
+                      Giá trên đã áp dụng mức giảm giá theo từng năm đăng ký:{" "}
+                      {form.discounts
+                        .slice(0, form.duration)
+                        .map((discount, index) => (
+                          <span key={index}>
+                            {index > 0 ? ", " : ""}
+                            <strong>
+                              Năm {index + 1}: {discount}%
+                            </strong>
+                          </span>
+                        ))}{" "}
+                      theo chính sách thương mại được lựa chọn.
+                    </div>
+
+                    {/* NOTE */}
+                    <div className="quotation-section mt-8 rounded-lg border border-gray-200 p-4 text-sm dark:border-gray-300">
+                      <strong>Ghi chú:</strong>
+
+                      <ul className="mt-2 list-disc space-y-1 pl-5 text-gray-600">
+                        <li>
+                          Phí cài đặt và triển khai chỉ 1 lần duy nhất (phí hỗ
+                          trợ triển khai, đào tạo, lưu trữ dữ liệu trên cloud
+                          của nhà cung cấp).
+                        </li>
+
+                        <li>
+                          Sau thời gian đăng ký lần đầu, phí gia hạn phần mềm sẽ
+                          là {""}
+                          <p className="inline italic font-bold">
+                            {formatCurrency(massAnnualPrice)} {""}
+                          </p>
+                          <p className="inline">
+                            cho năm tiếp theo dựa trên số lượng nhân sự tại thời
+                            điểm gia hạn hoặc theo thoả thuận từ khách hàng và
+                            đầu mối bán hàng.
+                          </p>
+                        </li>
+
+                        <li>
+                          Báo giá được áp dụng theo phân khúc khách hàng:{" "}
+                          <p className="inline italic font-bold">
+                            {
+                              CUSTOMER_SEGMENTS.find(
+                                (item) => item.value === form.customerSegment,
+                              )?.label
+                            }
+                          </p>
+                          .
+                        </li>
+
+                        {form.customerSegment === "50+" && (
+                          <li>
+                            Báo giá được tính theo số lượng nhân sự sử dụng phần
+                            mềm cụ thể:{" "}
+                            <p className="inline italic font-bold">
+                              {form.mainUsers} người dùng
+                            </p>
+                          </li>
+                        )}
+
+                        {form.freeMonths && form.giftedMonths > 0 && (
+                          <li>
+                            Báo giá được áp dụng với ưu đãi:{" "}
+                            <div className="inline font-bold">
+                              🎁 Tặng {form.giftedMonths} tháng sử dụng.
+                            </div>{" "}
+                            <p className="inline">
+                              Chi tiết sẽ được ghi rõ trong hợp đồng
+                            </p>
+                          </li>
+                        )}
+
+                        {massCalculation.vneidTotal > 0 && (
+                          <li>
+                            Khách hàng sử dụng gói lượt ký VNeID:{" "}
+                            {form.selectedVneidPackages
+                              .map(
+                                (id) =>
+                                  VNEID_PACKAGES.find((pkg) => pkg.id === id)
+                                    ?.name,
+                              )
+                              .filter(Boolean)
+                              .join(", ")}{" "}
+                            với tổng giá trị{" "}
+                            {formatCurrency(massCalculation.vneidTotal)}. Gói
+                            VNeID không áp dụng chiết khấu của phần mềm EasyHRM.
+                          </li>
+                        )}
+
+                        <li>
+                          Phí tích hợp/phát triển tính năng phát sinh sẽ được
+                          đánh giá và báo giá riêng theo yêu cầu.
+                        </li>
+
+                        <li>
+                          Giá trên áp dụng theo chính sách thương mại tại thời
+                          điểm báo giá.
+                        </li>
+
+                        <li>
+                          Đặc biệt phần mềm không thuộc sản phẩm chịu thuế GTGT.
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div className="quotation-footer">
+                      {/* LEFT - CONTACT */}
+                      <div className="quotation-footer-contact">
+                        <p className=" leading-4">
+                          Mọi thắc mắc, Quý khách vui lòng liên hệ:
+                        </p>
+
+                        <p className="font-semibold">
+                          {form.consultantName} - Chuyên viên tư vấn
+                        </p>
+
+                        <p>TEL/Zalo: {form.consultantPhone}</p>
+
+                        <p>Email: {form.consultantEmail}</p>
+                      </div>
+
+                      {/* RIGHT - COPYRIGHT */}
+                      <div className="quotation-footer-copyright">
+                        <div>COPYRIGHT © 2026</div>
+
+                        <div>Created by NNguyen1202</div>
+
+                        <div>All rights Reserved</div>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
 
               {form.deployment === "mass" && form.vneidEnabled && (
