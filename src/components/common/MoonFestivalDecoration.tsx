@@ -35,13 +35,13 @@ export default function MoonFestivalDecoration() {
         <div className="relative">
           {/* Moon Glow */}
           {/* <div className="absolute h-72 w-72 rounded-full bg-yellow-200/35 blur-[70px]" /> */}
-          <div className="absolute left-1/2 -translate-x-1/2 h-72 w-72 rounded-full bg-blue-500/65 blur-[70px]" />
+          <div className="absolute left-1/2 -translate-x-1/2 h-30 w-720 rounded-full bg-blue-500/25 blur-[50px]" />
           {/* <div className="text-[120px] drop-shadow-2xl animate-pulse opacity-30">
             🌕
             🌨 
             <img className="h-40 w-70 mt-14 rounded-full" src="https://vipcorel.com/attachments/18765-market-ky-niem-81-nam-quoc-khanh-nuoc-cong-hoa-xhcn-png.34052/"></img>
           </div> */}
-          <div className="absolute top-16 left-[8%] z-10 pointer-events-none">
+          <div className="absolute top-1 left-[8%] z-10 pointer-events-none">
             <div className="national-cloud scale-75 opacity-60">
               <span className="cloud-part cloud-1" />
               <span className="cloud-part cloud-2" />
@@ -50,7 +50,7 @@ export default function MoonFestivalDecoration() {
             </div>
           </div>
 
-          <div className="absolute top-32 right-[10%] z-10 pointer-events-none">
+          <div className="absolute top-6 right-[10%] z-10 pointer-events-none">
             <div className="national-cloud scale-100 opacity-50">
               <span className="cloud-part cloud-1" />
               <span className="cloud-part cloud-2" />
