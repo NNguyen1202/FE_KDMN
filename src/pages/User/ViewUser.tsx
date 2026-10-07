@@ -68,13 +68,12 @@ export default function ViewUser() {
     const loadCurrentUser = async () => {
       try {
         const currentUser = JSON.parse(localStorage.getItem("user") || "null");
-        console.log("Người dùng hiện tại: ", currentUser);
 
         if (!currentUser?._id) return;
 
         // Lấy user đầy đủ
         const userRes = await getUserById(currentUser._id);
-        console.log("Người dùng lấy ID hiện tại: ", userRes);
+
         const user = userRes.data.getUser;
 
         if (!user?.roleID) return;
@@ -84,8 +83,6 @@ export default function ViewUser() {
           typeof user.roleID === "string" ? user.roleID : user.roleID._id;
 
         const roleRes = await getRoleById(roleId);
-
-        console.log("Lấy role người dùng: ", roleRes);
 
         setIsAdmin(roleRes.data.roleName === "Admin");
       } catch (err) {
@@ -113,7 +110,6 @@ export default function ViewUser() {
       setSalesRecords(salesRes.data.data ?? []);
 
       const userData = res.data.getUser;
-      console.log(userData);
 
       // lấy role
       if (userData.roleID) {
@@ -125,7 +121,6 @@ export default function ViewUser() {
         const roleRes = await getRoleById(roleId);
 
         setRoleName(getRoleDisplayName(roleRes.data.roleName));
-        console.log(roleName);
       }
 
       const dashboard = await getUserDashboard(userId, month, year);

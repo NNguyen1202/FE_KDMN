@@ -2,15 +2,12 @@ import { useEffect, useState } from "react";
 import FallingItems from "./FallingItems";
 
 export default function MoonFestivalDecoration() {
-  console.log("MoonFestivalDecoration render");
+
   const [enabled, setEnabled] = useState(true);
 
   useEffect(() => {
     const load = () => {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
-
-      console.log("User:", user);
-      console.log("Moon:", user?.settings?.moonFestivalEffect);
 
       setEnabled(user?.settings?.moonFestivalEffect ?? true);
     };

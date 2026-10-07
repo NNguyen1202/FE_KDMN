@@ -51,12 +51,12 @@ export default function RevenueSearchFilter({
   useEffect(() => {
     getUsers().then((res) => {
       const list = res.data?.data || res.data || [];
-      console.log("Ha: ", list);
 
       const filteredUsers = list.filter((user: any) => {
+        if (user.isActive === false) {
+          return false;
+        }
         const roleName = user.roleID?.roleName || user.role?.name;
-
-        console.log("Hi: ", roleName);
 
         return roleName !== "Admin" && roleName !== "Manager";
       });

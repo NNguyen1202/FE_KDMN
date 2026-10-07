@@ -47,15 +47,11 @@ export default function EmployeeTargetYearModal({
 
       const usersRes = await getUsers();
 
-      console.log("usersRes", usersRes.data);
-
       const targetRes = await getEmployeeTargetYears(year);
 
       const users = Array.isArray(usersRes)
         ? usersRes
         : usersRes.data?.data || usersRes.data || [];
-
-      console.log("users", users);
 
       const targetMap = new Map();
 

@@ -41,10 +41,7 @@ export default function SignInForm() {
           phone: data.phone,
           settings: data.settings
         }),
-      );
-
-      console.log("LocalStorage: ", localStorage);
-      
+      );    
 
       navigate("/", { replace: true });
       requestAnimationFrame(() => {

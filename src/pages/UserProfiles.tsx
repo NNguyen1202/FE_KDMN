@@ -31,13 +31,8 @@ export default function UserProfiles() {
 
       const roleRes = await getRoleById(roleId);
 
-      console.log("Lấy role người dùng: ", roleRes);
-
       setUser(user);
       setRole(roleRes.data);
-
-      console.log("User hiện tại: ",user);
-      
     } catch (error) {
       console.error(error);
     } finally {

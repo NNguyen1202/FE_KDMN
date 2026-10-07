@@ -99,9 +99,6 @@ export const NotificationProvider = ({
     return () => clearInterval(timer);
   }, []);
 
-  console.log(notifications);
-console.log(unreadCount);
-
   return (
     <NotificationContext.Provider
       value={{
