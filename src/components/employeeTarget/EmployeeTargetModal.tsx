@@ -46,15 +46,11 @@ export default function EmployeeTargetModal({
 
       const usersRes = await getUsers();
 
-      console.log("usersRes", usersRes.data);
-
       const targetRes = await getEmployeeTargets(month, year);
 
       const users = Array.isArray(usersRes)
         ? usersRes
         : usersRes.data?.data || usersRes.data || [];
-
-      console.log("users", users);
 
       const targetMap = new Map();
 
@@ -65,6 +61,7 @@ export default function EmployeeTargetModal({
       const rows = users
         .filter(
           (user: any) =>
+            user.isActive !== false &&
             user.roleID?.roleName !== "Admin" &&
             user.roleID?.roleName !== "Manager",
         )

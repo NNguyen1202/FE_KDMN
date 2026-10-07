@@ -14,6 +14,8 @@ interface User {
   _id: string;
   fullName: string;
   avatarUrl: string;
+  isActive?: boolean;
+  roleID: string;
 }
 
 interface RevenueFormData {
@@ -61,11 +63,18 @@ export default function RevenueForm({
     return Number(value.replace(/\./g, "").replace(/,/g, ""));
   };
 
-  const userOptions = users.map((user) => ({
-    value: user._id,
-    label: user.fullName,
-    avatar: user.avatarUrl?.[0],
-  }));
+  const userOptions = users
+    .filter(
+      (user:any) =>
+        user.isActive !== false &&
+        user.roleID?.roleName !== "Admin" &&
+        user.roleID?.roleName !== "Manager",
+    )
+    .map((user) => ({
+      value: user._id,
+      label: user.fullName,
+      avatar: user.avatarUrl?.[0],
+    }));
 
   useEffect(() => {
     loadUsers();

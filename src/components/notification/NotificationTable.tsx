@@ -54,13 +54,11 @@ export default function NotificationTable({
     const loadCurrentUser = async () => {
       try {
         const currentUser = JSON.parse(localStorage.getItem("user") || "null");
-        console.log("Người dùng hiện tại: ", currentUser);
 
         if (!currentUser?._id) return;
 
         // Lấy user đầy đủ
         const userRes = await getUserById(currentUser._id);
-        console.log("Người dùng lấy ID hiện tại: ", userRes);
         const user = userRes.data.getUser;
 
         if (!user?.roleID) return;
@@ -70,8 +68,6 @@ export default function NotificationTable({
           typeof user.roleID === "string" ? user.roleID : user.roleID._id;
 
         const roleRes = await getRoleById(roleId);
-
-        console.log("Lấy role người dùng: ", roleRes);
 
         setIsAdmin(roleRes.data.roleName === "Admin");
       } catch (err) {

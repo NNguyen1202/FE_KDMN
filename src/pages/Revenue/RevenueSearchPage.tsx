@@ -16,6 +16,7 @@ import { getPayrollPeriod } from "../../utils/revenuePeriod";
 
 export default function RevenueSearchPage() {
   const [user, setCurrentUser] = useState<any>(null);
+  const [userLoaded, setUserLoaded] = useState(false);
   const [filters, setFilters] = useState({
     year: new Date().getFullYear(),
 
@@ -39,6 +40,10 @@ export default function RevenueSearchPage() {
   const [loading, setLoading] = useState(false);
 
   const handleSearch = async () => {
+    if (!user) {
+      console.log("Chưa có thông tin user, chưa tìm kiếm doanh thu.");
+      return;
+    }
     try {
       setLoading(true);
 
@@ -46,12 +51,15 @@ export default function RevenueSearchPage() {
 
       let searchUserId;
 
-      const roleName = user?.roleID?.name || user?.role?.name;
+      const role = user?.roleID;
 
       /**
        * Sales chỉ được xem doanh thu của chính mình
        */
-      if (roleName === "Sales" || roleName === "Nhân viên kinh doanh") {
+      if (
+        role === "6a3a31285b1107c9a166df56" ||
+        role === "6a3a31395b1107c9a166df5a"
+      ) {
         searchUserId = user?._id;
       } else {
         /**
@@ -74,11 +82,7 @@ export default function RevenueSearchPage() {
         sourceType: filters.sourceType || undefined,
       };
 
-      console.log("SEARCH PARAMS", params);
-
       const res = await searchRevenueByPeriod(params);
-
-      console.log("SEARCH RESULT", res.data);
 
       setData(
         res.data?.data ||
@@ -96,27 +100,30 @@ export default function RevenueSearchPage() {
   };
 
   useEffect(() => {
+    if (!userLoaded || !user) return;
+
     handleSearch();
-  }, []);
+  }, [userLoaded, user]);
 
   useEffect(() => {
     const loadCurrentUser = async () => {
       try {
         const currentUser = JSON.parse(localStorage.getItem("user") || "null");
-        console.log("Người dùng hiện tại: ", currentUser);
 
-        if (!currentUser?._id) return;
+        if (!currentUser?._id) {
+          setUserLoaded(true);
+          return;
+        }
 
-        // Lấy user đầy đủ
         const userRes = await getUserById(currentUser._id);
-        console.log("Người dùng lấy ID hiện tại: ", userRes);
-        const user = userRes.data.getUser;
 
-        setCurrentUser(user);
+        const fullUser = userRes.data.getUser;
 
-        if (!user?.roleID) return;
+        setCurrentUser(fullUser);
       } catch (err) {
-        console.error(err);
+        console.error("Load current user error:", err);
+      } finally {
+        setUserLoaded(true);
       }
     };
 
@@ -144,8 +151,6 @@ export default function RevenueSearchPage() {
             summary={data.summary}
           />
         </div>
-
-        
       </div>
     </div>
   );

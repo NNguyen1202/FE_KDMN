@@ -329,14 +329,12 @@ export default function QuotationPage() {
   };
 
   const consultantUsers = useMemo(() => {
-    return users.filter((user) => {
-      const role = user?.roleID?._id || "";
-
-      return (
-        role !== "67f87c9ac19b91da666bbdc5" &&
-        role !== "6a3a30ff5b1107c9a166df50"
-      );
-    });
+    return users.filter(
+      (user:any) =>
+        user.isActive !== false &&
+        user.roleID?.roleName !== "Admin" &&
+        user.roleID?.roleName !== "Manager",
+    );
   }, [users]);
 
   const consultantOptions = consultantUsers.map((user) => ({
@@ -538,8 +536,6 @@ export default function QuotationPage() {
         : form.customerSegment === "50+"
         ? `${form.mainUsers} nhân sự`
         : `${form.customerSegment} nhân sự`);
-
-    console.log("iden: ", identifier);
 
     // Ngày xuất PDF lấy ngày hiện tại.
     const now = new Date();
@@ -1665,12 +1661,12 @@ export default function QuotationPage() {
                         )}
 
                         <div>
-                          <div className="font-medium dark:text-white">
+                          <div className="font-medium text-white dark:text-white">
                             {user.label}
                           </div>
 
                           {user.phone && (
-                            <div className="text-xs text-gray-500 dark:text-white">
+                            <div className="text-xs text-gray-200 dark:text-white">
                               {user.phone}
                             </div>
                           )}

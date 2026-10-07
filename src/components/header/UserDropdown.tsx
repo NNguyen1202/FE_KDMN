@@ -4,14 +4,13 @@ import { useEffect, useState } from "react";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { getUserById } from "../../services/userService";
-import { getRoleById } from "../../services/userService";
 
 export default function UserDropdown() {
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
 
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
-  const [roleName, setRoleName] = useState("");
+
 
   function toggleDropdown() {
     setIsOpen(!isOpen);
@@ -33,21 +32,7 @@ export default function UserDropdown() {
 
       setUser(res.data.getUser);
 
-      const userData = res.data.getUser;
-      console.log(userData);
-
-      // lấy role
-      if (userData.roleID) {
-        const roleId =
-          typeof userData.roleID === "object"
-            ? userData.roleID._id
-            : userData.roleID;
-
-        const roleRes = await getRoleById(roleId);
-
-        setRoleName(roleRes.data.roleName);
-        console.log(roleName);
-      }
+      
     } catch (error) {
       console.error(error);
     }

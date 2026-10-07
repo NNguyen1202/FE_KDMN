@@ -7,7 +7,6 @@ interface Props {
 
 export default function RevenueSearchProduct({ products, summary }: Props) {
   const maxRevenue = summary.totalRevenue;
-  console.log("Max: ", maxRevenue);
 
   const getPercentColor = (percent: number) => {
     if (percent >= 50) {
@@ -63,7 +62,6 @@ p-6
         {products.map((item) => {
           const percent = (item.revenue / maxRevenue) * 100;
           const color = getPercentColor(percent);
-          console.log("Percent: ", percent);
 
           return (
             <div
